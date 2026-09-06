@@ -1,0 +1,169 @@
+openapi: 3.0.3
+info:
+  title: "[PROJECT_NAME] REST API Specification"
+  version: 1.0.0
+  description: |
+    Spesifikasi REST API standar enterprise.
+    Semua respons API wajib mengikuti format envelope standar `{ success, data, meta }` atau `{ success, error }`.
+servers:
+  - url: http://localhost:3001/api/v1
+    description: Local Development Server
+
+security:
+  - bearerAuth: []
+  - cookieAuth: []
+
+paths:
+  /auth/google:
+    post:
+      summary: Login atau Registrasi via Google OAuth
+      security: []
+      tags: [Authentication]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [id_token]
+              properties:
+                id_token:
+                  type: string
+                  description: Google ID Token dari client SDK
+      responses:
+        '200':
+          description: Login berhasil. Refresh token dikirimkan via HttpOnly Cookie.
+          headers:
+            Set-Cookie:
+              schema:
+                type: string
+                example: refresh_token=abc123xyz; Path=/api/auth; HttpOnly; Secure; SameSite=Strict
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          access_token: { type: string, example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." }
+                          expires_in: { type: integer, example: 900 }
+                          user: { $ref: '#/components/schemas/UserProfile' }
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+  /auth/refresh:
+    post:
+      summary: Refresh Access Token (Refresh Token Rotation)
+      security: []
+      tags: [Authentication]
+      description: Membaca refresh token dari HttpOnly Cookie dan menerbitkan token baru.
+      responses:
+        '200':
+          description: Token baru berhasil diterbitkan.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          access_token: { type: string }
+                          expires_in: { type: integer, example: 900 }
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+  /auth/logout:
+    post:
+      summary: Logout dan Invalidate Sesi
+      tags: [Authentication]
+      responses:
+        '200':
+          description: Sesi dibatalkan dan cookie dibersihkan.
+          headers:
+            Set-Cookie:
+              schema:
+                type: string
+                example: refresh_token=; Path=/api/auth; Max-Age=0; HttpOnly; Secure; SameSite=Strict
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+
+  /users/me:
+    get:
+      summary: Ambil profil pengguna yang sedang login
+      tags: [Users]
+      responses:
+        '200':
+          description: Data profil berhasil diambil
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+                  - type: object
+                    properties:
+                      data: { $ref: '#/components/schemas/UserProfile' }
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: refresh_token
+
+  schemas:
+    SuccessResponse:
+      type: object
+      required: [success]
+      properties:
+        success: { type: boolean, example: true }
+        meta:
+          type: object
+          properties:
+            page: { type: integer, example: 1 }
+            per_page: { type: integer, example: 20 }
+            total: { type: integer, example: 100 }
+
+    ErrorResponse:
+      type: object
+      required: [success, error]
+      properties:
+        success: { type: boolean, example: false }
+        error:
+          type: object
+          required: [code, message]
+          properties:
+            code: { type: string, example: "VALIDATION_ERROR" }
+            message: { type: string, example: "Data masukan tidak valid" }
+            details: { type: object }
+
+    UserProfile:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        email: { type: string, format: email }
+        name: { type: string }
+        role: { type: string, enum: [superadmin, admin, support, member, guest] }
+        avatar_url: { type: string, nullable: true }
+        created_at: { type: string, format: date-time }
+
+  responses:
+    UnauthorizedError:
+      description: Sesi tidak valid atau telah berakhir
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'

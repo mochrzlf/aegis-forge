@@ -11,7 +11,7 @@ RESET   := \033[0m
 .PHONY: help
 help: ## Tampilkan panduan penggunaan perintah Makefile
 	@echo -e "$(BLUE)==================================================================$(RESET)"
-	@echo -e "$(BLUE)🚀 Enterprise Baseline Task Runner$(RESET)"
+	@echo -e "$(BLUE)🚀 Universal Enterprise Baseline Task Runner$(RESET)"
 	@echo -e "$(BLUE)==================================================================$(RESET)"
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "  $(GREEN)%-16s$(RESET) %s\n", $$1, $$2}'
 	@echo -e "$(BLUE)==================================================================$(RESET)"
@@ -26,13 +26,18 @@ audit-staged: ## Jalankan audit khusus staged changes (seperti pre-commit)
 	@echo -e "$(YELLOW)🔍 Menjalankan Gitleaks pre-commit staged audit...$(RESET)"
 	@./scripts/devsec-check.sh --staged
 
+.PHONY: mock-api
+mock-api: ## Jalankan Prism Mock API server (port 4010) untuk testing Mobile & Frontend
+	@echo -e "$(GREEN)🌐 Menjalankan Prism Mock API server pada port 4010...$(RESET)"
+	@docker compose up -d prism
+
 .PHONY: up
-up: ## Jalankan database & messaging lokal (PostgreSQL, Redis, Mailpit)
+up: ## Jalankan stack lokal (PostgreSQL, Redis, Mailpit, Prism)
 	@echo -e "$(GREEN)🚀 Menjalankan Docker Compose services...$(RESET)"
 	@docker compose up -d
 
 .PHONY: down
-down: ## Hentikan stack Docker Compose
+down: ## Hentikan seluruh stack Docker Compose
 	@echo -e "$(YELLOW)🛑 Menghentikan Docker Compose services...$(RESET)"
 	@docker compose down
 
@@ -50,9 +55,9 @@ hermes-ui: ## Buka web dashboard Hermes di background (port 9119)
 	@~/.local/bin/hermes dashboard --no-open
 
 .PHONY: new
-new: ## Buat proyek baru dari baseline (Penggunaan: make new NAME=NamaProyek PATH=/path/tujuan)
+new: ## Buat proyek baru dari baseline (Penggunaan: make new NAME=NamaProyek PATH=/path/tujuan TYPE=web|mobile|trading|fullstack)
 	@if [ -z "$(NAME)" ] || [ -z "$(PATH)" ]; then \
-		echo -e "$(RED)❌ Gunakan: make new NAME=NamaProyek PATH=/path/tujuan$(RESET)"; \
+		echo -e "$(RED)❌ Gunakan: make new NAME=NamaProyek PATH=/path/tujuan [TYPE=web|mobile|trading|fullstack]$(RESET)"; \
 		exit 1; \
 	fi; \
-	bash scripts/init-new-project.sh "$(NAME)" "$(PATH)"
+	bash scripts/init-new-project.sh "$(NAME)" "$(PATH)" "$${TYPE:-fullstack}"

@@ -1,81 +1,94 @@
-# Panduan Setup Project Baru dari Baseline
+# Panduan Setup & Inisialisasi Proyek Multi-Domain
 
-Dokumen ini menjelaskan langkah demi langkah untuk membuat project baru menggunakan Baseline ini.
+Dokumen ini menjelaskan langkah demi langkah untuk membuat proyek baru menggunakan **Universal Enterprise Baseline** (Web, Mobile, EA Trading, atau Fullstack).
 
 ---
 
-## 1. Buat Salinan Project Baru
+## 1. Buat Salinan Proyek Baru Berdasarkan Domain
 
-Gunakan shortcut alias atau script otomatis:
+Gunakan perintah `make new` atau script otomatis:
+
 ```bash
-# Menggunakan shortcut alias
-new-project "MyAwesomeApp" "/home/tpam_su/Project/MyAwesomeApp"
+# Opsi 1: Proyek Web Application / SaaS
+bash /home/tpam_su/Project/Baseline/scripts/init-new-project.sh "MyWebApp" "/home/tpam_su/Project/MyWebApp" web
 
-# Atau jalankan script langsung
-bash /home/tpam_su/Project/Baseline/scripts/init-new-project.sh "MyAwesomeApp" "/home/tpam_su/Project/MyAwesomeApp"
-cd /home/tpam_su/Project/MyAwesomeApp
+# Opsi 2: Proyek Mobile Application (Android / iOS)
+bash /home/tpam_su/Project/Baseline/scripts/init-new-project.sh "MyMobileApp" "/home/tpam_su/Project/MyMobileApp" mobile
+
+# Opsi 3: Proyek EA / Algorithmic Trading
+bash /home/tpam_su/Project/Baseline/scripts/init-new-project.sh "MyTradingEA" "/home/tpam_su/Project/MyTradingEA" trading
+
+# Opsi 4: Proyek Fullstack Enterprise (Default)
+bash /home/tpam_su/Project/Baseline/scripts/init-new-project.sh "MyFullstack" "/home/tpam_su/Project/MyFullstack" fullstack
 ```
 
 Script akan otomatis:
-1. Menyalin seluruh struktur baseline (`AGENTS.md`, `docs/`, `scripts/`, `.env.example`, `.gitignore`, `docker-compose.yml`, `.github/`).
-2. Mengganti nama placeholder `[PROJECT_NAME]` menjadi nama project Anda di semua file template.
+1. Menyalin seluruh struktur baseline (`AGENTS.md`, `docs/blueprints/`, `docs/security/`, `docs/diagrams/`, `Makefile`, `.env.example`, `.gitignore`, `.gitattributes`, `.gitleaks.toml`).
+2. Mengganti nama placeholder `[PROJECT_NAME]` menjadi nama proyek Anda.
 3. Menginisialisasi Git repository baru (`git init -b main`).
-4. Memasang dan mengaktifkan **Git Pre-Commit Security Hook** (`.git/hooks/pre-commit`) untuk mencegah kebocoran file `.env`, private key, dan secret token via Gitleaks.
-5. Menyiapkan `.env` lokal dari `.env.example`.
+4. Memasang dan mengaktifkan **Git Pre-Commit Security Hook** (`.git/hooks/pre-commit`) untuk memblokir kebocoran file `.env`, file private key, keystore Android, dan secret token via Gitleaks.
+5. Menyiapkan file `.env` lokal dari `.env.example`.
 
 ---
 
-## 2. Siapkan Environment Variables
+## 2. Siapkan Kredensial & Lingkungan (.env)
 
-Buka `.env` dan sesuaikan nilainya:
+Masuk ke direktori proyek baru:
+```bash
+cd /home/tpam_su/Project/NamaProyekAnda
+```
+Buka file `.env` dan generate kunci kriptografi yang aman:
 - Generate JWT Secret: `openssl rand -base64 48`
 - Generate Encryption Master Key: `openssl rand -hex 32`
-- Konfigurasikan koneksi PostgreSQL dan Redis.
+- Sesuaikan konfigurasi database atau API key sesuai domain proyek.
 
 ---
 
-## 3. Tahap Perancangan Produk (PRD & UI Design)
+## 3. Alur Kerja Khusus per Domain
 
-Sebelum menulis kode aplikasi:
-1. Isi `docs/PRD.md` (gunakan `docs/PRD-template.md` sebagai acuan).
-2. Tentukan modul dan acceptance criteria di `docs/PRD-detail.md`.
-3. Tentukan palet warna brand di `docs/ui-design.md`.
-4. Sesuaikan endpoint API di `docs/openapi.yaml`.
-5. Sesuaikan tabel database di `docs/schema.sql`.
+### 🌐 A. Jika Anda Membangun Proyek Web:
+1. Rujuk cetak biru di `docs/blueprints/web-application-blueprint.md`.
+2. Perintahkan Hermes Agent:
+   > *"Hermes, tolong rancang docs/PRD.md dan docs/ui-design.md untuk aplikasi web ini dengan state management Zustand dan token session HttpOnly."*
 
-Anda bisa meminta Hermes Agent melakukannya:
-> *"Hermes, tolong lengkapi docs/PRD.md dan docs/ui-design.md untuk website portal kesehatan pasien berbasis template baseline."*
+### 📱 B. Jika Anda Membangun Proyek Mobile (Android/iOS):
+1. Rujuk cetak biru di `docs/blueprints/mobile-application-blueprint.md` dan checklist di `docs/security/mobile-security-checklist.md`.
+2. Jalankan Mock API Server instan:
+   ```bash
+   make mock-api
+   ```
+   *(Akses `http://localhost:4010` atau `http://10.0.2.2:4010` di emulator Android untuk langsung menguji request & response API).*
+3. Perintahkan Hermes Agent:
+   > *"Hermes, tolong rancang aplikasi Android Jetpack Compose dengan Clean Architecture dan simpan token di EncryptedSharedPreferences (Android Keystore)."*
+
+### 📈 C. Jika Anda Membangun Proyek EA / Algorithmic Trading:
+1. Rujuk cetak biru di `docs/blueprints/ea-trading-blueprint.md` dan kebijakan risiko di `docs/security/trading-risk-policy.md`.
+2. Perintahkan Hermes Agent:
+   > *"Hermes, tolong rancang arsitektur EA Trading untuk instrumen XAUUSD/EURUSD dengan aturan Hard Stop Loss, kalkulasi lot dinamis maksimal 1% risiko modal, dan Circuit Breaker jika daily drawdown mencapai 5%."*
 
 ---
 
-## 4. Setup Database & Migrasi
+## 4. Menjalankan Security Audit Kapan Saja
 
-Jalankan script skema PostgreSQL:
+Sistem keamanan pre-commit hook berjalan otomatis saat Anda melakukan `git commit`. Anda juga dapat melakukan audit manual kapan saja:
 ```bash
-# Menggunakan psql lokal
-psql -U postgres -d my_awesome_app_dev -f docs/schema.sql
+make audit
+# atau
+devsec-check
 ```
 
 ---
 
-## 5. Menjalankan Security Pre-Flight Check
+## 5. Ringkasan Shortcut Perintah
 
-Sistem keamanan sudah terintegrasi secara otomatis:
-- **Git Pre-Commit Hook**: Berjalan otomatis setiap kali Anda melakukan `git commit`, memverifikasi bahwa tidak ada file `.env`, file private key, atau secret token yang ter-staged.
-- **Manual Audit**: Anda dapat menjalankan audit keamanan menyeluruh kapan saja dengan:
-  ```bash
-  devsec-check
-  # atau
-  bash scripts/devsec-check.sh
-  ```
-
----
-
-## 6. Shortcut Perintah di Terminal
-
-Beberapa alias praktis yang telah terdaftar di `~/.bashrc`:
-- `hermes` : Membuka Hermes AI Agent di terminal CLI.
-- `hermes-ui` : Menjalankan web dashboard Hermes (`http://127.0.0.1:9119`).
-- `new-project <Nama> <Path>` : Membuat project baru dari template baseline.
-- `goto-baseline` : Langsung berpindah ke direktori Baseline.
-- `devsec-check` : Menjalankan audit keamanan DevSecOps.
+| Shortcut | Fungsi |
+| :--- | :--- |
+| `make help` | Menampilkan seluruh perintah yang tersedia |
+| `make audit` | Menjalankan audit keamanan Gitleaks & secret detection |
+| `make mock-api` | Menjalankan mock server API (port 4010) |
+| `make up` | Menjalankan stack Docker Compose lokal |
+| `make down` | Menghentikan stack Docker Compose lokal |
+| `make hermes` | Membuka Hermes AI Agent di terminal |
+| `make hermes-ui` | Menjalankan Web Dashboard Hermes di browser (port 9119) |
+| `new-project` | Shortcut alias terminal untuk membuat proyek baru |
+| `goto-baseline` | Berpindah langsung ke direktori Baseline |

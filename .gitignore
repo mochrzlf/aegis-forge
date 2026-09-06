@@ -7,6 +7,25 @@
 *.p12
 id_rsa*
 
+# Mobile (Android & iOS Secrets & Builds)
+*.jks
+*.keystore
+*.ap_
+*.aab
+*.apk
+google-services.json
+GoogleService-Info.plist
+.gradle/
+local.properties
+
+# Algorithmic & EA Trading (Data & Compiled Binaries)
+*.set
+*.ex4
+*.ex5
+*.fxt
+*.hst
+*.csv.cache
+
 # Dependencies
 node_modules/
 .pnpm-store/
