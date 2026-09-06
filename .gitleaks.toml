@@ -1,7 +1,7 @@
-# Gitleaks Configuration for Enterprise Baseline
+# Gitleaks Configuration for Aegis Forge
 # Custom rules, path allowlisting, and regex tuning
 
-title = "Enterprise Baseline Gitleaks Configuration"
+title = "Aegis Forge Gitleaks Configuration"
 
 [extend]
 # Inherit standard Gitleaks ruleset

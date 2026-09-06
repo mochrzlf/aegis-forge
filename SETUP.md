@@ -1,6 +1,6 @@
 # Multi-Domain Project Setup & Initialization Guide
 
-This document provides step-by-step instructions for creating a new project using the **Universal Enterprise Baseline** (Web, Mobile, EA Trading, or Fullstack).
+This document provides step-by-step instructions for creating a new project using the **Universal Aegis Forge** (Web, Mobile, EA Trading, or Fullstack).
 
 ---
 

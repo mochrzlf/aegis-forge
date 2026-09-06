@@ -1,6 +1,6 @@
 # Universal Multi-Domain System Architecture
 
-This diagram visualizes how the Web, Mobile App, and EA Trading Engine interfaces integrate seamlessly into the Enterprise Baseline ecosystem:
+This diagram visualizes how the Web, Mobile App, and EA Trading Engine interfaces integrate seamlessly into the Aegis Forge ecosystem:
 
 ```mermaid
 graph TB

@@ -2,7 +2,7 @@
 
 ## 🛡️ Enterprise Vulnerability Disclosure Policy
 
-Security and data privacy are the highest priorities within the **Enterprise Baseline** architecture. We welcome reports from security researchers, developers, and users to assist in maintaining the integrity of this repository and its derived applications.
+Security and data privacy are the highest priorities within the **Aegis Forge** architecture. We welcome reports from security researchers, developers, and users to assist in maintaining the integrity of this repository and its derived applications.
 
 ---
 

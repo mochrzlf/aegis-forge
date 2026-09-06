@@ -11,7 +11,7 @@ RESET   := \033[0m
 .PHONY: help
 help: ## Display Makefile usage guide
 	@echo -e "$(BLUE)==================================================================$(RESET)"
-	@echo -e "$(BLUE)🚀 Universal Enterprise Baseline Task Runner$(RESET)"
+	@echo -e "$(BLUE)🚀 Universal Aegis Forge Task Runner$(RESET)"
 	@echo -e "$(BLUE)==================================================================$(RESET)"
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "  $(GREEN)%-16s$(RESET) %s\n", $$1, $$2}'
 	@echo -e "$(BLUE)==================================================================$(RESET)"

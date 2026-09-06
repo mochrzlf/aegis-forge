@@ -1,4 +1,4 @@
-# AGENTS.md — Universal Multi-Domain Enterprise Baseline
+# AGENTS.md — Universal Multi-Domain Aegis Forge
 
 > **CRITICAL FOR AI AGENTS (Hermes / Claude / Cursor / LLM) & DEVELOPERS:**
 > This file is automatically read at the beginning of every development session.

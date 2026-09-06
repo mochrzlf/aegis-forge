@@ -1,8 +1,8 @@
-# Enterprise Baseline
+# Aegis Forge
 
 A production-ready blueprint and scaffolding template for building secure **Web Applications**, **Mobile Apps (Android & iOS)**, and **Algorithmic Trading Systems (EAs)**.
 
-[![DevSecOps CI Pipeline](https://github.com/mochrzlf/enterprise-baseline/actions/workflows/security.yml/badge.svg)](https://github.com/mochrzlf/enterprise-baseline/actions/workflows/security.yml)
+[![DevSecOps CI Pipeline](https://github.com/mochrzlf/aegis-forge/actions/workflows/security.yml/badge.svg)](https://github.com/mochrzlf/aegis-forge/actions/workflows/security.yml)
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 [![Protected by Gitleaks](https://img.shields.io/badge/Protected%20by-Gitleaks-red.svg)](.gitleaks.toml)
 [![Security Policy](https://img.shields.io/badge/Security-Policy-brightgreen.svg)](SECURITY.md)
@@ -37,8 +37,8 @@ This baseline solves that upfront. Whether you are building a SaaS portal, an An
 Clone this repository and create a dedicated workspace for your project:
 
 ```bash
-git clone https://github.com/mochrzlf/enterprise-baseline.git
-cd enterprise-baseline
+git clone https://github.com/mochrzlf/aegis-forge.git
+cd aegis-forge
 
 # Choose your project profile:
 # For Web App:
