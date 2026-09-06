@@ -1,0 +1,37 @@
+# Gitleaks Configuration for Enterprise Baseline
+# Custom rules, path allowlisting, and regex tuning
+
+title = "Enterprise Baseline Gitleaks Configuration"
+
+[extend]
+# Inherit standard Gitleaks ruleset
+useDefault = true
+
+[allowlist]
+description = "Global allowlist for templates and non-secret examples"
+paths = [
+  '''^\.env\.example$''',
+  '''^docs/.*-template\..*$''',
+  '''^docs/PRD.*\.md$''',
+  '''^docs/security-.*\.md$''',
+  '''^README\.md$''',
+  '''^SETUP\.md$'''
+]
+regexes = [
+  '''(?i)example[_-]?key''',
+  '''(?i)dummy[_-]?token''',
+  '''(?i)your[_-]?(secret|token|password|key)''',
+  '''ghp_000000000000000000000000000000000000'''
+]
+
+# Custom Rule: Strict JWT Secret Detection (minimum 32 chars Base64/Hex assignment in code)
+[[rules]]
+id = "hardcoded-jwt-secret"
+description = "Hardcoded JWT Secret detected in source or config"
+regex = '''(?i)(?:jwt_secret|jwt_key|jwt_secret_key)\s*[:=]\s*["']([A-Za-z0-9+/=_-]{32,})["']'''
+secretGroup = 1
+keywords = [
+  "jwt_secret",
+  "jwt_key",
+  "jwt_secret_key"
+]

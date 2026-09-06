@@ -1,0 +1,26 @@
+# Set default behavior, in case people don't have core.autocrlf set.
+* text=auto
+
+# Enforce Unix line endings (LF) for scripts and configs to prevent WSL/Linux runtime failures
+*.sh text eol=lf
+*.bash text eol=lf
+*.sql text eol=lf
+*.yaml text eol=lf
+*.yml text eol=lf
+*.json text eol=lf
+*.md text eol=lf
+*.toml text eol=lf
+Makefile text eol=lf
+.editorconfig text eol=lf
+.gitignore text eol=lf
+.gitattributes text eol=lf
+.env.example text eol=lf
+
+# Binary files that should not be normalized
+*.docx binary
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.pdf binary
+*.tar.gz binary
+*.zip binary
