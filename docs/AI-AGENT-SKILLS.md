@@ -19,6 +19,9 @@ AI agents produce significantly higher-quality code when equipped with specializ
 |---|---|---|---|
 | **Core** | `humanizer` | `hermes skills install blader/humanizer` | Strips AI cliches, buzzwords, and robotic phrasing from documentation and PRDs. |
 | **Core** | `diagram-design` | `hermes skills install skills-sh/diagram-design` | Renders clean Mermaid, SVG, and visual architecture/sequence diagrams. |
+| **Core** | `openapi-designer` | `hermes skills install stoplight/spectral` | Lints and validates REST API specifications to ensure enterprise standardization. |
+| **Core** | `ui-wireframer` | Built-in / Vercel v0 / Generative UI | Rapidly prototypes frontend components and wireframes before actual implementation. |
+| **Core** | `adr-threat-model` | Custom Rules in `AGENTS.md` | Automates the drafting of Architecture Decision Records (ADRs) and STRIDE Threat Models. |
 | **Cybersecurity** | `security-audit` | Built-in via `scripts/devsec-check.sh` & Gitleaks | Scans staged code for hardcoded API keys, private keys, and `.env` leaks. |
 | **Cybersecurity** | `semgrep-sast` | `.github/workflows/security.yml` | Scans for OWASP Top 10 vulnerabilities (SQLi, XSS, Broken Access Control). |
 | **Web** | `modern-web-guidance` | Built-in / Modern Web Plugin | Best practices for Next.js App Router, Tailwind CSS, and WCAG accessibility. |
@@ -31,21 +34,27 @@ AI agents produce significantly higher-quality code when equipped with specializ
 
 ### 1. Core Writing & Visual Architecture Skills
 
+While `humanizer` and `diagram-design` serve as the foundation for clear documentation and visual blueprints, a complete enterprise agent should also possess the following expanded writing and design skills:
+
 #### A. Humanizer (`blader/humanizer`)
 - **Purpose:** Rewrites AI-generated documentation (PRDs, READMEs, architecture decisions) into natural, direct, and senior-engineer prose based on Wikipedia's *Signs of AI Writing* cleanup guidelines.
 - **When to Invoke:** Whenever the AI agent writes or updates `docs/PRD.md`, `docs/PRD-detail.md`, or release notes.
-- **Installation:**
-  ```bash
-  hermes skills install blader/humanizer
-  ```
 
 #### B. Diagram Design (`skills-sh/diagram-design`)
 - **Purpose:** Generates visual system diagrams, token lifecycle sequences, and network topologies in Mermaid or standalone SVG format.
-- **When to Invoke:** Before creating new API routes or modules, ensuring team alignment in `docs/diagrams/`.
-- **Installation:**
-  ```bash
-  hermes skills install skills-sh/diagram-design
-  ```
+- **When to Invoke:** Before creating new API routes, databases, or modules, ensuring team alignment in `docs/diagrams/`.
+
+#### C. API Contract Designer (`stoplight/spectral` or similar)
+- **Purpose:** Automatically validates `docs/openapi.yaml` against OpenAPI v3 rules (e.g., ensuring all endpoints have security definitions, error schemas, and pagination metadata).
+- **When to Invoke:** During the backend design phase, strictly before any controller or router code is written.
+
+#### D. UI Wireframer & Prototyping
+- **Purpose:** Allows the AI Agent to render interactive UI mockups or HTML/Tailwind wireframes based on `docs/ui-design-template.md`.
+- **When to Invoke:** During frontend PRD definition to validate user experience (UX) and component layout before locking the design.
+
+#### E. ADR & Threat Modeling Generator
+- **Purpose:** Automates the drafting of Architecture Decision Records (ADRs) and STRIDE Threat Models based on the proposed system architecture.
+- **When to Invoke:** Prior to adopting a new technology, library, or security flow.
 
 ---
 
@@ -84,8 +93,7 @@ AI agents produce significantly higher-quality code when equipped with specializ
 ### 5. Algorithmic & EA Trading Skills
 
 - **Capital Preservation First:** Rejects any order dispatch that lacks a calculated **Hard Stop Loss (SL)**.
-- **Dynamic Lot Sizing Formula:** Calculates position size based on a strict 1% to 2% equity risk parameter:
-  $$\text{Lot Size} = \frac{\text{Account Equity} \times \text{Risk \%}}{\text{Stop Loss Points} \times \text{Tick Value}}$$
+- **Dynamic Lot Sizing Formula:** Calculates position size based on a strict 1% to 2% equity risk parameter.
 - **Autonomous Circuit Breaker:** Kills all open positions, cancels pending orders, and halts trading if the daily floating loss hits 5%.
 - **API Key Segregation:** Prohibits trading agents from using exchange API keys with *Withdrawal* permissions enabled.
 
@@ -96,8 +104,8 @@ AI agents produce significantly higher-quality code when equipped with specializ
 When kicking off a task, reference these skills directly:
 
 ```text
-"Hermes, read AGENTS.md. We are building a mobile application for user authentication.
+"Read AGENTS.md. We are building a mobile application for user authentication.
 First, consult docs/blueprints/mobile-application-blueprint.md and docs/security/mobile-security-checklist.md.
-Draft the architecture diagram in docs/diagrams/ and apply blader/humanizer to docs/PRD.md so the text is clear and human.
-Ensure Android Keystore storage is used for token caching."
+Draft the architecture diagram in docs/diagrams/ and apply humanizer to docs/PRD.md so the text is clear and human.
+Validate the API design using OpenAPI standards, and ensure Android Keystore storage is used for token caching."
 ```
