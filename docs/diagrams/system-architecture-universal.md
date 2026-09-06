@@ -1,6 +1,6 @@
 # Universal Multi-Domain System Architecture
 
-Diagram ini memvisualisasikan bagaimana antarmuka Web, Mobile App, dan EA Trading Engine terhubung secara harmonis ke dalam ekosistem Enterprise Baseline:
+This diagram visualizes how the Web, Mobile App, and EA Trading Engine interfaces integrate seamlessly into the Enterprise Baseline ecosystem:
 
 ```mermaid
 graph TB

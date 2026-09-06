@@ -1,12 +1,12 @@
 # Mobile Application Architecture Blueprint (Android & iOS)
 
-Dokumen ini adalah cetak biru teknis untuk merancang dan membangun **Aplikasi Mobile Enterprise (Native Android/Kotlin, Flutter, atau React Native)** yang terhubung dengan Baseline Backend.
+This document is the technical blueprint for designing and building **Enterprise Mobile Applications (Native Android/Kotlin, Flutter, or React Native)** integrating with the Baseline Backend.
 
 ---
 
-## 🏛️ 1. Pola Clean Architecture Mobile
+## 🏛️ 1. Clean Architecture Pattern for Mobile
 
-Aplikasi mobile mengadopsi struktur Clean Architecture untuk memisahkan UI, logika bisnis, dan interaksi data:
+The mobile application adopts Clean Architecture to decouple UI presentation, business rules, and data persistence:
 
 ```
 [Presentation Layer]
@@ -15,8 +15,8 @@ Aplikasi mobile mengadopsi struktur Clean Architecture untuk memisahkan UI, logi
   └── Navigation & Deep Linking
            │
            ▼
-[Domain Layer (Murni Logika Bisnis, Tanpa Ketergantungan OS)]
-  ├── Use Cases / Interactors (e.g. LoginUseCase, TransferFundUseCase)
+[Domain Layer (Pure Business Logic, OS-Agnostic)]
+  ├── Use Cases / Interactors (e.g., LoginUseCase, TransferFundUseCase)
   ├── Domain Models & Business Validation
   └── Repository Interfaces (Contract)
            │
@@ -33,12 +33,12 @@ Aplikasi mobile mengadopsi struktur Clean Architecture untuk memisahkan UI, logi
 
 ---
 
-## 🔐 2. Standar Keamanan Mobile Enterprise (Mobile AppSec)
+## 🔐 2. Enterprise Mobile Security Standards (Mobile AppSec)
 
-### 2.1 Penyimpanan Kredensial Aman (Hardware Keystore)
-- ❌ **Dilarang Keras:** Menyimpan token autentikasi di plain `SharedPreferences`, `NSUserDefaults`, atau file teks unencrypted.
-- ✅ **Standar Android Native:**
-  Gunakan `EncryptedSharedPreferences` dengan master key yang dikelola oleh hardware-backed **Android Keystore System**:
+### 2.1 Secure Credential Storage (Hardware Keystore)
+- ❌ **Strictly Prohibited:** Storing authentication tokens in plaintext `SharedPreferences`, `NSUserDefaults`, or unencrypted files.
+- ✅ **Native Android Standard:**
+  Utilize `EncryptedSharedPreferences` backed by master keys managed by the hardware-backed **Android Keystore System**:
   ```kotlin
   val masterKey = MasterKey.Builder(context)
       .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
@@ -52,12 +52,12 @@ Aplikasi mobile mengadopsi struktur Clean Architecture untuk memisahkan UI, logi
       EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
   )
   ```
-- ✅ **Standar Flutter / React Native:**
-  Gunakan plugin `flutter_secure_storage` (Android Keystore + iOS Keychain) atau `react-native-keychain`.
+- ✅ **Flutter / React Native Standard:**
+  Use the `flutter_secure_storage` plugin (backed by Android Keystore + iOS Keychain) or `react-native-keychain`.
 
 ### 2.2 SSL / Certificate Pinning (Anti-Man-in-the-Middle)
-Untuk mencegah sniffing trafik jaringan pada WiFi publik atau proxy:
-- Di Android, buat file `res/xml/network_security_config.xml`:
+To prevent network traffic sniffing and interception on public Wi-Fi or proxy environments:
+- In Android, configure `res/xml/network_security_config.xml`:
   ```xml
   <?xml version="1.0" encoding="utf-8"?>
   <network-security-config>
@@ -66,19 +66,19 @@ Untuk mencegah sniffing trafik jaringan pada WiFi publik atau proxy:
           <pin-set expiration="2027-01-01">
               <!-- SHA-256 Public Key Pinning -->
               <pin digest="SHA-256">AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</pin>
-              <!-- Backup Pin untuk antisipasi rotasi sertifikat -->
+              <!-- Backup Pin for certificate rotation resilience -->
               <pin digest="SHA-256">BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB=</pin>
           </pin-set>
       </domain-config>
   </network-security-config>
   ```
-- Di `AndroidManifest.xml`:
+- Reference in `AndroidManifest.xml`:
   ```xml
   <application android:networkSecurityConfig="@xml/network_security_config" ... >
   ```
 
-### 2.3 Proteksi Layar Sensitif (`FLAG_SECURE`)
-Pada Activity atau Composable yang menampilkan informasi rahasia (saldo, nomor kartu, OTP, form ganti sandi):
+### 2.3 Sensitive Screen Protection (`FLAG_SECURE`)
+In Activities or Composables displaying sensitive financial or personal data (account balance, card number, OTP, password reset forms):
 ```kotlin
 // Android Activity
 override fun onCreate(savedInstanceState: Bundle?) {
@@ -89,10 +89,10 @@ override fun onCreate(savedInstanceState: Bundle?) {
     )
 }
 ```
-*Efek:* Layar menjadi hitam saat direkam atau di-screenshot, dan disamarkan pada tampilan Android *Recent Apps*.
+*Effect:* The screen turns black when captured via screenshot or screen recording, and is obfuscated in the Android *Recent Apps* switcher.
 
-### 2.4 Obfuscation & Minifikasi (R8 / ProGuard)
-Konfigurasikan `android/app/build.gradle.kts`:
+### 2.4 Obfuscation & Minification (R8 / ProGuard)
+Configure `android/app/build.gradle.kts`:
 ```kotlin
 buildTypes {
     release {
@@ -108,18 +108,18 @@ buildTypes {
 
 ---
 
-## ⚡ 3. Alur Kerja Offline-First & Mock Testing
+## ⚡ 3. Offline-First & Mock Testing Workflow
 
-1. **Sinkronisasi Data Lokal:** Gunakan pola *Single Source of Truth* di mana UI hanya mengamati data dari database lokal (Room/SQLCipher), dan layer jaringan bertugas menyinkronkan data ke backend.
-2. **Pengujian Cepat Tanpa Menunggu Backend:**
-   - Jalankan `make mock-api` di Baseline (port 4010).
-   - Arahkan `BASE_URL` Android di emulator ke `http://10.0.2.2:4010/api/v1` (IP loopback host dari emulator Android) untuk langsung menguji request & response API.
+1. **Local Data Synchronization:** Adopt the *Single Source of Truth* pattern where UI components exclusively observe state from the local database (Room/SQLCipher), and the network layer reconciles data asynchronously with the backend.
+2. **Rapid Testing Without Backend Dependencies:**
+   - Execute `make mock-api` in the baseline project (port 4010).
+   - Point the Android emulator `BASE_URL` to `http://10.0.2.2:4010/api/v1` (host loopback alias from Android emulator) to directly validate API request/response serialization.
 
 ---
 
-## 📋 4. Checklist Kesiapan Google Play Store (Data Safety)
+## 📋 4. Google Play Store Readiness Checklist (Data Safety)
 
-- [ ] Cleartext traffic dinonaktifkan (`cleartextTrafficPermitted="false"`).
-- [ ] Tidak ada file sertifikat rilis `.jks`, `.keystore`, atau `google-services.json` yang ter-commit ke Git (diverifikasi oleh Gitleaks).
-- [ ] Target SDK selalu menggunakan versi Android terbaru sesuai kebijakan Play Console.
-- [ ] Pengumpulan data PII memenuhi deklarasi privasi sesuai `docs/security-iam-policy.md`.
+- [ ] Cleartext traffic disabled (`cleartextTrafficPermitted="false"`).
+- [ ] No release signing certificates (`.jks`, `.keystore`) or `google-services.json` committed to Git (enforced via Gitleaks).
+- [ ] Target SDK updated to the latest Android version mandated by Google Play Console policies.
+- [ ] PII data collection adheres to privacy declarations in `docs/security-iam-policy.md` and Data Privacy Laws (e.g., GDPR).

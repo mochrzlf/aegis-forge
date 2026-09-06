@@ -1,72 +1,72 @@
 # Enterprise Security & IAM Policy Blueprint
-## Standar Keamanan Identitas, Akses, dan Perlindungan Data
+## Identity, Access, and Data Protection Security Standard
 
-Dokumen ini adalah pedoman formal arsitektur keamanan bagi tim engineer dan AI Agent dalam merancang, membangun, dan menguji sistem.
+This document serves as the formal security architecture guideline for engineering teams and AI Agents when designing, implementing, and testing systems.
 
 ---
 
-## 1. Identitas & Autentikasi (Authentication)
+## 1. Identity & Authentication
 
-1. **Password Policy (Jika Ada Local Auth):**
-   - Wajib menggunakan algoritma hashing **Argon2id** (pilihan utama) atau **bcrypt** (cost factor minimal 12).
-   - Minimal 12 karakter dengan kombinasi huruf besar, kecil, angka, dan simbol.
-   - Pengecekan terhadap daftar kebocoran password umum (*HaveIBeenPwned API check*).
+1. **Password Policy (For Local Auth):**
+   - Must use **Argon2id** (primary choice) or **bcrypt** (minimum cost factor 12) hashing algorithms.
+   - Minimum 12 characters combining uppercase letters, lowercase letters, numbers, and symbols.
+   - Enforce validation against common leaked password databases (*HaveIBeenPwned API check*).
 2. **Session & Token Hygiene:**
-   - **Access Token:** Berumur sangat pendek (maksimal 15 menit), stateless JWT berisi klaim: `sub` (User ID), `role`, dan `jti` (JWT ID unik).
-   - **Refresh Token:** Wajib disimpan di database dalam bentuk SHA-256 hash.
-   - **Transport Cookie:** Wajib dikirimkan melalui header `Set-Cookie` dengan flag:
+   - **Access Token:** Ultra short-lived (maximum 15 minutes), stateless JWT containing claims: `sub` (User ID), `role`, and `jti` (unique JWT ID).
+   - **Refresh Token:** Must be stored in the database as a SHA-256 hash.
+   - **Transport Cookie:** Must be transmitted via `Set-Cookie` header with flags:
      `HttpOnly; Secure; SameSite=Strict; Path=/api/auth`.
-   - DILARANG KERAS menyimpan token autentikasi di `localStorage` atau `sessionStorage`.
+   - STRICTLY FORBIDDEN to store authentication tokens in `localStorage` or `sessionStorage`.
 3. **Refresh Token Rotation (RTR):**
-   - Setiap penggunaan refresh token menghasilkan token baru dan membatalkan token sebelumnya.
-   - Jika token yang sudah di-revoke dipanggil kembali, sistem memicu **Replay Detection Alert**, membatalkan seluruh sesi turunan, dan mencatat event ke `audit_logs`.
+   - Every refresh token exchange issues a new token pair and invalidates the previous token.
+   - If an already revoked token is submitted, the system triggers a **Replay Detection Alert**, invalidates all descendant sessions, and logs the event to `audit_logs`.
 
 ---
 
-## 2. Otorisasi & Kontrol Akses (Authorization & IAM)
+## 2. Authorization & Access Control (Authorization & IAM)
 
 1. **Principle of Least Privilege (PoLP):**
-   - Pengguna dan service hanya diberikan izin minimum mutlak yang dibutuhkan untuk menjalankan tugasnya.
+   - Users and services are granted only the absolute minimum permissions necessary to perform their assigned tasks.
 2. **Role-Based Access Control (RBAC):**
-   - Hierarki Role:
-     - `superadmin`: Manajemen sistem global, konfigurasi keamanan, dan audit.
-     - `admin`: Manajemen operasional dan review pengguna.
-     - `support`: Akses read-only terbatas untuk tiket keluhan (data sensitif dimaskir).
-     - `member`: Pengguna standar pemilik data akun sendiri.
-     - `guest`: Akses publik read-only.
-3. **Pencegahan IDOR (Insecure Direct Object Reference / BOLA):**
-   - Server tidak boleh hanya memvalidasi apakah format `id` valid.
-   - Server WAJIB memvalidasi bahwa `id` resource yang diminta benar-benar milik pengguna yang sedang login (`WHERE id = :id AND user_id = :currentUserId`).
+   - Role Hierarchy:
+     - `superadmin`: Global system management, security configuration, and auditing.
+     - `admin`: Operational management and user reviews.
+     - `support`: Limited read-only access for support tickets (sensitive data masked).
+     - `member`: Standard user owning their own account data.
+     - `guest`: Public read-only access.
+3. **Prevention of IDOR (Insecure Direct Object Reference / BOLA):**
+   - The server must not solely validate whether the `id` format is valid.
+   - The server MUST validate that the requested resource `id` truly belongs to the authenticated user (`WHERE id = :id AND user_id = :currentUserId`).
 4. **Step-Up Authentication:**
-   - Untuk aksi kritis (penarikan saldo, perubahan peran pengguna, ekspor data massal, hapus akun), pengguna wajib melalui tantangan autentikasi ulang (re-enter password, OTP WhatsApp/Email, atau WebAuthn).
+   - For critical actions (balance withdrawals, user role modifications, bulk data exports, account deletion), users must complete a re-authentication challenge (password re-entry, WhatsApp/Email OTP, or WebAuthn).
 
 ---
 
 ## 3. Threat Modeling (STRIDE) SOP
 
-Setiap pembuatan endpoint atau penambahan modul baru wajib didahului evaluasi STRIDE:
+Every new endpoint creation or module addition must be preceded by a STRIDE evaluation:
 
-| Kategori Ancaman | Fokus Evaluasi | Mitigasi Standar |
+| Threat Category | Evaluation Focus | Standard Mitigation |
 |---|---|---|
-| **S**poofing | Pemalsuan identitas / sesi | Validasi signature JWT, verifikasi webhook HMAC |
-| **T**ampering | Modifikasi data ilegal | Zod input validation, database constraints, parameterized query |
-| **R**epudiation | Penyangkalan aksi | Pencatatan permanen ke `audit_logs` (IP, UA, Timestamp) |
-| **I**nformation Disclosure | Kebocoran data rahasia | Masking PII, generic error messages, Field-Level Encryption |
-| **D**enial of Service | Exhaustion resource | Redis rate-limiter, pagination wajib, payload size limits |
-| **E**levation of Privilege | Lompatan hak akses | Server-side role guard, Row-Level Security / IDOR check |
+| **S**poofing | Identity / session forgery | JWT signature validation, HMAC webhook verification |
+| **T**ampering | Unauthorized data modification | Zod input validation, database constraints, parameterized queries |
+| **R**epudiation | Action denial | Immutable logging to `audit_logs` (IP, UA, Timestamp) |
+| **I**nformation Disclosure | Sensitive data leakage | PII masking, generic error messages, Field-Level Encryption |
+| **D**enial of Service | Resource exhaustion | Redis rate limiter, mandatory pagination, payload size limits |
+| **E**levation of Privilege | Permission escalation | Server-side role guards, Row-Level Security / IDOR checks |
 
-Dokumentasikan hasil evaluasi di `docs/adr/ADR-[NUM]-threat-model-[fitur].md`.
+Document evaluation results in `docs/adr/ADR-[NUM]-threat-model-[feature].md`.
 
 ---
 
-## 4. Kepatuhan Regulasi (UU Perlindungan Data Pribadi No. 27/2022)
+## 4. Regulatory Compliance (Data Privacy Laws (e.g., GDPR))
 
-1. **Persetujuan Pemrosesan Data (Consent):**
-   - Wajib mencatat waktu dan versi kebijakan privasi yang disetujui saat onboarding (`consent_given_at`, `consent_policy_version`).
-2. **Hak Penghapusan Data (Right to Erasure):**
-   - Pengguna berhak meminta penghapusan akun.
-   - Diberikan masa tenggang 30 hari (`deletion_requested_at`). Setelah 30 hari, background worker menjalankan *Permanent Hard Delete* atau *Anonymization* pada data riwayat.
+1. **Data Processing Consent:**
+   - Mandatory logging of timestamp and privacy policy version agreed to during onboarding (`consent_given_at`, `consent_policy_version`).
+2. **Right to Erasure:**
+   - Users have the right to request account deletion.
+   - A 30-day grace period is provided (`deletion_requested_at`). After 30 days, a background worker performs *Permanent Hard Delete* or *Anonymization* on historical records.
 3. **Data Portability:**
-   - Menyediakan fitur download arsip data akun dalam format terstruktur (JSON/CSV terenkripsi).
-4. **Enkripsi Kredensial Pihak Ketiga (Field-Level Encryption):**
-   - Token pihak ketiga (Gmail, GitHub, Payment Gateway) wajib dienkripsi di level kolom menggunakan **AES-256-GCM**.
+   - Provide account data archive download capabilities in a structured format (encrypted JSON/CSV).
+4. **Third-Party Credential Encryption (Field-Level Encryption):**
+   - Third-party tokens (Gmail, GitHub, Payment Gateway) must be encrypted at the column level using **AES-256-GCM**.

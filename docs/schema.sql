@@ -1,17 +1,17 @@
 -- =============================================================================
 -- HARDENED POSTGRESQL DATABASE SCHEMA BASELINE
 -- PostgreSQL 14+
--- Enterprise Banking-Grade IAM & Cyber Security Standard
+-- Enterprise Banking Standard IAM & Cyber Security Baseline
 -- =============================================================================
--- Fitur Keamanan Bawaan:
---  1. pgcrypto (UUIDv4) & CITEXT (Email Case-Insensitive)
+-- Built-in Security Features:
+--  1. pgcrypto (UUIDv4) & CITEXT (Case-Insensitive Email)
 --  2. Role-Based Access Control (RBAC) & User Status Lifecycle (JML)
 --  3. Maker-Checker (Dual Control / Four-Eyes Principle) Table
 --  4. Token Rotation (RTR) & Hash Storage (Anti-Replay Attack)
 --  5. Immutable Audit Trail (Anti-Tamper: Update & Delete Blocked)
---  6. Instant Kill-Switch Trigger pada User Termination
---  7. Field-Level Encryption Store untuk Kredensial Pihak Ketiga (AES-256-GCM)
---  8. Kepatuhan UU PDP Indonesia (Right to Erasure / 30-Day Grace Period)
+--  6. Instant Kill-Switch Trigger on User Termination
+--  7. Field-Level Encryption Store for Third-Party Credentials (AES-256-GCM)
+--  8. Compliance with Data Privacy Laws (e.g., GDPR) (Right to Erasure / 30-Day Grace Period)
 -- =============================================================================
 
 CREATE EXTENSION IF NOT EXISTS "pgcrypto";
@@ -22,17 +22,17 @@ CREATE EXTENSION IF NOT EXISTS "citext";
 -- -----------------------------------------------------------------------------
 CREATE TYPE user_role AS ENUM (
     'superadmin',      -- Root / Break-Glass Emergency
-    'admin',           -- Administrator Operasional
+    'admin',           -- Operations Administrator
     'support',         -- Customer Support (Masked Read-Only)
-    'member',          -- Pengguna Standar
-    'guest'            -- Pengguna Publik
+    'member',          -- Standard User
+    'guest'            -- Public User
 );
 
 CREATE TYPE user_status AS ENUM (
-    'active',          -- User aktif normal
-    'suspended',       -- Dibekukan sementara karena investigasi/anomali
-    'dormant',         -- Tidak aktif > 90 hari (auto-lock)
-    'terminated'       -- Dinonaktifkan permanen (Instant session revocation)
+    'active',          -- Normal active user
+    'suspended',       -- Temporarily suspended due to investigation/anomaly
+    'dormant',         -- Inactive > 90 days (auto-lock)
+    'terminated'       -- Permanently deactivated (instant session revocation)
 );
 
 CREATE TYPE audit_action AS ENUM (
@@ -80,10 +80,10 @@ CREATE TABLE users (
     password_changed_at     TIMESTAMPTZ DEFAULT now(),
     email_verified_at       TIMESTAMPTZ,
     
-    -- Kepatuhan UU PDP (Hak Persetujuan & Hak Penghapusan Data)
+    -- Data Privacy Laws Compliance (e.g., GDPR) (Consent & Right to Erasure)
     consent_given_at        TIMESTAMPTZ NOT NULL DEFAULT now(),
     consent_policy_version  VARCHAR(20) NOT NULL DEFAULT 'v1.0',
-    deletion_requested_at   TIMESTAMPTZ,                   -- Masa tenggang 30 hari
+    deletion_requested_at   TIMESTAMPTZ,                   -- 30-day grace period
     
     created_at              TIMESTAMPTZ NOT NULL DEFAULT now(),
     updated_at              TIMESTAMPTZ NOT NULL DEFAULT now()
@@ -96,10 +96,10 @@ CREATE INDEX idx_users_role_status ON users(role, status);
 -- -----------------------------------------------------------------------------
 CREATE TABLE approval_requests (
     id                      UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    action_type             VARCHAR(60) NOT NULL,          -- misal: 'user.role_change', 'payout.disburse'
+    action_type             VARCHAR(60) NOT NULL,          -- e.g., 'user.role_change', 'payout.disburse'
     target_entity_type      VARCHAR(50) NOT NULL,          -- 'users', 'finance', 'system_config'
     target_entity_id        VARCHAR(64) NOT NULL,
-    payload                 JSONB NOT NULL,                -- Data perubahan yang diusulkan
+    payload                 JSONB NOT NULL,                -- Proposed change payload
     maker_user_id           UUID NOT NULL REFERENCES users(id),
     checker_user_id         UUID REFERENCES users(id),
     status                  approval_status NOT NULL DEFAULT 'PENDING',
@@ -108,7 +108,7 @@ CREATE TABLE approval_requests (
     created_at              TIMESTAMPTZ NOT NULL DEFAULT now(),
     resolved_at             TIMESTAMPTZ,
     
-    -- Aturan Keras SoD: Maker DILARANG menjadi Checker untuk permintaannya sendiri!
+    -- Strict SoD Rule: Maker MUST NOT be the Checker for their own request!
     CONSTRAINT chk_maker_checker_different CHECK (maker_user_id <> checker_user_id)
 );
 CREATE INDEX idx_approvals_status ON approval_requests(status, expires_at);
@@ -120,7 +120,7 @@ CREATE INDEX idx_approvals_maker ON approval_requests(maker_user_id);
 CREATE TABLE refresh_tokens (
     id                      UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id                 UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-    token_hash              VARCHAR(128) NOT NULL UNIQUE,  -- SHA-256 hash dari raw refresh token
+    token_hash              VARCHAR(128) NOT NULL UNIQUE,  -- SHA-256 hash of raw refresh token
     device_name             VARCHAR(50),                   -- "Chrome on Windows", "Mobile App"
     ip_address              INET,
     expires_at              TIMESTAMPTZ NOT NULL,
@@ -147,14 +147,14 @@ CREATE TABLE audit_logs (
     entity_id               VARCHAR(64),
     ip_address              INET,
     user_agent              VARCHAR(300),
-    metadata                JSONB,                         -- DILARANG memuat PII atau raw password!
+    metadata                JSONB,                         -- MUST NOT contain PII or raw passwords!
     created_at              TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 CREATE INDEX idx_audit_user_time ON audit_logs(user_id, created_at DESC);
 CREATE INDEX idx_audit_action_time ON audit_logs(action, created_at DESC);
 CREATE INDEX idx_audit_status ON audit_logs(status, created_at DESC);
 
--- PROTEKSI ANTI-TAMPER: Audit logs DILARANG di-UPDATE atau di-DELETE oleh siapa pun!
+-- ANTI-TAMPER PROTECTION: Audit logs CANNOT be UPDATED or DELETED by anyone!
 CREATE OR REPLACE FUNCTION protect_audit_logs()
 RETURNS TRIGGER AS $$
 BEGIN
@@ -174,8 +174,8 @@ CREATE TRIGGER trg_protect_audit_logs
 CREATE TABLE third_party_credentials (
     id                      UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id                 UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-    service_name            VARCHAR(50) NOT NULL,          -- misal: "google_oauth", "broker_api"
-    encrypted_payload       TEXT NOT NULL,                 -- Base64 terenkripsi AES-256-GCM
+    service_name            VARCHAR(50) NOT NULL,          -- e.g., "google_oauth", "broker_api"
+    encrypted_payload       TEXT NOT NULL,                 -- Base64 AES-256-GCM encrypted
     iv                      VARCHAR(32) NOT NULL,          -- Hex IV (12 bytes / 24 hex)
     auth_tag                VARCHAR(32) NOT NULL,          -- Hex GCM Tag (16 bytes / 32 hex)
     created_at              TIMESTAMPTZ NOT NULL DEFAULT now(),
@@ -186,8 +186,8 @@ CREATE TABLE third_party_credentials (
 -- -----------------------------------------------------------------------------
 -- 6. AUTOMATED JML TRIGGER: LEAVER KILL-SWITCH
 -- -----------------------------------------------------------------------------
--- Begitu status user berubah menjadi 'terminated' atau 'suspended', 
--- sistem otomatis mematikan semua sesi dan refresh token yang aktif detik itu juga!
+-- Once user status changes to 'terminated' or 'suspended', 
+-- the system automatically revokes all active sessions and refresh tokens immediately!
 CREATE OR REPLACE FUNCTION trigger_user_status_kill_switch()
 RETURNS TRIGGER AS $$
 BEGIN
@@ -197,7 +197,7 @@ BEGIN
             revoked_reason = CONCAT('JML_ACTION_', UPPER(NEW.status::TEXT))
         WHERE user_id = NEW.id AND revoked_at IS NULL;
         
-        -- Catat insiden JML ke audit trail
+        -- Record JML incident in audit trail
         INSERT INTO audit_logs (user_id, actor_role, action, status, entity_type, entity_id, metadata)
         VALUES (NEW.id, NEW.role, 'user.status_changed', 'SUCCESS', 'users', NEW.id::TEXT, 
                 jsonb_build_object('old_status', OLD.status, 'new_status', NEW.status, 'revocation', 'INSTANT_KILL_SWITCH'));

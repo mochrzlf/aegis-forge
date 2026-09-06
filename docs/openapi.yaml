@@ -97,7 +97,7 @@ paths:
 
   /users/me:
     get:
-      summary: Ambil profil pengguna yang sedang login
+      summary: Get the profile of the currently logged-in user
       tags: [Users]
       responses:
         '200':

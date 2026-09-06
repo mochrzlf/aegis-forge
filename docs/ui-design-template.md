@@ -1,89 +1,89 @@
 # UI Design Concept & Design System
-## Standar Desain Antarmuka Modern, Bersih, dan Berkarakter
+## Modern, Clean, and Distinctive Interface Design Standards
 
 | | |
 |---|---|
-| **Platform Utama** | Web App (Mobile-first Responsive, PWA Ready) |
-| **Prinsip Utama** | Cepat, Intuitif, Modern, dan Ringan |
-| **Font Utama** | **Plus Jakarta Sans** (Heading/Display/Angka) + **Inter** (Body) |
+| **Primary Platform** | Web App (Mobile-first Responsive, PWA Ready) |
+| **Core Principles** | Fast, Intuitive, Modern, and Lightweight |
+| **Primary Fonts** | **Plus Jakarta Sans** (Heading/Display/Numbers) + **Inter** (Body) |
 | **Styling Framework**| Tailwind CSS + Radix UI / shadcn/ui primitives |
 
 ---
 
-# BAGIAN 1 — FILOSOFI DESAIN
+# SECTION 1 — DESIGN PHILOSOPHY
 
-## 1.1 Tiga Prinsip Inti
-1. **"Satu Layar, Satu Pekerjaan Utama":**
-   Setiap tampilan memiliki Call-to-Action (CTA) yang jelas dan dominan. Pengguna tidak boleh bingung mencari langkah selanjutnya.
-2. **"Data & Konten adalah Protagonis":**
-   Angka, status penting, dan hasil kerja adalah elemen visual paling kontras. Elemen dekorasi tidak boleh mengaburkan keterbacaan data.
-3. **"Modernitas Tanpa Clutter":**
-   Gunakan ruang napas (*whitespace*) yang lapang, sudut membulat yang lembut (radius 16px untuk kartu), dan bayangan halus (*subtle elevation*). Hindari gaya enterprise kuno yang padat dan kaku.
+## 1.1 Three Core Principles
+1. **"One Screen, One Primary Action":**
+   Every view has a clear and dominant Call-to-Action (CTA). Users should never be confused about what step to take next.
+2. **"Data & Content Are the Protagonists":**
+   Metrics, critical statuses, and actionable outputs are the highest visual contrast elements. Decorative elements must never compromise data readability.
+3. **"Modernity Without Clutter":**
+   Leverage generous whitespace, gentle rounded corners (16px radius for cards), and subtle elevation shadows. Avoid dated, dense, and rigid enterprise aesthetics.
 
-## 1.2 Personality Visual
-| Kami ADALAH | Kami BUKAN |
+## 1.2 Visual Personality
+| We ARE | We are NOT |
 |---|---|
-| Bersih, lapang, dan berkarakter | Kaku, formal berlebihan, dan birokratis |
-| Tipografi modern dengan kontras tajam | Font default browser (Times/Arial generik) |
-| Micro-interactions yang halus dan cepat | Penuh animasi lambat yang mengganggu flow |
-| Konsisten pada makna warna fungsional | Warna-warni tanpa hierarki tujuan |
+| Clean, spacious, and distinctive | Rigid, overly formal, and bureaucratic |
+| Modern typography with crisp contrast | Browser default fonts (generic Times/Arial) |
+| Smooth and responsive micro-interactions | Packed with sluggish animations that disrupt user flow |
+| Consistent functional color semantics | Colorful without clear purpose or hierarchy |
 
 ---
 
-# BAGIAN 2 — DESIGN SYSTEM TOKENS
+# SECTION 2 — DESIGN SYSTEM TOKENS
 
-## 2.1 Palet Warna
+## 2.1 Color Palette
 
-### Warna Brand
-| Token | Hex Contoh | Penggunaan |
+### Brand Colors
+| Token | Example Hex | Usage |
 |---|---|---|
-| `brand-primary` | `#4F46E5` (Indigo modern) | Tombol CTA utama, status aktif, highlight penting |
-| `brand-primary-hover` | `#4338CA` | State hover / active pada tombol utama |
-| `brand-soft` | `#EEF2FF` | Background badge, kartu aksen, state selected |
+| `brand-primary` | `#4F46E5` (Modern Indigo) | Primary CTA buttons, active state, key highlights |
+| `brand-primary-hover` | `#4338CA` | Hover / active state on primary buttons |
+| `brand-soft` | `#EEF2FF` | Badge backgrounds, accent cards, selected state |
 
-### Warna Fungsional
-| Token | Hex | Makna & Penggunaan |
+### Functional Colors
+| Token | Hex | Meaning & Usage |
 |---|---|---|
-| `success` | `#16A34A` (Emerald) | Status berhasil, transaksi masuk, verifikasi valid |
-| `danger` | `#DC2626` (Red) | Pesan error, aksi destruktif, peringatan kritis |
-| `warning` | `#F59E0B` (Amber) | Peringatan lembut, kuota menipis, pending review |
-| `info` | `#2563EB` (Blue) | Petunjuk informatif, link navigasi |
+| `success` | `#16A34A` (Emerald) | Success status, incoming transactions, valid verification |
+| `danger` | `#DC2626` (Red) | Error messages, destructive actions, critical warnings |
+| `warning` | `#F59E0B` (Amber) | Soft warnings, quota limits, pending review |
+| `info` | `#2563EB` (Blue) | Informational hints, navigation links |
 
-### Warna Netral
-| Token | Hex | Penggunaan |
+### Neutral Colors
+| Token | Hex | Usage |
 |---|---|---|
-| `surface-bg` | `#F8FAFC` (Slate-50) | Background halaman utama aplikasi |
-| `surface-card` | `#FFFFFF` | Background kartu, modal, popover |
-| `border-subtle` | `#E2E8F0` (Slate-200) | Garis pembatas kartu halus |
-| `text-primary` | `#0F172A` (Slate-900) | Judul, angka utama, teks dengan kontras tinggi |
-| `text-secondary` | `#475569` (Slate-600) | Label sekunder, deskripsi pendukung |
-| `text-muted` | `#94A3B8` (Slate-400) | Placeholder form, teks non-aktif |
+| `surface-bg` | `#F8FAFC` (Slate-50) | Main application page background |
+| `surface-card` | `#FFFFFF` | Card background, modals, popovers |
+| `border-subtle` | `#E2E8F0` (Slate-200) | Subtle card borders and dividers |
+| `text-primary` | `#0F172A` (Slate-900) | Headings, primary metrics, high-contrast text |
+| `text-secondary` | `#475569` (Slate-600) | Secondary labels, supporting descriptions |
+| `text-muted` | `#94A3B8` (Slate-400) | Form placeholders, disabled text |
 
 ---
 
-## 2.2 Tipografi
+## 2.2 Typography
 
-- **Display / Heading / Angka:** `Plus Jakarta Sans` (font modern rancangan desainer Indonesia).
-- **Body / Paragraf / Form:** `Inter` (optimal untuk keterbacaan tinggi di berbagai ukuran layar).
-- **Angka Nominal / Statistik:** Wajib menggunakan class CSS `tabular-nums` agar digit angka sejajar vertikal saat ditampilkan dalam tabel atau daftar.
+- **Display / Heading / Numbers:** `Plus Jakarta Sans` (modern geometric sans-serif optimized for display legibility).
+- **Body / Paragraphs / Forms:** `Inter` (optimized for high legibility across all screen sizes).
+- **Numeric / Statistics:** Must use CSS class `tabular-nums` so numeric digits align vertically in tables or lists.
 
 ---
 
 ## 2.3 Radius, Spacing & Elevation
 
-| Elemen | Token / Nilai | Catatan Implementasi |
+| Element | Token / Value | Implementation Notes |
 |---|---|---|
-| Kartu Konten (`Card`) | `rounded-2xl` (16px) | Menghasilkan kesan ramah dan modern |
-| Tombol & Input Form | `rounded-xl` (12px) | Ukuran target sentuh minimal 48px tinggi |
-| Badge & Avatar | `rounded-full` | Elemen visual bulat penuh |
+| Content Card (`Card`) | `rounded-2xl` (16px) | Delivers a welcoming, modern appearance |
+| Buttons & Form Inputs | `rounded-xl` (12px) | Minimum touch target size of 48px height |
+| Badges & Avatars | `rounded-full` | Fully rounded pill/circle visual elements |
 | Card Shadow | `shadow-sm` | `0 1px 3px 0 rgba(0, 0, 0, 0.05)` |
-| Modal Dialog Shadow | `shadow-xl` | Bayangan tegas dengan backdrop blur lembut |
-| Card Border | `border border-slate-100` | Border tipis untuk pemisah visual yang bersih |
+| Modal Dialog Shadow | `shadow-xl` | Distinct elevation with soft backdrop blur |
+| Card Border | `border border-slate-100` | Thin border for clean visual separation |
 
 ---
 
-# BAGIAN 3 — POLA KOMPONEN
+# SECTION 3 — COMPONENT PATTERNS
 
-1. **Empty State:** Tidak boleh layar kosong; wajib ada ilustrasi/icon sederhana, pesan ramah, dan tombol aksi untuk membuat item pertama.
-2. **Skeleton Loading:** Gunakan skeleton loading shimmer daripada spinner layar penuh untuk persepsi kecepatan render yang lebih baik.
-3. **Form Feedback:** Validasi inline real-time saat field kehilangan fokus (*onBlur*), dengan pesan error yang ramah di bawah input.
+1. **Empty State:** Never leave a screen blank; always include a simple illustration/icon, friendly copy, and an action button to create the first item.
+2. **Skeleton Loading:** Use skeleton loading shimmer effects rather than full-screen spinners for better perceived render performance.
+3. **Form Feedback:** Real-time inline validation when a field loses focus (*onBlur*), with friendly error messages below the input field.

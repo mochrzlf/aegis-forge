@@ -1,12 +1,12 @@
 # Web Application Architecture Blueprint
 
-Dokumen ini adalah cetak biru teknis untuk merancang dan membangun **Aplikasi Web & SaaS Modern** berskala enterprise berbasis Baseline.
+This document is the technical blueprint for designing and building enterprise-grade **Modern Web & SaaS Applications** based on this Baseline.
 
 ---
 
-## 🏛️ 1. Pola Arsitektur Berlapis (Layered Web Architecture)
+## 🏛️ 1. Layered Web Architecture Pattern
 
-Aplikasi web mengadopsi pemisahan tanggung jawab (*Separation of Concerns*) yang tegas:
+The web application enforces strict Separation of Concerns across architectural layers:
 
 ```
 [Presentation Layer]
@@ -36,49 +36,49 @@ Aplikasi web mengadopsi pemisahan tanggung jawab (*Separation of Concerns*) yang
 
 ---
 
-## 🔐 2. Standar Autentikasi & Manajemen Sesi Web
+## 🔐 2. Web Authentication & Session Management Standards
 
-### 2.1 Transport Token Aman
-- **Access Token:** Format JWT (JSON Web Token), masa berlaku pendek (**maksimal 15 menit**). Disimpan di memori JavaScript aplikasi client (*in-memory*), BUKAN di `localStorage`.
-- **Refresh Token:** Token opaque dengan masa berlaku moderat (misal 7 hari) yang didukung oleh tabel database `refresh_tokens`.
-- **Pengiriman Cookie:** Refresh token WAJIB dikirim oleh backend via header `Set-Cookie` dengan parameter:
+### 2.1 Secure Token Transport
+- **Access Token:** JWT (JSON Web Token) format, short-lived (**maximum 15 minutes**). Stored in client application JavaScript memory (*in-memory*), NEVER in `localStorage`.
+- **Refresh Token:** Opaque token with moderate validity (e.g., 7 days) backed by the `refresh_tokens` database table.
+- **Cookie Delivery:** The backend MUST issue refresh tokens via the `Set-Cookie` header with the following parameters:
   ```http
   Set-Cookie: refresh_token=abc123xyz...; Path=/api/v1/auth; HttpOnly; Secure; SameSite=Strict; Max-Age=604800
   ```
-  *(Flags ini memblokir akses script JavaScript/XSS dan mencegah serangan Cross-Site Request Forgery)*.
+  *(These flags block JavaScript/XSS script access and mitigate Cross-Site Request Forgery attacks)*.
 
-### 2.2 Rotasi Refresh Token Otomatis (RFC 6749)
-Setiap kali endpoint `/api/v1/auth/refresh` dipanggil:
-1. Refresh token lama langsung di-revoke.
-2. Refresh token baru diterbitkan.
-3. Jika token yang sudah di-revoke mencoba digunakan kembali, sistem mendeteksi pencurian token (*token reuse detection*) dan mencabut seluruh sesi pengguna yang bersangkutan seketika.
+### 2.2 Automatic Refresh Token Rotation (RFC 6749)
+Each time the `/api/v1/auth/refresh` endpoint is invoked:
+1. The previous refresh token is immediately revoked.
+2. A new refresh token is issued.
+3. If an already revoked token is submitted, the system triggers token reuse detection (*token reuse detection*) and immediately invalidates all active sessions for that user.
 
 ---
 
-## 🛡️ 3. Pengerasan Keamanan Frontend (Frontend Hardening)
+## 🛡️ 3. Frontend Hardening
 
 1. **Content Security Policy (CSP):**
    ```http
    Content-Security-Policy: default-src 'self'; script-src 'self' 'nonce-...'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self'; connect-src 'self' https://api.yourdomain.com; frame-ancestors 'none';
    ```
-2. **Sanitasi Input & Anti-XSS:**
-   - Semua input yang dirender ke DOM wajib disanitasi menggunakan DOMPurify atau fitur auto-escaping bawaan framework (React JSX / Vue templates).
-3. **CORS Ketat (Cross-Origin Resource Sharing):**
-   - Backend hanya mengizinkan *origin* resmi domain web, bukan wildcard (`*`).
+2. **Input Sanitization & Anti-XSS:**
+   - All dynamic input rendered into the DOM must be sanitized using DOMPurify or the framework's native auto-escaping mechanisms (React JSX / Vue templates).
+3. **Strict CORS (Cross-Origin Resource Sharing):**
+   - The backend explicitly allows only trusted origin domains, disallowing wildcard (`*`) origins on authenticated endpoints.
 
 ---
 
-## ⚡ 4. Kinerja & Core Web Vitals (CWV)
+## ⚡ 4. Performance & Core Web Vitals (CWV)
 
-- **Largest Contentful Paint (LCP):** < 2.5 detik (optimasi gambar Next/Image, format WebP/AVIF, preloading font).
-- **Interaction to Next Paint (INP):** < 200 ms (hindari long tasks di main thread JavaScript).
-- **Cumulative Layout Shift (CLS):** < 0.1 (alokasikan ukuran eksplisit pada elemen gambar dan iklan).
+- **Largest Contentful Paint (LCP):** < 2.5 seconds (Next/Image optimization, WebP/AVIF formats, font preloading).
+- **Interaction to Next Paint (INP):** < 200 ms (minimize long tasks on the JavaScript main thread).
+- **Cumulative Layout Shift (CLS):** < 0.1 (assign explicit dimensions to image and ad elements).
 
 ---
 
-## 📋 5. Checklist Verifikasi Rilis Web
+## 📋 5. Web Release Verification Checklist
 
-- [ ] Seluruh endpoint API tervalidasi skema Zod/Pydantic di sisi server.
-- [ ] Header keamanan (*Helmet / CSP / HSTS*) aktif dan lulus uji di `securityheaders.com`.
-- [ ] Tidak ada API key atau secret rahasia yang bocor ke bundle JavaScript client (`NEXT_PUBLIC_` hanya untuk data publik non-kredensial).
-- [ ] Audit aksesibilitas lulus uji WCAG 2.1 AA (Lighthouse Accessibility Score > 90).
+- [ ] All API endpoints enforce server-side schema validation via Zod/Pydantic.
+- [ ] Security headers (*Helmet / CSP / HSTS*) are enabled and pass verification on `securityheaders.com`.
+- [ ] No API keys or backend secrets are leaked into client JavaScript bundles (`NEXT_PUBLIC_` prefixes reserved strictly for non-sensitive public metadata).
+- [ ] Accessibility audits comply with WCAG 2.1 AA standards (Lighthouse Accessibility Score > 90).

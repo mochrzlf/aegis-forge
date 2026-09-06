@@ -1,28 +1,28 @@
 # Algorithmic & EA Trading Execution & Risk Flow
 
-Diagram alur ini menjelaskan proses pemfilteran risiko sebelum order dikirimkan ke pasar finansial:
+This flow diagram illustrates the pre-trade risk-filtering process before an order is dispatched to financial markets:
 
 ```mermaid
 graph TD
-    Start["Tick Pasar Diterima (OnTick / WebSocket)"] --> NewsCheck{"Filter Berita Ekonomi Aktif?"}
+    Start["Market Tick Received (OnTick / WebSocket)"] --> NewsCheck{"Economic News Filter Active?"}
     
-    NewsCheck -- "Ya (Ada Berita High Impact)" --> Skip["Batalkan Eksekusi (News Blackout Window)"]
-    NewsCheck -- "Tidak (Pasar Normal)" --> SignalGen["Evaluasi Strategi & Indikator Kuantitatif"]
+    NewsCheck -- "Yes (High-Impact News Detected)" --> Skip["Abort Execution (News Blackout Window)"]
+    NewsCheck -- "No (Normal Market)" --> SignalGen["Evaluate Strategy & Quantitative Indicators"]
     
-    SignalGen --> HasSignal{"Sinyal Entry Terdeteksi?"}
-    HasSignal -- "Tidak" --> Wait["Tunggu Tick Selanjutnya"]
-    HasSignal -- "Ya (BUY / SELL)" --> RiskGate["🛡️ GERBANG KONTROL RISIKO (Pre-Trade Risk Gate)"]
+    SignalGen --> HasSignal{"Entry Signal Detected?"}
+    HasSignal -- "No" --> Wait["Wait for Next Tick"]
+    HasSignal -- "Yes (BUY / SELL)" --> RiskGate["🛡️ PRE-TRADE RISK GATE"]
     
-    RiskGate --> DDCheck{"Floating Drawdown Hari Ini < 5%?"}
-    DDCheck -- "TIDAK (Drawdown >= 5%)" --> CircuitBreaker["🚨 CIRCUIT BREAKER AKTIF: Tutup Semua Posisi & Kunci Trading"]
-    DDCheck -- "YA (Aman)" --> SpreadCheck{"Spread Saat Ini <= Batas Maksimum?"}
+    RiskGate --> DDCheck{"Today's Floating Drawdown < 5%?"}
+    DDCheck -- "NO (Drawdown >= 5%)" --> CircuitBreaker["🚨 CIRCUIT BREAKER ACTIVATED: Close All Positions & Lock Trading"]
+    DDCheck -- "YES (Safe)" --> SpreadCheck{"Current Spread <= Maximum Threshold?"}
     
-    SpreadCheck -- "TIDAK (Spread Melebar)" --> RejectSpread["Tolak Order (Cegah Slippage Ekstrem)"]
-    SpreadCheck -- "YA (Spread Wajar)" --> LotCalc["Kalkulasi Lot Dinamis (1% Equity / Jarak SL)"]
+    SpreadCheck -- "NO (Spread Widened)" --> RejectSpread["Reject Order (Prevent Extreme Slippage)"]
+    SpreadCheck -- "YES (Normal Spread)" --> LotCalc["Calculate Dynamic Lot Size (1% Equity / SL Distance)"]
     
-    LotCalc --> SendOrder["Kirim Order ke Broker via FIX/API dengan Hard SL"]
-    SendOrder --> OrderStatus{"Order Berhasil Terisi (Filled)?"}
+    LotCalc --> SendOrder["Dispatch Order to Broker via FIX/API with Hard SL"]
+    SendOrder --> OrderStatus{"Order Filled Successfully?"}
     
-    OrderStatus -- "Gagal / Re-quote" --> RequoteLog["Catat Error & Evaluasi Latensi"]
-    OrderStatus -- "Sukses Terisi" --> LogDB["Catat ke Audit Trail Database & Kirim Notif Telegram"]
+    OrderStatus -- "Failed / Re-quote" --> RequoteLog["Log Error & Evaluate Latency"]
+    OrderStatus -- "Successfully Filled" --> LogDB["Record in Audit Trail Database & Send Telegram Notification"]
 ```

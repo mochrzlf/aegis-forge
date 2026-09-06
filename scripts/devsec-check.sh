@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -e
 
-# Pastikan PATH menyertakan ~/.local/bin agar gitleaks/hermes selalu ditemukan
+# Ensure PATH includes ~/.local/bin so gitleaks/hermes is always found
 export PATH="$HOME/.local/bin:$PATH"
 
 # ==============================================================================
@@ -11,54 +11,54 @@ export PATH="$HOME/.local/bin:$PATH"
 MODE="$1"
 EXIT_CODE=0
 
-echo "🔍 Menjalankan Automated Security Audit..."
+echo "🔍 Running Automated Security Audit..."
 
-# 1. Periksa apakah .env ter-track oleh Git
+# 1. Check if .env is tracked by Git
 if git ls-files --error-unmatch .env >/dev/null 2>&1; then
-    echo "❌ FATAL: File .env terdeteksi berada di dalam staging/tracking Git!"
-    echo "   Jalankan: git rm --cached .env"
+    echo "❌ FATAL: .env file detected in Git staging/tracking!"
+    echo "   Run: git rm --cached .env"
     EXIT_CODE=1
 else
-    echo "✅ Proteksi .env: OK (Tidak ter-track Git)"
+    echo "✅ .env Protection: OK (Not tracked by Git)"
 fi
 
-# 2. Periksa apakah ada file kredensial berbahaya
+# 2. Check for dangerous credential files
 SUSPICIOUS_FILES=$(find . -maxdepth 3 -name "*.pem" -o -name "*.key" -o -name "*.p12" -o -name "id_rsa*" 2>/dev/null | grep -v "/node_modules/" || true)
 if [ -n "$SUSPICIOUS_FILES" ]; then
-    echo "⚠️  PERINGATAN: Ditemukan file kunci privat:"
+    echo "⚠️  WARNING: Private key file(s) found:"
     echo "$SUSPICIOUS_FILES"
     EXIT_CODE=1
 else
-    echo "✅ Private Key Scan: OK (Tidak ada private key sensitif)"
+    echo "✅ Private Key Scan: OK (No sensitive private keys found)"
 fi
 
-# 3. Gitleaks scan jika terpasang
+# 3. Gitleaks scan if installed
 if command -v gitleaks >/dev/null 2>&1; then
     if [ "$MODE" = "--staged" ]; then
-        echo "🔍 Menjalankan Gitleaks protect pada staged changes..."
+        echo "🔍 Running Gitleaks protect on staged changes..."
         if ! gitleaks protect -v --staged; then
-            echo "❌ Kredensial atau secret terdeteksi pada perubahan yang akan di-commit!"
+            echo "❌ Credentials or secrets detected in changes staged for commit!"
             EXIT_CODE=1
         else
-            echo "✅ Gitleaks Pre-Commit Audit: Clean (Tidak ada leak)"
+            echo "✅ Gitleaks Pre-Commit Audit: Clean (No leaks detected)"
         fi
     else
-        echo "🔍 Menjalankan Gitleaks full repository audit..."
+        echo "🔍 Running Gitleaks full repository audit..."
         if ! gitleaks detect --verbose; then
-            echo "❌ Kredensial atau secret terdeteksi oleh Gitleaks!"
+            echo "❌ Credentials or secrets detected by Gitleaks!"
             EXIT_CODE=1
         else
             echo "✅ Gitleaks Repository Audit: Clean"
         fi
     fi
 else
-    echo "ℹ️  Gitleaks belum terpasang di sistem. Pasang untuk deteksi secret otomatis."
+    echo "ℹ️  Gitleaks is not installed on the system. Install it for automated secret detection."
 fi
 
 if [ $EXIT_CODE -eq 0 ]; then
-    echo "🎉 Semua pemeriksaan keamanan lolos!"
+    echo "🎉 All security checks passed!"
 else
-    echo "❌ Pemeriksaan keamanan menemukan masalah! Operasi dibatalkan."
+    echo "❌ Security checks encountered issues! Operation aborted."
 fi
 
 exit $EXIT_CODE

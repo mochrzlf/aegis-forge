@@ -1,46 +1,40 @@
-# ADR-[NUM]: [Judul Keputusan Arsitektur]
-## Architecture Decision Record & Threat Model
+# ADR-00X: [Title of ADR]
+## Architecture Decision Record
 
 | | |
 |---|---|
-| **ID** | ADR-[NUM] |
-| **Judul** | [Judul Keputusan Singkat] |
-| **Status** | PROPOSED / ACCEPTED / DEPRECATED |
-| **Tanggal** | [Bulan Tahun] |
-| **Diputuskan oleh** | [Nama Engineer / Security Architect] |
-| **Berdampak pada** | [Komponen sistem yang terdampak] |
+| **ID** | ADR-00X |
+| **Title** | [Short, descriptive title] |
+| **Status** | **PROPOSED** \| **ACCEPTED** \| **REJECTED** \| **DEPRECATED** |
+| **Date** | [YYYY-MM-DD] |
+| **Decided by** | [Name or Role] |
+| **Impacts** | [Impacted system components] |
 
 ---
 
-## 1. Konteks Masalah
-[Jelaskan latar belakang teknis atau kebutuhan bisnis yang melatarbelakangi keputusan ini].
+## 1. Context & Problem Statement
+[Explain the technical background or business requirement that necessitated this decision].
+
+## 2. Alternatives Considered
+* **Option A:** [Description]
+* **Option B:** [Description]
+
+## 3. Decision
+[Explain which option was chosen and the reasoning behind the choice].
+
+## 4. Consequences
+* **Positive:** [What gets better?]
+* **Trade-off:** [What gets worse or what is the cost?]
 
 ---
 
-## 2. Pilihan Alternatif yang Dipertimbangkan
-1. **Opsi A**: [Deskripsi singkat, kelebihan & kekurangan].
-2. **Opsi B**: [Deskripsi singkat, kelebihan & kekurangan].
+## 5. Security Threat Modeling (STRIDE)
 
----
-
-## 3. Keputusan yang Diambil
-[Jelaskan opsi mana yang dipilih dan dasar argumen pemilihannya].
-
----
-
-## 4. Analisis Keamanan (STRIDE Threat Model)
-
-| Kategori Ancaman | Potensi Serangan pada Fitur Ini | Rencana Mitigasi Teknis |
+| Threat | Description | Mitigation Strategy |
 |---|---|---|
-| **S**poofing | [Potensi pemalsuan identitas] | [Mitigasi otentikasi] |
-| **T**ampering | [Potensi manipulasi parameter] | [Validasi schema / checksum] |
-| **R**epudiation | [Potensi penyangkalan transaksi] | [Audit logging spesifik] |
-| **I**nformation Disclosure | [Potensi kebocoran data] | [Masking / enkripsi field] |
-| **D**enial of Service | [Potensi spam / abuse] | [Rate limiting per IP / User] |
-| **E**levation of Privilege | [Potensi IDOR atau bypass role] | [Role guard & ownership check] |
-
----
-
-## 5. Konsekuensi Positif & Negatif
-- **Positif:** [Manfaat performa, kecepatan dev, atau keamanan].
-- **Negatif / Trade-off:** [Kompleksitas tambahan, overhead database, dll].
+| **S**poofing | [Potential identity forgery] | [Mitigation] |
+| **T**ampering | [Potential data modification] | [Mitigation] |
+| **R**epudiation | [Potential transaction denial] | [Specific audit logging] |
+| **I**nformation Disclosure | [Potential data leak] | [Mitigation] |
+| **D**enial of Service | [Potential resource exhaustion] | [Mitigation] |
+| **E**levation of Privilege | [Potential unauthorized role escalation] | [Mitigation] |

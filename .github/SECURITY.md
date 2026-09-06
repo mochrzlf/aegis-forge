@@ -2,57 +2,57 @@
 
 ## 🛡️ Enterprise Vulnerability Disclosure Policy
 
-Keamanan dan privasi data adalah prioritas tertinggi dalam arsitektur **Enterprise Baseline**. Kami menyambut baik laporan dari peneliti keamanan, pengembang, dan pengguna untuk membantu menjaga integritas repositori dan aplikasi turunannya.
+Security and data privacy are the highest priorities within the **Enterprise Baseline** architecture. We welcome reports from security researchers, developers, and users to assist in maintaining the integrity of this repository and its derived applications.
 
 ---
 
-## 📦 Versi yang Didukung (Supported Versions)
+## 📦 Supported Versions
 
-Hanya rilis terbaru pada branch utama yang secara aktif menerima pembaruan keamanan:
+Only the latest release on the primary branch actively receives security updates:
 
-| Versi | Didukung Secara Aktif | Status Patch Keamanan |
+| Version | Actively Supported | Security Patch Status |
 | :--- | :---: | :--- |
-| **Main (Latest)** | ✅ Ya | Patch langsung dirilis via PR & CI/CD |
-| **< 1.0.0** | ❌ Tidak | Harap rebase ke rilis terbaru |
+| **Main (Latest)** | ✅ Yes | Patches released immediately via PR & CI/CD |
+| **< 1.0.0** | ❌ No | Please rebase to the latest release |
 
 ---
 
-## 🚨 Cara Melaporkan Kerentanan (Reporting a Vulnerability)
+## 🚨 Reporting a Vulnerability
 
-Jika Anda menemukan potensi kerentanan keamanan (vulnerability) atau kebocoran kredensial, **JANGAN** membuat issue publik di GitHub. Harap laporkan melalui salah satu saluran rahasia berikut:
+If you discover a potential security vulnerability or credential leak, **DO NOT** create a public GitHub issue. Please submit your report through one of the following confidential channels:
 
-1. **GitHub Private Vulnerability Reporting (Direkomendasikan):**
-   - Masuk ke tab **Security** pada repositori GitHub.
-   - Klik **Report a vulnerability** untuk membuka draf pengungkapan terenkripsi yang hanya dapat diakses oleh *maintainer*.
+1. **GitHub Private Vulnerability Reporting (Recommended):**
+   - Navigate to the **Security** tab of the GitHub repository.
+   - Click **Report a vulnerability** to open an encrypted disclosure draft accessible only to maintainers.
 
-2. **Email Tim Keamanan:**
-   - Kirimkan detail temuan ke: `security@enterprise.local` (atau kontak maintainer di profil GitHub).
+2. **Security Team Email:**
+   - Send details of the finding to: `security@enterprise.local` (or maintainer contact on the GitHub profile).
 
-### Format Laporan yang Diharapkan:
-- **Deskripsi Kerentanan:** Penjelasan singkat tentang tipe celah (misal: Broken Access Control, SQL Injection, Secret Exposure, SSRF).
-- **Langkah Reproduksi (Proof of Concept):** Langkah terperinci atau skrip PoC untuk memvalidasi temuan.
-- **Dampak Potensial:** Risiko bisnis atau teknis jika kerentanan dieksploitasi.
-- **Rekomendasi Remediasi:** Saran perbaikan kode atau konfigurasi jika tersedia.
-
----
-
-## ⏱️ Service Level Agreement (SLA) Respons
-
-Tim maintainer berkomitmen pada standar penanganan kerentanan perbankan & enterprise:
-
-- **Pengakuan Awal (Acknowledgment):** Maksimal **1x24 jam** sejak laporan diterima.
-- **Triase & Validasi:** Maksimal **3 hari kerja**.
-- **Rilis Patch Keamanan (Hotfix):** 
-  - *Critical / High Severity (CVSS 7.0 - 10.0):* Maksimal **7 hari kalender**.
-  - *Medium / Low Severity (CVSS < 7.0):* Disertakan dalam siklus rilis berikutnya.
+### Expected Report Format:
+- **Vulnerability Description:** A brief explanation of the flaw type (e.g., Broken Access Control, SQL Injection, Secret Exposure, SSRF).
+- **Steps to Reproduce (Proof of Concept):** Detailed reproduction steps or a PoC script to validate the finding.
+- **Potential Impact:** Business or technical risks if the vulnerability is exploited.
+- **Remediation Recommendations:** Suggested code or configuration fixes, if available.
 
 ---
 
-## 🔒 Kebijakan Safe Harbor & Etika Riset
+## ⏱️ Response Service Level Agreement (SLA)
 
-Kami mendukung riset keamanan yang bertanggung jawab (*Responsible Disclosure*). Selama Anda:
-1. Tidak merusak data produksi atau mengganggu ketersediaan layanan (*Denial of Service*).
-2. Tidak mengakses atau mengekstrak data pribadi pengguna lain.
-3. Memberikan waktu yang wajar bagi tim untuk merilis perbaikan sebelum mempublikasikan temuan ke publik.
+The maintainer team commits to enterprise banking vulnerability handling standards:
 
-Maka kami tidak akan menempuh jalur hukum terhadap aktivitas riset keamanan Anda.
+- **Initial Acknowledgment:** Within **24 hours** of report receipt.
+- **Triage & Validation:** Maximum of **3 business days**.
+- **Security Patch Release (Hotfix):** 
+  - *Critical / High Severity (CVSS 7.0 - 10.0):* Maximum of **7 calendar days**.
+  - *Medium / Low Severity (CVSS < 7.0):* Included in the next release cycle.
+
+---
+
+## 🔒 Safe Harbor Policy & Research Ethics
+
+We support responsible security research (*Responsible Disclosure*). Provided that you:
+1. Do not damage production data or disrupt service availability (*Denial of Service*).
+2. Do not access or exfiltrate personal data belonging to other users.
+3. Allow reasonable time for the team to release a patch before disclosing findings publicly.
+
+We will not pursue legal action against your authorized security research activities.

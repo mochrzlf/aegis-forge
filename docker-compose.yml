@@ -34,7 +34,7 @@ services:
       timeout: 5s
       retries: 5
 
-  # Mailpit: Local SMTP Server & Webmail untuk testing OTP/Email tanpa spamming email asli
+  # Mailpit: Local SMTP Server Mailpit: Local SMTP Server & Webmail untuk testing OTP/Email tanpa spamming email asli Webmail for testing OTP/Emails without spamming real email accounts
   mailpit:
     image: axllent/mailpit:latest
     container_name: ${APP_NAME:-baseline}_mailpit
@@ -45,7 +45,7 @@ services:
     environment:
       MP_MAX_MESSAGES: 500
 
-  # Prism: Mock API Server instan dari docs/openapi.yaml untuk pengujian Mobile & Frontend
+  # Prism: Instant Mock API Server from docs/openapi.yaml for Mobile Prism: Mock API Server instan dari docs/openapi.yaml untuk pengujian Mobile & Frontend Frontend testing
   prism:
     image: stoplight/prism:5
     container_name: ${APP_NAME:-baseline}_mock_api

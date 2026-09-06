@@ -1,48 +1,48 @@
 # PRD Detail — User Stories & Acceptance Criteria
 
-Dokumen ini menjabarkan spesifikasi teknis dan kriteria penerimaan untuk setiap modul fitur yang didefinisikan di `docs/PRD.md`.
+This document outlines the technical specifications and acceptance criteria for each feature module defined in `docs/PRD.md`.
 
 ---
 
-## Modul F1: Autentikasi & Manajemen Sesi (IAM)
+## Module F1: Authentication & Session Management (IAM)
 
-### User Story F1.1: Login Pengguna
-> **Sebagai** calon pengguna baru atau pengguna terdaftar,  
-> **Saya ingin** masuk ke aplikasi menggunakan Google OAuth atau email terverifikasi,  
-> **Agar** saya bisa mengakses dashboard pribadi secara aman tanpa menghafal password rumit.
-
-#### Acceptance Criteria (AC):
-- **AC 1**: Pengguna dapat menekan tombol "Masuk dengan Google" dan diarahkan ke consent screen OAuth Google.
-- **AC 2**: Saat otorisasi berhasil, server menerbitkan short-lived JWT Access Token (15 menit) dan Refresh Token yang disimpan dalam cookie `HttpOnly; Secure; SameSite=Strict`.
-- **AC 3**: DILARANG mengekspos `refresh_token` ke dalam JSON response body yang dapat disimpan di `localStorage`.
-- **AC 4**: Token refresh di-hash (SHA-256) sebelum disimpan ke tabel `refresh_tokens`.
-- **AC 5**: Jika otorisasi gagal atau dibatalkan, tampilkan pesan error yang informatif dan tombol untuk mencoba kembali.
-
-### User Story F1.2: Refresh Sesi & Replay Detection
-> **Sebagai** pengguna yang sedang aktif menggunakan aplikasi,  
-> **Saya ingin** sesi login saya diperbarui secara otomatis di latar belakang,  
-> **Agar** pekerjaan saya tidak terputus setiap 15 menit.
+### User Story F1.1: User Login
+> **As a** prospective or registered user,  
+> **I want to** log in to the application using Google OAuth or a verified email,  
+> **So that** I can access my personal dashboard securely without memorizing complex passwords.
 
 #### Acceptance Criteria (AC):
-- **AC 1**: Client memanggil `POST /auth/refresh` saat access token kedaluwarsa.
-- **AC 2**: Server menerapkan **Refresh Token Rotation (RTR)** — setiap kali refresh token digunakan, server membatalkan token lama (`revoked_at`) dan menerbitkan pasangan token baru.
-- **AC 3**: Jika sistem mendeteksi refresh token yang sudah pernah di-revoke digunakan kembali (*token reuse/replay attack*), server WAJIB membatalkan seluruh sesi turunan milik pengguna tersebut dan mencatat insiden keamanan ke `audit_logs`.
+- **AC 1**: Users can click the "Sign in with Google" button and be redirected to the Google OAuth consent screen.
+- **AC 2**: Upon successful authorization, the server issues a short-lived JWT Access Token (15 minutes) and a Refresh Token stored in an `HttpOnly; Secure; SameSite=Strict` cookie.
+- **AC 3**: The `refresh_token` MUST NOT be exposed in the JSON response body where it could be stored in `localStorage`.
+- **AC 4**: Refresh tokens are hashed (SHA-256) before being persisted to the `refresh_tokens` table.
+- **AC 5**: If authorization fails or is canceled, display an informative error message and a button to retry.
+
+### User Story F1.2: Session Refresh & Replay Detection
+> **As an** active application user,  
+> **I want** my login session to be refreshed automatically in the background,  
+> **So that** my workflow is not interrupted every 15 minutes.
+
+#### Acceptance Criteria (AC):
+- **AC 1**: The client calls `POST /auth/refresh` when the access token expires.
+- **AC 2**: The server implements **Refresh Token Rotation (RTR)** — every time a refresh token is used, the server revokes the old token (`revoked_at`) and issues a new token pair.
+- **AC 3**: If the system detects that an already revoked refresh token is reused (*token reuse/replay attack*), the server MUST revoke all active descendant sessions belonging to that user and record a security incident in `audit_logs`.
 
 ---
 
-## Modul F2: [Nama Core Feature]
+## Module F2: [Core Feature Name]
 
-### User Story F2.1: [Nama Aksi Fitur]
-> **Sebagai** [Role Pengguna],  
-> **Saya ingin** [Aksi yang ingin dilakukan],  
-> **Agar** [Manfaat / Tujuan bisnis].
+### User Story F2.1: [Feature Action Name]
+> **As a** [User Role],  
+> **I want to** [Action to perform],  
+> **So that** [Benefit / Business objective].
 
 #### Acceptance Criteria (AC):
-- **AC 1**: [Kondisi input valid dan hasil yang diharapkan].
-- **AC 2**: [Validasi schema menggunakan Zod/Pydantic sebelum data diproses].
-- **AC 3**: [Pengecekan otorisasi kepemilikan data (Anti-IDOR) di level server].
-- **AC 4**: [Pencatatan mutasi ke tabel audit log].
+- **AC 1**: [Valid input condition and expected result].
+- **AC 2**: [Schema validation using Zod/Pydantic before data is processed].
+- **AC 3**: [Server-side data ownership authorization check (Anti-IDOR)].
+- **AC 4**: [Mutation recorded in audit log table].
 
 #### Edge Cases & Error States:
-1. **Akses tanpa hak (IDOR Probe)**: Jika user mencoba memodifikasi resource milik user lain, server merespons dengan HTTP `403 Forbidden` atau `404 Not Found`.
-2. **Koneksi database terputus**: Tampilkan notifikasi toast "Gagal memproses permintaan, silakan coba beberapa saat lagi" tanpa membocorkan stacktrace internal.
+1. **Unauthorized Access (IDOR Probe)**: If a user attempts to modify resources belonging to another user, the server responds with HTTP `403 Forbidden` or `404 Not Found`.
+2. **Database Connection Interrupted**: Display a toast notification "Failed to process request, please try again shortly" without leaking internal stack traces.

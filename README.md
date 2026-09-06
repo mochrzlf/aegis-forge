@@ -6,7 +6,6 @@ A production-ready blueprint and scaffolding template for building secure **Web 
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 [![Protected by Gitleaks](https://img.shields.io/badge/Protected%20by-Gitleaks-red.svg)](.gitleaks.toml)
 [![Security Policy](https://img.shields.io/badge/Security-Policy-brightgreen.svg)](SECURITY.md)
-[![Bahasa Indonesia](https://img.shields.io/badge/Lang-Bahasa%20Indonesia-blue.svg)](README.id.md)
 
 ---
 
@@ -124,7 +123,6 @@ git commit -m "feat: implement user registration flow"
 Baseline/
 ├── AGENTS.md                   # AI Agent Operating Contract & Non-Negotiable Rules
 ├── README.md                   # Primary English documentation
-├── README.id.md                # Dokumentasi versi Bahasa Indonesia
 ├── SETUP.md                    # Technical setup & configuration manual
 ├── SECURITY.md                 # Vulnerability disclosure policy
 ├── LICENSE                     # Apache-2.0 License

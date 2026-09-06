@@ -1,94 +1,94 @@
-# Panduan Setup & Inisialisasi Proyek Multi-Domain
+# Multi-Domain Project Setup & Initialization Guide
 
-Dokumen ini menjelaskan langkah demi langkah untuk membuat proyek baru menggunakan **Universal Enterprise Baseline** (Web, Mobile, EA Trading, atau Fullstack).
+This document provides step-by-step instructions for creating a new project using the **Universal Enterprise Baseline** (Web, Mobile, EA Trading, or Fullstack).
 
 ---
 
-## 1. Buat Salinan Proyek Baru Berdasarkan Domain
+## 1. Create a New Project Instance by Domain
 
-Gunakan perintah `make new` atau script otomatis:
+Use the `make new` command or automated script:
 
 ```bash
-# Opsi 1: Proyek Web Application / SaaS
+# Option 1: Web Application / SaaS Project
 bash scripts/init-new-project.sh "MyWebApp" "../MyWebApp" web
 
-# Opsi 2: Proyek Mobile Application (Android / iOS)
+# Option 2: Mobile Application Project (Android / iOS)
 bash scripts/init-new-project.sh "MyMobileApp" "../MyMobileApp" mobile
 
-# Opsi 3: Proyek EA / Algorithmic Trading
+# Option 3: EA / Algorithmic Trading Project
 bash scripts/init-new-project.sh "MyTradingEA" "../MyTradingEA" trading
 
-# Opsi 4: Proyek Fullstack Enterprise (Default)
+# Option 4: Fullstack Enterprise Project (Default)
 bash scripts/init-new-project.sh "MyFullstack" "../MyFullstack" fullstack
 ```
 
-Script akan otomatis:
-1. Menyalin seluruh struktur baseline (`AGENTS.md`, `docs/blueprints/`, `docs/security/`, `docs/diagrams/`, `Makefile`, `.env.example`, `.gitignore`, `.gitattributes`, `.gitleaks.toml`).
-2. Mengganti nama placeholder `[PROJECT_NAME]` menjadi nama proyek Anda.
-3. Menginisialisasi Git repository baru (`git init -b main`).
-4. Memasang dan mengaktifkan **Git Pre-Commit Security Hook** (`.git/hooks/pre-commit`) untuk memblokir kebocoran file `.env`, file private key, keystore Android, dan secret token via Gitleaks.
-5. Menyiapkan file `.env` lokal dengan kunci enkripsi & JWT unik yang di-generate otomatis via OpenSSL.
+The script will automatically:
+1. Copy the entire baseline structure (`AGENTS.md`, `docs/blueprints/`, `docs/security/`, `docs/diagrams/`, `Makefile`, `.env.example`, `.gitignore`, `.gitattributes`, `.gitleaks.toml`).
+2. Replace the placeholder `[PROJECT_NAME]` with your project's name.
+3. Initialize a new Git repository (`git init -b main`).
+4. Install and enable the **Git Pre-Commit Security Hook** (`.git/hooks/pre-commit`) to block leaks of `.env` files, private key files, Android keystores, and secret tokens via Gitleaks.
+5. Prepare a local `.env` file with unique encryption & JWT keys generated automatically via OpenSSL.
 
 ---
 
-## 2. Siapkan Kredensial & Lingkungan (.env)
+## 2. Configure Credentials & Environment (.env)
 
-Masuk ke direktori proyek baru:
+Navigate into the new project directory:
 ```bash
-cd ../NamaProyekAnda
+cd ../YourProjectName
 ```
-Buka file `.env` dan generate kunci kriptografi yang aman:
+Open the `.env` file and generate secure cryptographic keys:
 - Generate JWT Secret: `openssl rand -base64 48`
 - Generate Encryption Master Key: `openssl rand -hex 32`
-- Sesuaikan konfigurasi database atau API key sesuai domain proyek.
+- Adjust database or API key configurations according to your project domain.
 
 ---
 
-## 3. Alur Kerja Khusus per Domain
+## 3. Domain-Specific Workflows
 
-### 🌐 A. Jika Anda Membangun Proyek Web:
-1. Rujuk cetak biru di `docs/blueprints/web-application-blueprint.md`.
-2. Perintahkan Hermes Agent:
-   > *"Hermes, tolong rancang docs/PRD.md dan docs/ui-design.md untuk aplikasi web ini dengan state management Zustand dan token session HttpOnly."*
+### 🌐 A. If You Are Building a Web Project:
+1. Refer to the blueprint in `docs/blueprints/web-application-blueprint.md`.
+2. Prompt Hermes Agent:
+   > *"Hermes, please design docs/PRD.md and docs/ui-design.md for this web application using Zustand for state management and HttpOnly session cookies."*
 
-### 📱 B. Jika Anda Membangun Proyek Mobile (Android/iOS):
-1. Rujuk cetak biru di `docs/blueprints/mobile-application-blueprint.md` dan checklist di `docs/security/mobile-security-checklist.md`.
-2. Jalankan Mock API Server instan:
+### 📱 B. If You Are Building a Mobile Project (Android/iOS):
+1. Refer to the blueprint in `docs/blueprints/mobile-application-blueprint.md` and the checklist in `docs/security/mobile-security-checklist.md`.
+2. Launch the instant Mock API Server:
    ```bash
    make mock-api
    ```
-   *(Akses `http://localhost:4010` atau `http://10.0.2.2:4010` di emulator Android untuk langsung menguji request & response API).*
-3. Perintahkan Hermes Agent:
-   > *"Hermes, tolong rancang aplikasi Android Jetpack Compose dengan Clean Architecture dan simpan token di EncryptedSharedPreferences (Android Keystore)."*
+   *(Access `http://localhost:4010` or `http://10.0.2.2:4010` in an Android emulator to immediately test API requests & responses).*
+3. Prompt Hermes Agent:
+   > *"Hermes, please design an Android Jetpack Compose application following Clean Architecture and store tokens in EncryptedSharedPreferences (Android Keystore)."*
 
-### 📈 C. Jika Anda Membangun Proyek EA / Algorithmic Trading:
-1. Rujuk cetak biru di `docs/blueprints/ea-trading-blueprint.md` dan kebijakan risiko di `docs/security/trading-risk-policy.md`.
-2. Perintahkan Hermes Agent:
-   > *"Hermes, tolong rancang arsitektur EA Trading untuk instrumen XAUUSD/EURUSD dengan aturan Hard Stop Loss, kalkulasi lot dinamis maksimal 1% risiko modal, dan Circuit Breaker jika daily drawdown mencapai 5%."*
+### 📈 C. If You Are Building an EA / Algorithmic Trading Project:
+1. Refer to the blueprint in `docs/blueprints/ea-trading-blueprint.md` and the risk policy in `docs/security/trading-risk-policy.md`.
+2. Prompt Hermes Agent:
+   > *"Hermes, please design an EA Trading architecture for XAUUSD/EURUSD instruments with Hard Stop Loss rules, dynamic lot sizing capped at 1% capital risk, and a Circuit Breaker triggered when daily drawdown reaches 5%."*
 
 ---
 
-## 4. Menjalankan Security Audit Kapan Saja
+## 4. Running Security Audits Anytime
 
-Sistem keamanan pre-commit hook berjalan otomatis saat Anda melakukan `git commit`. Anda juga dapat melakukan audit manual kapan saja:
+The pre-commit hook security checks run automatically whenever you execute `git commit`. You can also trigger a manual audit at any time:
 ```bash
 make audit
-# atau
+# or
 devsec-check
 ```
 
 ---
 
-## 5. Ringkasan Shortcut Perintah
+## 5. Command Shortcut Summary
 
-| Shortcut | Fungsi |
+| Shortcut | Description |
 | :--- | :--- |
-| `make help` | Menampilkan seluruh perintah yang tersedia |
-| `make audit` | Menjalankan audit keamanan Gitleaks & secret detection |
-| `make mock-api` | Menjalankan mock server API (port 4010) |
-| `make up` | Menjalankan stack Docker Compose lokal |
-| `make down` | Menghentikan stack Docker Compose lokal |
-| `make hermes` | Membuka Hermes AI Agent di terminal |
-| `make hermes-ui` | Menjalankan Web Dashboard Hermes di browser (port 9119) |
-| `new-project` | Shortcut alias terminal untuk membuat proyek baru |
-| `goto-baseline` | Berpindah langsung ke direktori Baseline |
+| `make help` | Display all available Makefile commands |
+| `make audit` | Run comprehensive Gitleaks & secret detection security audit |
+| `make mock-api` | Start Prism Mock API server (port 4010) |
+| `make up` | Start local Docker Compose services |
+| `make down` | Stop local Docker Compose services |
+| `make hermes` | Open Hermes AI Agent in terminal |
+| `make hermes-ui` | Launch Hermes Web Dashboard in background (port 9119) |
+| `new-project` | Terminal alias shortcut to initialize a new project |
+| `goto-baseline` | Navigate directly to the Baseline directory |
