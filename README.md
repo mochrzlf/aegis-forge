@@ -1,124 +1,119 @@
-# Universal Enterprise Baseline Blueprint
-### Gold-Standard Framework for Web, Mobile, EA Trading, & Enterprise Systems
+# Enterprise Baseline
+
+Template dan blueprint arsitektur untuk memulai proyek baru (Web, Mobile Android/iOS, atau EA Trading) dengan standar keamanan dan struktur yang sudah teruji.
 
 [![DevSecOps CI Pipeline](https://github.com/mochrzlf/enterprise-baseline/actions/workflows/security.yml/badge.svg)](https://github.com/mochrzlf/enterprise-baseline/actions/workflows/security.yml)
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 [![Protected by Gitleaks](https://img.shields.io/badge/Protected%20by-Gitleaks-red.svg)](.gitleaks.toml)
 [![Security Policy](https://img.shields.io/badge/Security-Policy-brightgreen.svg)](SECURITY.md)
-[![Compliance](https://img.shields.io/badge/Compliance-UU%20PDP%202022-emerald.svg)](docs/security-iam-policy.md)
-
-Baseline ini adalah fondasi standar emas (*universal enterprise blueprint*) yang dirancang khusus untuk membangun solusi perangkat lunak skala produksi, siap diaudit, dan berstandar institusi.
-
-Dapat dioperasikan secara otonom bersama **AI Coding Agents (Hermes Agent, Claude, Cursor)** maupun oleh tim rekayasa perangkat lunak manusia dengan dukungan penuh untuk 4 domain:
-1. 🌐 **Web Applications & SaaS:** Fullstack, modern UI system, SSR/CSR, cookie session RFC 6749, anti-XSS/CSP.
-2. 📱 **Mobile Applications (Android & iOS):** Jetpack Compose / Flutter, hardware-backed Keystore, SSL/Certificate Pinning, `FLAG_SECURE`, dan proteksi R8/ProGuard.
-3. 📈 **Algorithmic & EA Trading Systems:** Expert Advisor (MQL5/Python), doktrin *Capital Preservation*, kalkulasi lot dinamis, *Emergency Circuit Breaker*, dan *Anti-Overfitting SOP*.
-4. 🏢 **Enterprise Backend & IAM Core:** RBAC/ABAC, *Maker-Checker (Four-Eyes Principle)*, *JML Kill-Switch*, enkripsi tingkat kolom (AES-256-GCM), dan *Immutable Audit Trail*.
 
 ---
 
-## 🌟 Pilar Utama Baseline
+## Latar Belakang
 
-1. **Specification-First & AI-Agent Operating Contract:**
-   - Kontrak kerja permanen di `AGENTS.md` mengatur aturan keras (*non-negotiable rules*) sebelum AI menulis baris kode pertama.
-2. **Rigid Identity & Access Management (IAM):**
-   - Refresh Token Rotation (RFC 6749) dengan transport cookie `HttpOnly; Secure; SameSite=Strict`.
-   - Integritas *Maker-Checker* ditegakkan di level database constraint (`maker_user_id <> checker_user_id`).
-   - Jejak audit anti-manipulasi (*tamper-proof audit trail*).
-3. **Institutional Risk Management (EA Trading):**
-   - Kewajiban *Hard Stop Loss* di setiap order, larangan martingal murni, dan pemutus sirkuit otomatis jika terjadi *Maximum Daily Drawdown* (>5%).
-4. **Mobile AppSec Rigor:**
-   - Penyimpanan kredensial terisolasi di hardware Keystore, anti-sniffing via Certificate Pinning, dan pencegahan perekaman layar sensitif.
-5. **Automated DevSecOps:**
-   - Git pre-commit hook cerdas memblokir file `.env`, private key, dan secret token via Gitleaks secara real-time.
+Setiap kali memulai proyek software baru, developer sering kali menghabiskan waktu berulang-ulang untuk:
+- Menyiapkan otentikasi aman (rotasi refresh token, cookies HttpOnly).
+- Menata skema database dan audit log yang tahan manipulasi.
+- Memasang proteksi anti-bocor kredensial (pre-commit hook, gitleaks).
+- Menentukan arsitektur folder agar kode tetap rapi saat proyek membesar.
+
+Repositori ini dibuat untuk menyelesaikan masalah tersebut. Semua fondasi keamanan, dokumen spesifikasi (PRD & OpenAPI), template database PostgreSQL, dan alur kerja bantuan AI Agent (Hermes, Claude, Cursor) sudah siap pakai sejak hari pertama.
 
 ---
 
-## 📁 Struktur Direktori Repositori
+## Cakupan Proyek yang Didukung
+
+Template ini menyediakan cetak biru teknis (*blueprints*) dan aturan untuk beberapa jenis kebutuhan:
+
+- **Aplikasi Web & SaaS**: Session management dengan cookie `HttpOnly; Secure; SameSite=Strict`, proteksi CSRF/XSS, dan kontrak REST API OpenAPI 3.0.
+- **Aplikasi Mobile (Android & iOS)**: Clean Architecture, penyimpanan token di hardware Keystore (`EncryptedSharedPreferences`), SSL Pinning, dan proteksi layar (`FLAG_SECURE`).
+- **Sistem EA / Algorithmic Trading**: Manajemen risiko modal (*Hard Stop Loss* wajib, lot dinamis maksimal 1-2% risiko, dan *Emergency Circuit Breaker* jika drawdown harian menyentuh batas toleransi).
+- **Backend & Database Core**: Role-Based Access Control (RBAC), alur persetujuan Maker-Checker, trigger audit log anti-manipulasi (*tamper-proof*), dan enkripsi kolom sensitif (AES-256-GCM).
+
+---
+
+## Cara Cepat Memulai (Quick Start)
+
+Untuk membuat proyek baru dari template ini, jalankan perintah di terminal WSL/Linux:
+
+```bash
+# Clone repositori jika belum ada
+git clone https://github.com/mochrzlf/enterprise-baseline.git
+cd enterprise-baseline
+
+# Buat proyek baru sesuai kebutuhan:
+# 1. Untuk Web App:
+make new NAME="PortalPasien" PATH="/home/tpam_su/Project/PortalPasien" TYPE="web"
+
+# 2. Untuk Mobile App (Android/iOS):
+make new NAME="MobileBanking" PATH="/home/tpam_su/Project/MobileBanking" TYPE="mobile"
+
+# 3. Untuk EA Trading Bot:
+make new NAME="GoldScalperEA" PATH="/home/tpam_su/Project/GoldScalperEA" TYPE="trading"
+
+# 4. Untuk Proyek Fullstack:
+make new NAME="CoreEnterprise" PATH="/home/tpam_su/Project/CoreEnterprise" TYPE="fullstack"
+```
+
+Skrip scaffolding akan otomatis:
+1. Menyalin seluruh dokumen arsitektur, skrip, dan konfigurasi ke folder target.
+2. Mengganti nama placeholder `[PROJECT_NAME]` menjadi nama proyek Anda.
+3. Menjalankan `git init -b main`.
+4. Memasang Git pre-commit hook yang terhubung ke Gitleaks agar file `.env` atau token tidak bisa ter-commit secara tidak sengaja.
+5. Menyiapkan file `.env` lokal dari `.env.example`.
+
+---
+
+## Struktur Direktori
 
 ```
 Baseline/
-├── AGENTS.md                   # Kontrak kerja & aturan keras untuk AI Agent & Devs
-├── README.md                   # Dokumentasi umum baseline
-├── SETUP.md                    # Panduan inisialisasi dan alur kerja harian
-├── SECURITY.md                 # Kebijakan pelaporan kerentanan (Vulnerability Disclosure)
-├── LICENSE                     # Lisensi resmi Apache-2.0
-├── Makefile                    # Task runner terpadu (audit, mock-api, up, down, dll)
-├── .env.example                # Template variabel lingkungan ter-hardening
-├── .gitattributes              # Menegakkan Linux line endings (LF) lintas OS
-├── .editorconfig               # Konsistensi formatting editor & IDE
-├── .gitleaks.toml              # Konfigurasi audit rahasia, custom rules & allowlist
-├── docker-compose.yml          # PostgreSQL 16, Redis 7, Mailpit, & Prism Mock Server
+├── AGENTS.md                   # Kontrak kerja & batasan teknis saat dibantu AI Agent
+├── README.md                   # Dokumentasi umum
+├── SETUP.md                    # Panduan teknis inisialisasi & konfigurasi
+├── SECURITY.md                 # Kebijakan pelaporan celah keamanan
+├── LICENSE                     # Lisensi Apache-2.0
+├── Makefile                    # Kumpulan perintah kerja cepat
+├── .env.example                # Template variabel lingkungan
+├── .gitattributes              # Penguncian format line-ending Unix (LF)
+├── .editorconfig               # Standar indentasi & format editor
+├── .gitleaks.toml              # Aturan audit rahasia & allowlist template
+├── docker-compose.yml          # PostgreSQL 16, Redis 7, Mailpit, dan Prism Mock Server
 ├── docs/
-│   ├── PRD-template.md         # Template PRD tingkat tinggi (Bisnis & Fitur)
-│   ├── PRD-detail-template.md  # Template spesifikasi User Stories & AC
-│   ├── ui-design-template.md   # Panduan Design System & UI Tokens
-│   ├── schema-template.sql     # Skema PostgreSQL dengan RBAC & Audit Log
+│   ├── PRD-template.md         # Template kebutuhan produk tingkat tinggi
+│   ├── PRD-detail-template.md  # Template user stories & acceptance criteria
+│   ├── ui-design-template.md   # Panduan design system & UI tokens
+│   ├── schema-template.sql     # Skema PostgreSQL (RBAC, triggers, audit log)
 │   ├── openapi-template.yaml   # Kontrak REST API standar OpenAPI 3.0
-│   ├── security-iam-policy.md  # Doktrin lengkap IAM & AppSec Policy
-│   ├── security-access-matrix.md # Matriks Entitlement & Segregation of Duties
-│   ├── blueprints/             # Cetak biru arsitektur khusus per domain
-│   │   ├── web-application-blueprint.md
-│   │   ├── mobile-application-blueprint.md
-│   │   └── ea-trading-blueprint.md
-│   ├── security/               # Kebijakan & checklist keamanan lanjutan
-│   │   ├── mobile-security-checklist.md
-│   │   └── trading-risk-policy.md
+│   ├── blueprints/             # Panduan arsitektur per domain (web, mobile, trading)
+│   ├── security/               # Checklist keamanan mobile & kebijakan risiko trading
 │   ├── diagrams/               # Diagram visual arsitektur & sequence (Mermaid)
-│   │   ├── system-architecture-universal.md
-│   │   ├── mobile-auth-sequence.md
-│   │   └── ea-trading-execution-flow.md
-│   └── adr/
-│       ├── ADR-000-template.md # Template Architecture Decision Record + STRIDE
-│       └── ADR-001-Threat-Modeling-Standard.md
+│   └── adr/                    # Architecture Decision Records & analisis STRIDE
 └── scripts/
-    ├── init-new-project.sh     # Script otomatis scaffolding multi-domain
-    └── devsec-check.sh         # Script automated security audit & secret scan
+    ├── init-new-project.sh     # Skrip pembuat proyek otomatis
+    └── devsec-check.sh         # Skrip audit keamanan lokal & scan gitleaks
 ```
 
 ---
 
-## ⚡ Task Runner (Makefile)
+## Perintah Harian (Task Runner)
 
-Baseline menyertakan `Makefile` untuk standardisasi operasional harian:
+Repositori ini menyediakan `Makefile` untuk mempermudah eksekusi tanpa perlu menghafal path panjang:
 
-| Perintah | Deskripsi |
-| :--- | :--- |
-| `make help` | Menampilkan seluruh daftar perintah yang tersedia |
-| `make audit` | Menjalankan audit keamanan menyeluruh (Git, .env, Private Key, Gitleaks) |
-| `make audit-staged` | Menjalankan audit khusus file yang sedang di-stage (mode pre-commit) |
-| `make mock-api` | Menjalankan Prism Mock API Server (`http://localhost:4010`) |
-| `make up` | Menjalankan stack lokal (Postgres, Redis, Mailpit, Prism) |
-| `make down` | Menghentikan seluruh stack Docker Compose |
-| `make status` | Memeriksa status kontainer Docker |
-| `make hermes` | Membuka Hermes AI Agent di CLI terminal |
-| `make hermes-ui` | Menjalankan Hermes Web Dashboard di port 9119 |
-| `make new NAME=... PATH=... TYPE=...` | Membuat proyek baru dari baseline |
+- `make help` : Melihat daftar seluruh perintah yang tersedia.
+- `make audit` : Menjalankan audit keamanan menyeluruh (cek file `.env`, private keys, dan scan Gitleaks).
+- `make mock-api` : Menjalankan mock server API lokal di port 4010 dari `docs/openapi.yaml` (sangat berguna untuk developer mobile/frontend yang ingin mulai coding tanpa menunggu backend).
+- `make up` : Menjalankan PostgreSQL, Redis, Mailpit, dan Prism via Docker Compose.
+- `make down` : Mematikan seluruh kontainer Docker.
+- `make hermes` : Membuka Hermes AI Agent langsung di terminal.
+- `make hermes-ui` : Menjalankan Web Dashboard Hermes di browser (`http://127.0.0.1:9119`).
 
 ---
 
-## 🚀 Cara Membuat Proyek Baru Berdasarkan Domain
+## Standar Keamanan Bawaan
 
-Gunakan perintah `make new` atau script `init-new-project.sh` dengan menentukan tipe domain:
-
-### 1. Proyek Web Application / SaaS
-```bash
-make new NAME="PortalKesehatan" PATH="/home/tpam_su/Project/PortalKesehatan" TYPE="web"
-```
-
-### 2. Proyek Mobile Application (Android / iOS)
-```bash
-make new NAME="MobileBanking" PATH="/home/tpam_su/Project/MobileBanking" TYPE="mobile"
-```
-*(Tip: Jalankan `make mock-api` di folder proyek untuk langsung menguji API di emulator).*
-
-### 3. Proyek EA / Algorithmic Trading
-```bash
-make new NAME="GoldScalperEA" PATH="/home/tpam_su/Project/GoldScalperEA" TYPE="trading"
-```
-*(Tip: Seluruh aturan manajemen risiko dan circuit breaker langsung aktif di `docs/security/trading-risk-policy.md`).*
-
-### 4. Proyek Fullstack Enterprise
-```bash
-make new NAME="EnterpriseCore" PATH="/home/tpam_su/Project/EnterpriseCore" TYPE="fullstack"
-```
+- **Pre-Commit Shield:** Setiap kali Anda menjalankan `git commit`, hook otomatis memindai baris kode yang di-stage. Jika ada token API, private key, atau file `.env` yang masuk, commit langsung dibatalkan.
+- **Four-Eyes Principle (Maker-Checker):** Transaksi penting memiliki constraint database di mana pembuat request tidak boleh menjadi penyetuju dirinya sendiri.
+- **Audit Log Anti-Manipulasi:** Tabel `audit_logs` dilindungi trigger PostgreSQL yang menolak perintah `UPDATE` dan `DELETE`.
+- **Enkripsi Data Sensitif:** Data pribadi disimpan dengan cipher AES-256-GCM (*Field-Level Encryption*).
+- **Higiene API Trading:** Kunci API exchange atau broker diwajibkan hanya memiliki hak akses *Read* dan *Trade*, dengan hak akses penarikan dana (*Withdrawal*) dinonaktifkan secara permanen.
