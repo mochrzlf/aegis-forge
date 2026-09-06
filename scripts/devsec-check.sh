@@ -1,13 +1,17 @@
 #!/usr/bin/env bash
 set -e
 
+# Pastikan PATH menyertakan ~/.local/bin agar gitleaks/hermes selalu ditemukan
+export PATH="$HOME/.local/bin:$PATH"
+
 # ==============================================================================
-# AUTOMATED DEVSECOPS PRE-FLIGHT AUDIT
+# AUTOMATED DEVSECOPS AUDIT SCRIPT
 # ==============================================================================
 
-echo "🔍 Menjalankan Automated Security Pre-flight Check..."
-
+MODE="$1"
 EXIT_CODE=0
+
+echo "🔍 Menjalankan Automated Security Audit..."
 
 # 1. Periksa apakah .env ter-track oleh Git
 if git ls-files --error-unmatch .env >/dev/null 2>&1; then
@@ -30,21 +34,31 @@ fi
 
 # 3. Gitleaks scan jika terpasang
 if command -v gitleaks >/dev/null 2>&1; then
-    echo "🔍 Menjalankan Gitleaks audit..."
-    if ! gitleaks detect --no-git --source . --verbose; then
-        echo "❌ Kredensial atau secret terdeteksi oleh Gitleaks!"
-        EXIT_CODE=1
+    if [ "$MODE" = "--staged" ]; then
+        echo "🔍 Menjalankan Gitleaks protect pada staged changes..."
+        if ! gitleaks protect -v --staged; then
+            echo "❌ Kredensial atau secret terdeteksi pada perubahan yang akan di-commit!"
+            EXIT_CODE=1
+        else
+            echo "✅ Gitleaks Pre-Commit Audit: Clean (Tidak ada leak)"
+        fi
     else
-        echo "✅ Gitleaks Secret Audit: Clean"
+        echo "🔍 Menjalankan Gitleaks full repository audit..."
+        if ! gitleaks detect --verbose; then
+            echo "❌ Kredensial atau secret terdeteksi oleh Gitleaks!"
+            EXIT_CODE=1
+        else
+            echo "✅ Gitleaks Repository Audit: Clean"
+        fi
     fi
 else
     echo "ℹ️  Gitleaks belum terpasang di sistem. Pasang untuk deteksi secret otomatis."
 fi
 
 if [ $EXIT_CODE -eq 0 ]; then
-    echo "🎉 Semua pemeriksaan keamanan dasar lolos!"
+    echo "🎉 Semua pemeriksaan keamanan lolos!"
 else
-    echo "❌ Pemeriksaan keamanan menemukan masalah! Harap perbaiki sebelum melanjutkan."
+    echo "❌ Pemeriksaan keamanan menemukan masalah! Operasi dibatalkan."
 fi
 
 exit $EXIT_CODE

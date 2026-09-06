@@ -58,6 +58,17 @@ if [ ! -d ".git" ]; then
     echo "✅ Git repository berhasil diinisialisasi."
 fi
 
+# Pasang Git Pre-Commit Security Hook
+mkdir -p "$TARGET_DIR/.git/hooks"
+cat << 'HOOK_EOF' > "$TARGET_DIR/.git/hooks/pre-commit"
+#!/usr/bin/env bash
+if [ -f "./scripts/devsec-check.sh" ]; then
+    ./scripts/devsec-check.sh --staged
+fi
+HOOK_EOF
+chmod +x "$TARGET_DIR/.git/hooks/pre-commit"
+echo "🛡️  Git pre-commit security hook berhasil diaktifkan."
+
 # Salin .env.example menjadi .env
 cp .env.example .env
 
