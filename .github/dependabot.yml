@@ -1,0 +1,19 @@
+version: 2
+updates:
+  # Monitor GitHub Actions CI/CD workflows for vulnerabilities
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    labels:
+      - "security"
+      - "dependencies"
+
+  # Monitor Docker Compose / container base images
+  - package-ecosystem: "docker-compose"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    labels:
+      - "security"
+      - "docker"
