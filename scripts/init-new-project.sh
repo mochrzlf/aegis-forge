@@ -12,13 +12,15 @@ PROJECT_TYPE="${3:-fullstack}"
 if [ -z "$PROJECT_NAME" ] || [ -z "$TARGET_DIR" ]; then
     echo "Penggunaan: bash init-new-project.sh <NamaProject> <PathTujuan> [web|mobile|trading|fullstack]"
     echo "Contoh:"
-    echo "  bash init-new-project.sh FinPortal /home/tpam_su/Project/FinPortal web"
-    echo "  bash init-new-project.sh FinMobile /home/tpam_su/Project/FinMobile mobile"
-    echo "  bash init-new-project.sh QuantEA   /home/tpam_su/Project/QuantEA trading"
+    echo "  bash init-new-project.sh FinPortal ../FinPortal web"
+    echo "  bash init-new-project.sh FinMobile ../FinMobile mobile"
+    echo "  bash init-new-project.sh QuantEA   ../QuantEA trading"
     exit 1
 fi
 
-BASELINE_DIR="/home/tpam_su/Project/Baseline"
+# Deteksi direktori baseline secara dinamis (bekerja di komputer/user mana saja)
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+BASELINE_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 
 echo "=================================================================="
 echo "🚀 Membuat Universal Project: $PROJECT_NAME"
@@ -83,20 +85,32 @@ echo "🛡️  Git pre-commit security hook berhasil diaktifkan."
 # Salin .env.example menjadi .env
 cp .env.example .env
 
+# Otomatis generate kunci kriptografi unik dan aman untuk proyek baru
+if command -v openssl >/dev/null 2>&1; then
+    RAND_JWT_ACCESS=$(openssl rand -base64 48 | tr -d '\n\r')
+    RAND_JWT_REFRESH=$(openssl rand -base64 48 | tr -d '\n\r')
+    RAND_ENC_KEY=$(openssl rand -hex 32 | tr -d '\n\r')
+    
+    sed -i "s|JWT_ACCESS_SECRET=\".*\"|JWT_ACCESS_SECRET=\"$RAND_JWT_ACCESS\"|g" .env
+    sed -i "s|JWT_REFRESH_SECRET=\".*\"|JWT_REFRESH_SECRET=\"$RAND_JWT_REFRESH\"|g" .env
+    sed -i "s|ENCRYPTION_MASTER_KEY=\".*\"|ENCRYPTION_MASTER_KEY=\"$RAND_ENC_KEY\"|g" .env
+    echo "🔑 Kunci kriptografi aman (JWT & AES-256 FLE) berhasil di-generate otomatis di .env."
+fi
+
 echo "=================================================================="
 echo "✨ Project $PROJECT_NAME (${PROJECT_TYPE^^}) berhasil dibuat di $TARGET_DIR!"
 echo "Langkah selanjutnya:"
 echo "  1. cd $TARGET_DIR"
-echo "  2. Buka Hermes Agent: ~/.local/bin/hermes"
+echo "  2. Buka AI Coding Agent pilihan Anda (Hermes, Claude, Cursor, dll)"
 
 if [ "$PROJECT_TYPE" = "mobile" ]; then
     echo "  3. Jalankan Mock API Server: make mock-api"
-    echo "  4. Perintahkan Hermes: 'Baca AGENTS.md dan rancang Mobile App untuk $PROJECT_NAME mengacu pada docs/blueprints/mobile-application-blueprint.md dan docs/security/mobile-security-checklist.md'"
+    echo "  4. Beri instruksi: 'Baca AGENTS.md dan rancang Mobile App untuk $PROJECT_NAME mengacu pada docs/blueprints/mobile-application-blueprint.md dan docs/security/mobile-security-checklist.md'"
 elif [ "$PROJECT_TYPE" = "trading" ]; then
-    echo "  3. Perintahkan Hermes: 'Baca AGENTS.md dan rancang EA Trading System untuk $PROJECT_NAME mengacu pada docs/blueprints/ea-trading-blueprint.md dan docs/security/trading-risk-policy.md'"
+    echo "  3. Beri instruksi: 'Baca AGENTS.md dan rancang EA Trading System untuk $PROJECT_NAME mengacu pada docs/blueprints/ea-trading-blueprint.md dan docs/security/trading-risk-policy.md'"
 elif [ "$PROJECT_TYPE" = "web" ]; then
-    echo "  3. Perintahkan Hermes: 'Baca AGENTS.md dan rancang Web Application untuk $PROJECT_NAME mengacu pada docs/blueprints/web-application-blueprint.md'"
+    echo "  3. Beri instruksi: 'Baca AGENTS.md dan rancang Web Application untuk $PROJECT_NAME mengacu pada docs/blueprints/web-application-blueprint.md'"
 else
-    echo "  3. Perintahkan Hermes: 'Baca AGENTS.md dan rancang spesifikasi lengkap untuk $PROJECT_NAME'"
+    echo "  3. Beri instruksi: 'Baca AGENTS.md dan rancang spesifikasi lengkap untuk $PROJECT_NAME'"
 fi
 echo "=================================================================="

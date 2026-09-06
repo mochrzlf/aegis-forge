@@ -43,16 +43,16 @@ cd enterprise-baseline
 
 # Buat proyek baru sesuai kebutuhan:
 # 1. Untuk Web App:
-make new NAME="PortalPasien" PATH="/home/tpam_su/Project/PortalPasien" TYPE="web"
+make new NAME="PortalPasien" PATH="../PortalPasien" TYPE="web"
 
 # 2. Untuk Mobile App (Android/iOS):
-make new NAME="MobileBanking" PATH="/home/tpam_su/Project/MobileBanking" TYPE="mobile"
+make new NAME="MobileBanking" PATH="../MobileBanking" TYPE="mobile"
 
 # 3. Untuk EA Trading Bot:
-make new NAME="GoldScalperEA" PATH="/home/tpam_su/Project/GoldScalperEA" TYPE="trading"
+make new NAME="GoldScalperEA" PATH="../GoldScalperEA" TYPE="trading"
 
 # 4. Untuk Proyek Fullstack:
-make new NAME="CoreEnterprise" PATH="/home/tpam_su/Project/CoreEnterprise" TYPE="fullstack"
+make new NAME="CoreEnterprise" PATH="../CoreEnterprise" TYPE="fullstack"
 ```
 
 Skrip scaffolding akan otomatis:

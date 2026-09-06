@@ -47,12 +47,12 @@ status: ## Periksa status container Docker
 
 .PHONY: hermes
 hermes: ## Buka Hermes AI Agent di terminal
-	@~/.local/bin/hermes
+	@command -v hermes >/dev/null 2>&1 && hermes || (~/.local/bin/hermes 2>/dev/null || echo "Hermes belum terpasang. Kunjungi https://hermes.sh untuk instalasi.")
 
 .PHONY: hermes-ui
 hermes-ui: ## Buka web dashboard Hermes di background (port 9119)
 	@echo -e "$(GREEN)🌐 Membuka Hermes Web Dashboard di http://127.0.0.1:9119$(RESET)"
-	@~/.local/bin/hermes dashboard --no-open
+	@command -v hermes >/dev/null 2>&1 && hermes dashboard --no-open || (~/.local/bin/hermes dashboard --no-open 2>/dev/null || echo "Hermes belum terpasang.")
 
 .PHONY: new
 new: ## Buat proyek baru dari baseline (Penggunaan: make new NAME=NamaProyek PATH=/path/tujuan TYPE=web|mobile|trading|fullstack)

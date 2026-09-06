@@ -10,16 +10,16 @@ Gunakan perintah `make new` atau script otomatis:
 
 ```bash
 # Opsi 1: Proyek Web Application / SaaS
-bash /home/tpam_su/Project/Baseline/scripts/init-new-project.sh "MyWebApp" "/home/tpam_su/Project/MyWebApp" web
+bash scripts/init-new-project.sh "MyWebApp" "../MyWebApp" web
 
 # Opsi 2: Proyek Mobile Application (Android / iOS)
-bash /home/tpam_su/Project/Baseline/scripts/init-new-project.sh "MyMobileApp" "/home/tpam_su/Project/MyMobileApp" mobile
+bash scripts/init-new-project.sh "MyMobileApp" "../MyMobileApp" mobile
 
 # Opsi 3: Proyek EA / Algorithmic Trading
-bash /home/tpam_su/Project/Baseline/scripts/init-new-project.sh "MyTradingEA" "/home/tpam_su/Project/MyTradingEA" trading
+bash scripts/init-new-project.sh "MyTradingEA" "../MyTradingEA" trading
 
 # Opsi 4: Proyek Fullstack Enterprise (Default)
-bash /home/tpam_su/Project/Baseline/scripts/init-new-project.sh "MyFullstack" "/home/tpam_su/Project/MyFullstack" fullstack
+bash scripts/init-new-project.sh "MyFullstack" "../MyFullstack" fullstack
 ```
 
 Script akan otomatis:
@@ -27,7 +27,7 @@ Script akan otomatis:
 2. Mengganti nama placeholder `[PROJECT_NAME]` menjadi nama proyek Anda.
 3. Menginisialisasi Git repository baru (`git init -b main`).
 4. Memasang dan mengaktifkan **Git Pre-Commit Security Hook** (`.git/hooks/pre-commit`) untuk memblokir kebocoran file `.env`, file private key, keystore Android, dan secret token via Gitleaks.
-5. Menyiapkan file `.env` lokal dari `.env.example`.
+5. Menyiapkan file `.env` lokal dengan kunci enkripsi & JWT unik yang di-generate otomatis via OpenSSL.
 
 ---
 
@@ -35,7 +35,7 @@ Script akan otomatis:
 
 Masuk ke direktori proyek baru:
 ```bash
-cd /home/tpam_su/Project/NamaProyekAnda
+cd ../NamaProyekAnda
 ```
 Buka file `.env` dan generate kunci kriptografi yang aman:
 - Generate JWT Secret: `openssl rand -base64 48`
