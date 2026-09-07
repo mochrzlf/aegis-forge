@@ -34,6 +34,16 @@ Every project derived from this baseline MUST uphold four universal pillars:
 | `docs/security/` | Domain-specific security checklists (Mobile AppSec, Trading Risk Policy) |
 | `docs/diagrams/` | Visual architecture diagrams, authentication sequences, and execution flows |
 | `docs/adr/` | Architecture Decision Records & STRIDE Threat Modeling |
+| `docs/agent-playbooks/` | Gated, step-by-step workflows per domain — follow BEFORE writing code |
+| `docs/prompt-library.md` | Tested copy-paste prompts per phase & domain |
+| `docs/backend-checklist.md` | Backend/service QA checklist (contract, data, authz, observability) |
+| `docs/observability.md` | Structured anti-PII logging, RED metrics, tracing, tamper-evident audit |
+| `docs/migrations.md` | Versioned, reversible, zero-downtime DB migration standard |
+| `docs/design-tokens.md` | Single-source design-token pipeline → Web/Tailwind, Compose, SwiftUI, Flutter |
+| `docs/frontend-testing.md` | Frontend testing standard (Vitest, Testing Library, axe-core, Playwright) |
+| `docs/performance-budgets.md` | Core Web Vitals + bundle-size budgets, enforced in CI |
+| `docs/research/EXTERNAL-TOOLS.md` | Adoption register for all external tools/skills (verdict, license, constraints) |
+| `evals/` | Agent output-quality harness (scenarios + rubrics) |
 
 ---
 

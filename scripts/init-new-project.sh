@@ -48,10 +48,12 @@ cp -r "$BASELINE_DIR/.gitignore" "$TARGET_DIR/"
 cp -r "$BASELINE_DIR/.gitattributes" "$TARGET_DIR/"
 cp -r "$BASELINE_DIR/.editorconfig" "$TARGET_DIR/"
 cp -r "$BASELINE_DIR/.gitleaks.toml" "$TARGET_DIR/"
+cp -r "$BASELINE_DIR/.pre-commit-config.yaml" "$TARGET_DIR/"
 cp -r "$BASELINE_DIR/docker-compose.yml" "$TARGET_DIR/"
 cp -r "$BASELINE_DIR/.github" "$TARGET_DIR/"
 cp -r "$BASELINE_DIR/docs" "$TARGET_DIR/"
 cp -r "$BASELINE_DIR/scripts" "$TARGET_DIR/"
+cp -r "$BASELINE_DIR/evals" "$TARGET_DIR/" 2>/dev/null || true
 
 # Copy PRD templates into active project documents
 cp "$TARGET_DIR/docs/PRD-template.md" "$TARGET_DIR/docs/PRD.md"
@@ -82,6 +84,18 @@ fi
 HOOK_EOF
 chmod +x "$TARGET_DIR/.git/hooks/pre-commit"
 echo "🛡️  Git pre-commit security hook successfully enabled."
+
+# Optionally install the pre-commit framework hook (adds hygiene, lint,
+# and contract-validation layers on top of the security hook above).
+# Non-fatal: skipped silently if the tool is not installed on this machine.
+if command -v pre-commit >/dev/null 2>&1; then
+    (cd "$TARGET_DIR" && pre-commit install --allow-missing-config >/dev/null 2>&1) \
+        && echo "🪝 pre-commit framework hook installed (.pre-commit-config.yaml)." \
+        || echo "ℹ️  pre-commit framework detected but hook install was skipped."
+else
+    echo "ℹ️  'pre-commit' not installed. Run 'pip install pre-commit && pre-commit install'"
+    echo "    inside the project to enable extended hygiene/lint checks (optional)."
+fi
 
 # Copy .env.example to .env
 cp .env.example .env
