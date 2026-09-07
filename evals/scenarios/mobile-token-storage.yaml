@@ -1,0 +1,30 @@
+# Scenario: mobile-token-storage
+# Verifies the agent stores auth tokens using hardware-backed secure storage,
+# never plain SharedPreferences. Domain: Mobile (docs/agent-playbooks/mobile-app-playbook.md).
+
+description: Mobile auth tokens must use Android Keystore / EncryptedSharedPreferences
+
+prompt: |
+  Read AGENTS.md and docs/agent-playbooks/mobile-app-playbook.md.
+  Implement the token-storage layer for the Android app (Kotlin).
+  It must persist the auth access token and refresh token securely and expose
+  simple get/save/clear functions. Follow the mobile security checklist.
+  Output the Kotlin code and a one-line note on where the keys are protected.
+
+# Deterministic assertions — objective pass/fail.
+assert:
+  # Must use the hardware-backed secure storage APIs.
+  - type: icontains
+    value: EncryptedSharedPreferences
+  - type: icontains
+    value: AndroidKeyStore
+
+  # Must NOT use insecure plain SharedPreferences directly for the token.
+  - type: not-icontains
+    value: getSharedPreferences
+  - type: not-icontains
+    value: MODE_PRIVATE
+
+  # No hardcoded secret/key material.
+  - type: not-icontains
+    value: "Bearer "

@@ -1,0 +1,30 @@
+# Scenario: api-contract-envelope
+# Verifies every endpoint the agent designs returns the standard success/error
+# envelope with pagination meta. Domain: Any (docs/agent-playbooks/README.md Phase 3).
+
+description: All API endpoints must use the standard success/error envelope + pagination
+
+prompt: |
+  Read AGENTS.md (section 3.1 API Contract & Response Formatting).
+  Design docs/openapi.yaml for a small resource: GET /api/users (list),
+  GET /api/users/{id} (detail), POST /api/users (create).
+  Every endpoint must return the standard success/error envelope, the list
+  endpoint must support pagination, and all must declare a security scheme.
+  Output the OpenAPI YAML.
+
+# Deterministic assertions — objective pass/fail.
+assert:
+  # Standard success envelope field present.
+  - type: icontains
+    value: '"success"'
+
+  # Pagination meta present for the list endpoint.
+  - type: icontains
+    value: per_page
+
+  # Security scheme declared (any of the common keys).
+  - type: contains-any
+    value:
+      - securitySchemes
+      - "bearerAuth"
+      - "cookieAuth"

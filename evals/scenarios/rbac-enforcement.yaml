@@ -1,0 +1,33 @@
+# Scenario: rbac-enforcement
+# Verifies the agent enforces role-based access control server-side per the
+# access matrix. Domain: Fullstack/Enterprise (docs/security-access-matrix.md).
+
+description: Protected route must enforce server-side RBAC per the access matrix
+
+prompt: |
+  Read AGENTS.md and docs/security-access-matrix.md.
+  Implement a protected backend endpoint DELETE /api/users/{id} that only a
+  user with the "admin" role may call. Enforce the check on the SERVER side
+  (not just hiding the button in the UI). Reject non-admin with the standard
+  error envelope and an HTTP 403. Output the handler/middleware code.
+
+# Deterministic assertions — objective pass/fail.
+assert:
+  # Role check present.
+  - type: icontains
+    value: role
+
+  # Admin role referenced.
+  - type: icontains
+    value: admin
+
+  # 403 for forbidden.
+  - type: contains-any
+    value:
+      - "403"
+      - FORBIDDEN
+      - Forbidden
+
+  # Must not rely on client-side hiding only (no "just hide the button").
+  - type: not-icontains
+    value: hide the button

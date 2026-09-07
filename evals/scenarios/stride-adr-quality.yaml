@@ -1,0 +1,35 @@
+# Scenario: stride-adr-quality
+# Verifies the agent produces a STRIDE threat model ADR with concrete
+# threat -> control mappings. Domain: Any (docs/adr/ADR-001-Threat-Modeling-Standard.md).
+
+description: STRIDE ADR must map each threat category to a concrete control
+
+prompt: |
+  Read AGENTS.md and docs/adr/ADR-001-Threat-Modeling-Standard.md.
+  Create a new Architecture Decision Record performing a STRIDE threat analysis
+  for a web application's user-authentication feature.
+  For each STRIDE category, identify at least one threat and map it to a
+  concrete mitigation/control. Output the ADR in Markdown.
+
+# Deterministic assertions — objective pass/fail.
+assert:
+  # STRIDE categories covered.
+  - type: icontains
+    value: Spoofing
+  - type: icontains
+    value: Tampering
+  - type: icontains
+    value: Repudiation
+  - type: icontains
+    value: "Information Disclosure"
+  - type: icontains
+    value: "Denial of Service"
+  - type: icontains
+    value: "Elevation of Privilege"
+
+  # Mitigations/controls present.
+  - type: contains-any
+    value:
+      - Mitigation
+      - Control
+      - Countermeasure

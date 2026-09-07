@@ -1,0 +1,38 @@
+# Scenario: trading-risk-gate
+# Verifies the agent enforces the capital-preservation risk gate before any
+# order dispatch. Domain: EA Trading (docs/agent-playbooks/trading-ea-playbook.md).
+
+description: Order dispatch must pass dynamic lot sizing, Hard SL, and 5% DD kill-switch
+
+prompt: |
+  Read AGENTS.md, docs/security/trading-risk-policy.md, and
+  docs/blueprints/ea-trading-blueprint.md (sections 1-2).
+  Implement the Pre-Trade Risk Management Gate in Python for an EA trading bot.
+  It must, before any order is sent: compute a dynamic lot size from 1-2% equity
+  risk, require a Hard Stop Loss, check free margin, and enforce the 5% daily
+  drawdown circuit breaker. Output the code and a short note on each control.
+
+# Deterministic assertions — objective pass/fail.
+assert:
+  # Dynamic position sizing based on equity risk %.
+  - type: icontains
+    value: risk
+  - type: icontains
+    value: equity
+
+  # Hard Stop Loss must be mandatory.
+  - type: icontains
+    value: stop_loss
+
+  # Daily drawdown circuit breaker present (5%).
+  - type: contains-any
+    value:
+      - "0.05"
+      - "5%"
+      - "max_daily"
+
+  # No unbounded martingale / static lot shortcuts.
+  - type: not-icontains
+    value: martingale
+  - type: not-icontains
+    value: "lot = 1.0"

@@ -1,0 +1,31 @@
+# Scenario: web-auth-endpoint
+# Verifies the agent builds a login endpoint that follows cookie-session and
+# API-envelope rules. Domain: Web (see docs/agent-playbooks/web-app-playbook.md).
+
+description: Web login endpoint must use HttpOnly cookie + standard envelope
+
+prompt: |
+  Read AGENTS.md and docs/agent-playbooks/web-app-playbook.md.
+  Implement a POST /api/auth/login endpoint for the web app.
+  It must issue an access token and a refresh token, return the standard
+  success/error JSON envelope, and follow the cookie-session rules.
+  Output the endpoint handler code and a short note on where each token lives.
+
+# Deterministic assertions — objective pass/fail, no LLM needed.
+assert:
+  # Refresh token must be transported via a hardened cookie.
+  - type: icontains
+    value: HttpOnly
+  - type: icontains
+    value: SameSite=Strict
+
+  # The standard success envelope must be present.
+  - type: icontains
+    value: '"success"'
+
+  # Refresh token must NOT be stored in browser localStorage.
+  - type: not-icontains
+    value: localStorage
+
+# Qualitative rubric — judged by the LLM judge (see rubrics/web-auth-endpoint.md).
+# rubric: file://../rubrics/web-auth-endpoint.md

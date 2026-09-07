@@ -1,0 +1,36 @@
+# promptfoo configuration — Aegis Forge agent evals
+# Docs: https://promptfoo.dev  (MIT — see docs/research/EXTERNAL-TOOLS.md §4)
+#
+# This is a TEMPLATE. Fill in your provider/model, then run:
+#   npx promptfoo@latest eval -c evals/promptfooconfig.yaml
+#
+# The agent under test is treated as a "provider". You can point this at an
+# LLM API, or wrap your actual agent CLI via an exec provider.
+
+description: Aegis Forge — AI agent rule-compliance evals
+
+# --- Model(s) used to PRODUCE the artifact under test ------------------------
+# Example (OpenAI-compatible). Replace with your provider of choice.
+providers:
+  - id: openai:chat:gpt-4o-mini
+    label: agent-under-test
+  # To run YOUR agent CLI instead of a raw model, use an exec provider, e.g.:
+  # - id: exec:python evals/runners/run_agent.py --scenario {{prompt}}
+  #   label: my-agent-cli
+
+# --- Model used as the LLM JUDGE for rubric items ---------------------------
+defaultTest:
+  options:
+    provider:
+      id: openai:chat:gpt-4o-mini
+      label: llm-judge
+
+# --- Scenarios ---------------------------------------------------------------
+# Each YAML in scenarios/ is a test case with its own prompt + assertions.
+tests:
+  - file://scenarios/web-auth-endpoint.yaml
+  - file://scenarios/mobile-token-storage.yaml
+  - file://scenarios/trading-risk-gate.yaml
+  - file://scenarios/api-contract-envelope.yaml
+  - file://scenarios/rbac-enforcement.yaml
+  - file://scenarios/stride-adr-quality.yaml
