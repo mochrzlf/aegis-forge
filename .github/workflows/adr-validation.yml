@@ -1,0 +1,37 @@
+# ADR Format & STRIDE Enforcement
+# Validates every numbered ADR in docs/adr/ has correct metadata, a valid
+# status, required sections, and a complete STRIDE threat-model table.
+# Enforces ADR-001 (mandatory threat modeling) as an automated gate.
+name: ADR Validation
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'docs/adr/**'
+      - 'scripts/validate_adrs.py'
+      - '.github/workflows/adr-validation.yml'
+  pull_request:
+    paths:
+      - 'docs/adr/**'
+      - 'scripts/validate_adrs.py'
+      - '.github/workflows/adr-validation.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  adr-validation:
+    name: Validate ADR format & STRIDE completeness
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.13'
+
+      - name: Validate ADRs
+        run: python scripts/validate_adrs.py docs/adr

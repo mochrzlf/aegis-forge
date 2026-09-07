@@ -1,0 +1,28 @@
+# Release Please — Automated Versioning & Changelog
+# Parses Conventional Commits on main and opens/updates a release PR that
+# bumps the version and generates CHANGELOG.md. Merging that PR creates a
+# Git tag + GitHub Release. Requires commits to follow Conventional Commits
+# (see CONTRIBUTING.md §4).
+name: Release Please
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write        # to create tags/releases
+  pull-requests: write   # to open/update the release PR
+
+jobs:
+  release-please:
+    name: Release Please
+    runs-on: ubuntu-latest
+    outputs:
+      release_created: ${{ steps.release.outputs.release_created }}
+      tag_name: ${{ steps.release.outputs.tag_name }}
+    steps:
+      - name: Run release-please
+        id: release
+        uses: googleapis/release-please-action@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
