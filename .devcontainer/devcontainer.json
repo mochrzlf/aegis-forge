@@ -1,0 +1,89 @@
+// Aegis Forge — Development Container
+// One-click, reproducible dev environment for humans and AI agents.
+// Works in VS Code ("Reopen in Container") and GitHub Codespaces.
+// Docs: https://containers.dev
+{
+  "name": "aegis-forge",
+
+  // Use the Microsoft universal dev image (Linux) as a base and layer
+  // toolchains via Features. Pin the image tag for reproducibility.
+  "image": "mcr.microsoft.com/devcontainers/base:bookworm",
+
+  "features": {
+    // Language toolchains
+    "ghcr.io/devcontainers/features/python:1": {
+      "version": "3.13",
+      "installTools": true
+    },
+    "ghcr.io/devcontainers/features/node:1": {
+      "version": "20",
+      "pnpm": false
+    },
+    // Docker-in-Docker so `docker compose` (postgres/redis/prism/mailpit) works
+    "ghcr.io/devcontainers/features/docker-in-docker:2": {},
+    // GitHub CLI for PR/issue workflows
+    "ghcr.io/devcontainers/features/github-cli:1": {},
+    // Common shell utilities (git, curl, jq, etc. come with base image)
+    "ghcr.io/devcontainers/features/git:1": {}
+  },
+
+  // VS Code customizations applied inside the container
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        // Python
+        "ms-python.python",
+        "ms-python.vscode-pylance",
+        // JavaScript / TypeScript / Web
+        "dbaeumer.vscode-eslint",
+        "esbenp.prettier-vscode",
+        "bradlc.vscode-tailwindcss",
+        "ms-playwright.playwright",
+        // API & DB contracts
+        "redocly.openapi-vs-code",
+        "mtxr.sqltools",
+        "mtxr.sqltools-driver-pg",
+        // Containers & DevOps
+        "ms-azuretools.vscode-docker",
+        "ms-kubernetes-tools.vscode-kubernetes-tools",
+        "github.vscode-github-actions",
+        // YAML / misc
+        "redhat.vscode-yaml",
+        "tamasfe.even-better-toml",
+        "eamodio.gitlens",
+        "streetsidesoftware.code-spell-checker"
+      ],
+      "settings": {
+        "editor.formatOnSave": true,
+        "editor.defaultFormatter": "esbenp.prettier-vscode",
+        "[python]": { "editor.defaultFormatter": "ms-python.python" },
+        "python.analysis.typeCheckingMode": "basic",
+        "redocly.openapi.lint": true,
+        "files.eol": "\n",
+        "terminal.integrated.defaultProfile.linux": "bash"
+      }
+    }
+  },
+
+  // Environment variables available in the container
+  "containerEnv": {
+    "PIP_DISABLE_PIP_VERSION_CHECK": "1",
+    "PYTHONDONTWRITEBYTECODE": "1"
+  },
+
+  // Forward the local service ports so the host browser can reach them:
+  // 4010 Prism mock API, 8025 Mailpit UI, 5432 Postgres, 6379 Redis, 3000 web
+  "forwardPorts": [3000, 4010, 5432, 6379, 8025],
+  "portsAttributes": {
+    "4010": { "label": "Prism Mock API", "onAutoForward": "notify" },
+    "8025": { "label": "Mailpit UI", "onAutoForward": "silent" },
+    "3000": { "label": "Web App", "onAutoForward": "notify" }
+  },
+
+  // After the container is created, install Python + CLI tooling and hooks.
+  // Kept non-fatal where a tool may be unavailable in a given environment.
+  "postCreateCommand": "bash .devcontainer/post-create.sh",
+
+  // Run as the non-root 'vscode' user provided by the base image (least privilege)
+  "remoteUser": "vscode"
+}

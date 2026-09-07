@@ -6,8 +6,11 @@ This document provides step-by-step instructions for creating a new project usin
 
 ## 1. Create a New Project Instance by Domain
 
-Use the `make new` command or automated script:
+> **Zero-setup option (recommended):** open this baseline in the provided **Dev Container** (`.devcontainer/`) via VS Code *"Reopen in Container"* or GitHub Codespaces. Python, Node, Docker, gitleaks, and pre-commit come pre-installed and version-pinned — no manual toolchain setup required.
 
+Use the `make new` command or the automated script (two equivalent variants):
+
+**Bash (Linux / macOS / Git Bash / WSL):**
 ```bash
 # Option 1: Web Application / SaaS Project
 bash scripts/init-new-project.sh "MyWebApp" "../MyWebApp" web
@@ -22,12 +25,27 @@ bash scripts/init-new-project.sh "MyTradingEA" "../MyTradingEA" trading
 bash scripts/init-new-project.sh "MyFullstack" "../MyFullstack" fullstack
 ```
 
-The script will automatically:
-1. Copy the entire baseline structure (`AGENTS.md`, `docs/blueprints/`, `docs/security/`, `docs/diagrams/`, `Makefile`, `.env.example`, `.gitignore`, `.gitattributes`, `.gitleaks.toml`).
+**PowerShell (native Windows — no bash/WSL/openssl required):**
+```powershell
+# Web Application / SaaS Project
+pwsh scripts/init-new-project.ps1 "MyWebApp" "../MyWebApp" web
+
+# Mobile Application Project (Android / iOS)
+pwsh scripts/init-new-project.ps1 "MyMobileApp" "../MyMobileApp" mobile
+
+# EA / Algorithmic Trading Project
+pwsh scripts/init-new-project.ps1 "MyTradingEA" "../MyTradingEA" trading
+
+# Fullstack Enterprise Project (Default)
+pwsh scripts/init-new-project.ps1 "MyFullstack" "../MyFullstack" fullstack
+```
+
+Both scripts are functionally identical and will automatically:
+1. Copy the entire baseline structure (`AGENTS.md`, `docs/blueprints/`, `docs/security/`, `docs/diagrams/`, `Makefile`, `.env.example`, `.gitignore`, `.gitattributes`, `.gitleaks.toml`, `.devcontainer/`).
 2. Replace the placeholder `[PROJECT_NAME]` with your project's name.
 3. Initialize a new Git repository (`git init -b main`).
 4. Install and enable the **Git Pre-Commit Security Hook** (`.git/hooks/pre-commit`) to block leaks of `.env` files, private key files, Android keystores, and secret tokens via Gitleaks.
-5. Prepare a local `.env` file with unique encryption & JWT keys generated automatically via OpenSSL.
+5. Prepare a local `.env` file with unique encryption & JWT keys generated automatically (via OpenSSL in bash, or .NET crypto in PowerShell).
 
 ---
 
