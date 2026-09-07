@@ -132,6 +132,7 @@ Baseline/
 ├── .editorconfig               # Editor & IDE consistency rules
 ├── .gitleaks.toml              # Secret detection rules & template allowlists
 ├── docker-compose.yml          # PostgreSQL 16, Redis 7, Mailpit, & Prism Mock Server
+├── .devcontainer/              # One-click reproducible dev environment (VS Code / Codespaces)
 ├── docs/
 │   ├── AI-AGENT-SKILLS.md      # Recommended AI agent skills matrix & installation
 │   ├── PRD-template.md         # High-level product requirements template
@@ -139,12 +140,24 @@ Baseline/
 │   ├── ui-design-template.md   # Design system & UI tokens guide
 │   ├── schema-template.sql     # PostgreSQL schema (RBAC, triggers, audit logs)
 │   ├── openapi-template.yaml   # REST API contract (OpenAPI 3.0)
+│   ├── backend-checklist.md    # Backend/service QA checklist
+│   ├── observability.md        # Anti-PII logging, RED metrics, tracing, audit trail
+│   ├── migrations.md           # Zero-downtime DB migration standard
+│   ├── design-tokens.md        # Design-token pipeline to all platforms
+│   ├── frontend-testing.md     # Frontend testing standard (Vitest/axe/Playwright)
+│   ├── performance-budgets.md  # Web Vitals + bundle-size budgets (CI-enforced)
+│   ├── deployment.md           # Environment promotion & deploy strategies
+│   ├── runbook-template.md     # Per-service operational runbook template
+│   ├── prompt-library.md       # Tested copy-paste AI prompts per phase/domain
 │   ├── blueprints/             # Architecture blueprints (web, mobile, trading)
+│   ├── agent-playbooks/        # Gated step-by-step workflows per domain
 │   ├── security/               # Mobile security checklist & trading risk policy
 │   ├── diagrams/               # Architecture & sequence diagrams (Mermaid)
 │   └── adr/                    # Architecture Decision Records & STRIDE models
+├── evals/                      # Agent output-quality harness (scenarios + rubrics)
 └── scripts/
-    ├── init-new-project.sh     # Scaffolding automation script
+    ├── init-new-project.sh     # Scaffolding automation script (bash)
+    ├── init-new-project.ps1    # Scaffolding automation script (PowerShell / Windows)
     └── devsec-check.sh         # Security audit & secret scanner script
 ```
 

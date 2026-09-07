@@ -42,6 +42,8 @@ Every project derived from this baseline MUST uphold four universal pillars:
 | `docs/design-tokens.md` | Single-source design-token pipeline → Web/Tailwind, Compose, SwiftUI, Flutter |
 | `docs/frontend-testing.md` | Frontend testing standard (Vitest, Testing Library, axe-core, Playwright) |
 | `docs/performance-budgets.md` | Core Web Vitals + bundle-size budgets, enforced in CI |
+| `docs/deployment.md` | Environment promotion, deploy strategies, secrets, rollback standard |
+| `docs/runbook-template.md` | Per-service operational runbook (start/stop, alerts, recovery) |
 | `docs/research/EXTERNAL-TOOLS.md` | Adoption register for all external tools/skills (verdict, license, constraints) |
 | `evals/` | Agent output-quality harness (scenarios + rubrics) |
 
