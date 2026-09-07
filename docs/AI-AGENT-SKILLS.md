@@ -27,6 +27,9 @@ AI agents produce significantly higher-quality code when equipped with specializ
 | **Web** | `modern-web-guidance` | Built-in / Modern Web Plugin | Best practices for Next.js App Router, Tailwind CSS, and WCAG accessibility. |
 | **Mobile** | `mobile-appsec` | Custom Rules in `AGENTS.md` | Audits Android Keystore, SSL Pinning, and `FLAG_SECURE` screen protection. |
 | **EA Trading** | `quant-risk-guardian` | Custom Rules in `AGENTS.md` | Enforces Hard Stop Loss, dynamic lot calculation, and the 5% daily drawdown circuit breaker. |
+| **EA Trading** | `freqtrade` | External — `github.com/freqtrade/freqtrade` (**GPL-3.0** ⚠️) | End-to-end **crypto** algo bot: backtest, hyperopt, dry-run, live. Reference/separate deploy only — never copy source into derived projects. |
+| **EA Trading** | `quantconnect-lean` | External — `github.com/QuantConnect/Lean` (**Apache-2.0** ✅) | Reference architecture for event-driven engines (data feeds, risk, kill-switch). Design reference only; C#/.NET, does not author MetaTrader EAs. |
+| **EA Trading** | `vibe-trading` | External — `github.com/HKUDS/Vibe-Trading` (**MIT** ✅) | Optional research workspace: 10 backtest engines, Alpha Zoo, strategy export incl. MQL5. Research-only companion, not the execution core. |
 
 ---
 
@@ -96,6 +99,14 @@ While `humanizer` and `diagram-design` serve as the foundation for clear documen
 - **Dynamic Lot Sizing Formula:** Calculates position size based on a strict 1% to 2% equity risk parameter.
 - **Autonomous Circuit Breaker:** Kills all open positions, cancels pending orders, and halts trading if the daily floating loss hits 5%.
 - **API Key Segregation:** Prohibits trading agents from using exchange API keys with *Withdrawal* permissions enabled.
+
+#### External Tooling (Optional — select by instrument, see `docs/blueprints/ea-trading-blueprint.md` §6)
+
+- **freqtrade** (**GPL-3.0** ⚠️): Full-featured **crypto** trading bot (backtest, hyperopt, dry-run, live via ccxt). Use for crypto sub-domain research or isolated deployment only. Its GPL-3.0 copyleft means its source must **never** be copied into an Apache-2.0 derived project — reference or run it standalone.
+- **QuantConnect Lean** (**Apache-2.0** ✅): Professional event-driven trading engine. Treat as an **architectural reference** for how to model data feeds, transaction handlers, and risk kill-switches. It is C#/.NET and does not produce MetaTrader EAs — do not add it as a project dependency.
+- **Vibe-Trading** (**MIT** ✅): Natural-language finance research workspace with 10 backtest engines, an Alpha Zoo, and strategy export (including MQL5). Use as an **optional research-phase companion**; it is research-only (read-only, no custody) and is not the hardened execution core.
+
+> ⚠️ **Boundary for all trading tools:** Adopting any external tool does not waive the Capital Preservation Doctrine — Hard SL, 1–2% dynamic sizing, and the 5% daily drawdown circuit breaker remain mandatory regardless of the tool used.
 
 ---
 

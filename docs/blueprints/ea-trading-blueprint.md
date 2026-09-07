@@ -113,3 +113,31 @@ Trading algorithms are prohibited from deploying with live capital before passin
 - [ ] Spread filters and economic news filters (*Economic News Filter*) are active.
 - [ ] *Withdrawal* permissions on all exchange API keys are 100% disabled.
 - [ ] Audit database logs every order ticket, execution timestamp, and realized slippage.
+
+---
+
+## 🧰 6. Tool Selection Matrix (By Instrument & Use Case)
+
+Not every trading tool serves the same purpose. Select based on **target instrument** and **role in the pipeline** — do not force a single tool to cover everything. This matrix reflects each project's license and scope constraints so that derived projects remain legally compliant and architecturally coherent.
+
+### 6.1 Selection by Instrument
+
+| Target Instrument | Primary Toolchain | License | Role | Notes |
+|---|---|---|---|---|
+| **Forex / CFD / Metals** (XAUUSD, EURUSD, dll) | **MQL5 + MT5 Strategy Tester + MetaAPI** | Proprietary (MetaQuotes) + MetaAPI SDK | Authoring EA, backtest, live execution | The ONLY path that produces a real MetaTrader EA (`.ex5`). This is the baseline's default trading stack. |
+| **Crypto Spot / Futures** (BTC/USDT, dll) | **freqtrade** *or* your own `ccxt + vectorbt/backtrader` stack | freqtrade = **GPL-3.0** ⚠️ | End-to-end crypto algo: backtest, hyperopt, dry-run, live | Strong risk controls (stoploss, trailing, protections). GPL-3.0 = **reference/separate deployment only**, never copy code into Apache-2.0 derived projects. |
+| **Multi-asset backtest / architecture reference** | **QuantConnect Lean** | **Apache-2.0** ✅ | Reference design for event-driven engine (data feeds, transaction handlers, risk, kill-switch) | Written in C#/.NET — **use as a design reference, not a dependency**. Does NOT author MetaTrader EAs. |
+| **Alpha research + strategy export** | **Vibe-Trading** | **MIT** ✅ | Optional research workspace: backtesting (10 engines), Alpha Zoo, and strategy export incl. **MQL5** | Research-only by default (read-only, no custody). Optional companion for the research phase, not the execution core. |
+
+### 6.2 Non-Negotiable Rules for External Tools
+
+1. **License gate:** Only MIT / Apache-2.0 tools may be referenced as *recommended*. GPL/AGPL tools (freqtrade, FinceptTerminal) are for **learning or isolated deployment** — never copy their source into a derived project.
+2. **No MetaTrader authoring outside MQL5:** None of the external tools above compile a MetaTrader EA. For Forex/CFD, always fall back to the MQL5 + MetaAPI stack defined in Section 1.
+3. **Research vs Execution separation:** Tools like Vibe-Trading and Lean belong to the *research/backtest* tier. The *live execution* tier must remain the hardened, risk-gated pipeline from Sections 1–2 with the circuit breaker and API-key segregation intact.
+4. **Capital preservation is non-transferable:** Adopting any external tool does NOT waive the Section 2 doctrine — Hard Stop Loss, 1–2% dynamic sizing, and the 5% daily drawdown kill-switch must still be enforced regardless of the tool.
+
+### 6.3 Rejected / Not Recommended
+
+| Tool | Reason |
+|---|---|
+| **FinceptTerminal** | Financial *data/analytics desktop terminal*, not a trading/bot framework. No MetaTrader/MQL support, and **AGPL-3.0** copyleft is incompatible with this Apache-2.0 baseline. Core algo/live features are locked behind paid tiers. |
