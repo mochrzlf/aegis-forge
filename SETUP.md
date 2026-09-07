@@ -79,7 +79,50 @@ devsec-check
 
 ---
 
-## 5. Command Shortcut Summary
+## 5. (Recommended) Enable the Pre-Commit Framework
+
+Beyond the built-in security hook, the baseline ships a `.pre-commit-config.yaml`
+that adds file hygiene checks, ShellCheck, YAML lint, **OpenAPI contract
+validation**, and **PostgreSQL schema linting** — the same checks enforced in CI:
+
+```bash
+pip install pre-commit
+pre-commit install        # one-time, per repository clone
+pre-commit run --all-files # manual full audit
+```
+
+The scaffolding script installs this hook automatically when `pre-commit` is
+already available on your machine. Both hooks coexist: the framework hook runs
+first, then the Gitleaks-based security hook.
+
+---
+
+## 6. Branch Protection & CODEOWNERS (Recommended)
+
+The baseline ships `.github/CODEOWNERS`, which routes review of security-sensitive
+paths to designated owners. For this to actually *enforce* anything, enable branch
+protection on `main` in your repository settings:
+
+**GitHub → Settings → Branches → Add rule for `main`:**
+- ✅ Require a pull request before merging (no direct pushes).
+- ✅ **Require review from Code Owners** (enforces `.github/CODEOWNERS`).
+- ✅ Require status checks to pass → select: `Security & SAST Scans`,
+  `API Contract & Schema Validation`, `Dependency Review (PR Gate)`,
+  `Scorecard supply-chain security`.
+- ✅ Require conversation resolution before merging.
+- ✅ (Recommended) Require linear history & block force pushes.
+
+Then edit `.github/CODEOWNERS` and replace the `@org/...` placeholder handles with
+your real GitHub users/teams (`@you`, `@your-org/security`, etc.).
+
+> **Segregation of Duties:** with CODEOWNERS + "require code owner review", a
+> change to `docs/security/`, CI workflows, or the DB schema *cannot* be merged
+> by a single person — it needs the owning lead's approval. This mirrors the
+> Maker-Checker principle already used elsewhere in the baseline.
+
+---
+
+## 7. Command Shortcut Summary
 
 | Shortcut | Description |
 | :--- | :--- |
