@@ -1,6 +1,6 @@
 ---
 version: 1.0.0
-name: Aegis-Forge-Enterprise-Design-System
+name: Aegis-Forge-Design-System
 description: A modern, clean, and highly functional enterprise interface system optimized for SaaS, Web Apps, and Financial Dashboards. Anchored on a spacious Slate canvas and Modern Indigo (#4f46e5) as the primary brand voltage. The typography relies on a dual-stack: Plus Jakarta Sans for crisp, geometric headings and numbers, with Inter providing supreme legibility for dense data tables and body copy. Unlike rigid traditional enterprise software, the system uses generous whitespace, gentle 12-16px corner radii, and subtle elevation to reduce cognitive load while maintaining high data density.
 
 colors:

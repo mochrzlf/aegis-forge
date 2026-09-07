@@ -1,0 +1,36 @@
+# ==============================================================================
+# CODEOWNERS — Aegis Forge
+# ==============================================================================
+# Every path below requires review from its listed owner(s) before merge.
+# Combined with branch protection (see SETUP.md §Branch Protection), this
+# enforces Segregation of Duties on security-sensitive surfaces.
+#
+# Replace the placeholder handles with real GitHub users/teams in derived
+# projects. Syntax:  <pattern>  <owner> [<owner>...]
+# ==============================================================================
+
+# Default owner for anything not matched below
+*                                           @org/maintainers
+
+# Security policy, IAM, access matrix, threat models — Security lead must review
+/docs/security/                             @org/security-lead
+/docs/security-iam-policy.md                @org/security-lead
+/docs/security-access-matrix.md             @org/security-lead
+/docs/adr/                                  @org/security-lead @org/maintainers
+SECURITY.md                                 @org/security-lead
+
+# CI/CD & DevSecOps pipeline — DevOps lead must review (protects the supply chain)
+/.github/workflows/                         @org/devops-lead
+/.github/dependabot.yml                     @org/devops-lead
+/.gitleaks.toml                             @org/devops-lead @org/security-lead
+/.pre-commit-config.yaml                    @org/devops-lead
+/scripts/                                   @org/devops-lead
+/docker-compose.yml                         @org/devops-lead
+
+# Data layer — DBA / data owner must review schema & migrations
+/docs/schema.sql                            @org/dba-lead
+/docs/schema-template.sql                   @org/dba-lead
+
+# API contract — backend/API owner must review
+/docs/openapi.yaml                          @org/api-lead
+/docs/openapi-template.yaml                 @org/api-lead

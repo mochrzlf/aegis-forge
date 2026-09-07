@@ -16,7 +16,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           fetch-depth: 0
 
@@ -25,16 +25,34 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Semgrep SAST Scan (OWASP Top 10)
-        uses: returntocorp/semgrep-action@v1
+      # NOTE: returntocorp/semgrep-action is archived. Semgrep now runs
+      # directly via the official CLI container and emits SARIF so findings
+      # appear in the GitHub Security tab alongside Trivy results.
+      - name: Semgrep SAST Scan (OWASP Top 10, SARIF Output)
+        uses: actions/setup-python@v6
         with:
-          config: >-
-            p/security-audit
-            p/owasp-top-ten
-            p/cwe-top-25
+          python-version: '3.12'
 
+      - name: Run Semgrep
+        run: |
+          pipx run semgrep scan \
+            --config p/security-audit \
+            --config p/owasp-top-ten \
+            --config p/cwe-top-25 \
+            --sarif --sarif-output=semgrep-results.sarif \
+            --error --metrics=off
+
+      - name: Upload Semgrep Results to GitHub Security Tab
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: semgrep-results.sarif
+          category: semgrep
+
+      # Pinned to a release tag instead of @master for supply-chain safety
+      # (Dependabot will propose version bumps automatically).
       - name: Trivy Vulnerability Scan (SARIF Output)
-        uses: aquasecurity/trivy-action@master
+        uses: aquasecurity/trivy-action@0.33.1
         with:
           scan-type: 'fs'
           format: 'sarif'
@@ -46,3 +64,100 @@ jobs:
         if: always()
         with:
           sarif_file: 'trivy-results.sarif'
+          category: trivy
+
+  contract-validation:
+    name: API Contract & Schema Validation
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v5
+
+      # Lint the OpenAPI contract so a broken spec fails before any
+      # backend/mobile code is written against it.
+      - name: Validate OpenAPI Specification (Redocly)
+        uses: Redocly/redocly-cli-action@v4
+        with:
+          args: lint docs/openapi.yaml
+
+      # Parse-check the PostgreSQL schema inside a real Postgres container
+      # so syntax/DDL errors surface in CI instead of at first `make up`.
+      - name: Validate PostgreSQL Schema (docs/schema.sql)
+        run: |
+          docker run -d --name pg-schema-check \
+            -e POSTGRES_PASSWORD=ci_check \
+            postgres:16-alpine
+          for i in $(seq 1 30); do
+            docker exec pg-schema-check pg_isready -U postgres && break || sleep 1
+          done
+          docker cp docs/schema.sql pg-schema-check:/tmp/schema.sql
+          docker exec -e PGPASSWORD=ci_check pg-schema-check \
+            psql -U postgres -v ON_ERROR_STOP=1 -f /tmp/schema.sql
+          docker rm -f pg-schema-check
+
+  dependency-review:
+    name: Dependency Review (PR Gate)
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v5
+
+      # Blocks PRs that introduce dependencies with known vulnerabilities
+      # or non-compliant licenses before they reach main.
+      - name: Dependency Review
+        uses: actions/dependency-review-action@v4
+        with:
+          fail-on-severity: high
+
+  scorecard:
+    name: OpenSSF Scorecard
+    runs-on: ubuntu-latest
+    # Scorecard analyzes the repo's security posture (branch protection,
+    # dependency pinning, token permissions, etc.). Most meaningful on the
+    # default branch; results upload to the GitHub Security tab.
+    permissions:
+      security-events: write
+      id-token: write
+      contents: read
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+
+      - name: Run OpenSSF Scorecard
+        uses: ossf/scorecard-action@v2.4.2
+        with:
+          results_file: scorecard-results.sarif
+          results_format: sarif
+          publish_results: true
+
+      - name: Upload Scorecard Results to GitHub Security Tab
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: scorecard-results.sarif
+          category: scorecard
+
+  sbom:
+    name: Generate SBOM (Supply Chain)
+    runs-on: ubuntu-latest
+    # Produces a Software Bill of Materials so consumers can audit exactly
+    # what the baseline ships. Uploaded as a build artifact.
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v5
+
+      - name: Generate SBOM (Anchore Syft, SPDX)
+        uses: anchore/sbom-action@v0.20.0
+        with:
+          format: spdx-json
+          output-file: sbom.spdx.json
+
+      - name: Upload SBOM as Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: sbom
+          path: sbom.spdx.json
+          retention-days: 30

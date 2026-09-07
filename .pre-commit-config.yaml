@@ -1,0 +1,92 @@
+# ==============================================================================
+# PRE-COMMIT FRAMEWORK CONFIGURATION — Aegis Forge
+# ==============================================================================
+# Installation (one-time, per machine):
+#   pip install pre-commit
+#   pre-commit install          # installs the git hook into .git/hooks/
+#
+# Usage:
+#   pre-commit run --all-files  # audit the entire repository manually
+#
+# NOTE: This complements scripts/devsec-check.sh (used by the scaffolded
+# project hook). Both run Gitleaks; this file adds hygiene, lint, and
+# contract-validation layers so local checks match CI exactly.
+# ==============================================================================
+
+# Fail the commit if any hook modifies files (forces re-stage & review)
+fail_fast: false
+
+repos:
+  # --------------------------------------------------------------------------
+  # 1. Standard file hygiene (fast, language-agnostic)
+  # --------------------------------------------------------------------------
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: check-added-large-files
+        args: ['--maxkb=500']
+      - id: check-merge-conflict
+      - id: check-case-conflict
+      - id: check-json
+      - id: check-yaml
+        args: ['--allow-multiple-documents']
+      - id: check-symlinks
+      - id: check-executables-have-shebangs
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
+        args: ['--markdown-linebreak-ext=md']
+      - id: mixed-line-ending
+        args: ['--fix=lf']
+      - id: detect-private-key
+
+  # --------------------------------------------------------------------------
+  # 2. Secret detection — must match .gitleaks.toml used in CI
+  # --------------------------------------------------------------------------
+  - repo: https://github.com/gitleaks/gitleaks
+    rev: v8.24.3
+    hooks:
+      - id: gitleaks
+
+  # --------------------------------------------------------------------------
+  # 3. Shell script linting (scripts/*.sh, Makefile-adjacent tooling)
+  # --------------------------------------------------------------------------
+  - repo: https://github.com/shellcheck-py/shellcheck-py
+    rev: v0.10.0.1
+    hooks:
+      - id: shellcheck
+        args: ['--severity=warning']
+
+  # --------------------------------------------------------------------------
+  # 4. YAML formatting consistency (docs/openapi.yaml, workflows, compose)
+  # --------------------------------------------------------------------------
+  - repo: https://github.com/adrienverge/yamllint
+    rev: v1.37.1
+    hooks:
+      - id: yamllint
+        args: ['-d', 'relaxed', '--no-warnings']
+
+  # --------------------------------------------------------------------------
+  # 5. OpenAPI contract validation — mirrors the CI 'contract-validation' job
+  #    so a broken spec is caught before push, not in the pipeline.
+  #    Requires Node.js (bundled with most dev environments).
+  # --------------------------------------------------------------------------
+  - repo: local
+    hooks:
+      - id: openapi-spec-lint
+        name: OpenAPI Spec Validation (Redocly)
+        entry: npx --yes @redocly/cli lint docs/openapi.yaml
+        language: system
+        files: ^docs/openapi\.yaml$
+        pass_filenames: false
+
+  # --------------------------------------------------------------------------
+  # 6. SQL schema sanity check — PostgreSQL dialect parse
+  # --------------------------------------------------------------------------
+  - repo: local
+    hooks:
+      - id: sql-schema-lint
+        name: SQL Schema Lint (sqlfluff, postgres dialect)
+        entry: python -m sqlfluff lint docs/schema.sql --dialect postgres --disable-progress-bar
+        language: system
+        files: ^docs/schema.*\.sql$
+        pass_filenames: false
