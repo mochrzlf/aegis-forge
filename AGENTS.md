@@ -44,6 +44,7 @@ Every project derived from this baseline MUST uphold four universal pillars:
 | `docs/performance-budgets.md` | Core Web Vitals + bundle-size budgets, enforced in CI |
 | `docs/deployment.md` | Environment promotion, deploy strategies, secrets, rollback standard |
 | `docs/runbook-template.md` | Per-service operational runbook (start/stop, alerts, recovery) |
+| `docs/testing-strategy.md` | Unified cross-domain testing strategy, coverage & quality gates |
 | `docs/research/EXTERNAL-TOOLS.md` | Adoption register for all external tools/skills (verdict, license, constraints) |
 | `evals/` | Agent output-quality harness (scenarios + rubrics) |
 

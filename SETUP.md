@@ -126,7 +126,7 @@ protection on `main` in your repository settings:
 - ✅ **Require review from Code Owners** (enforces `.github/CODEOWNERS`).
 - ✅ Require status checks to pass → select: `Security & SAST Scans`,
   `API Contract & Schema Validation`, `Dependency Review (PR Gate)`,
-  `Scorecard supply-chain security`.
+  `Scorecard supply-chain security`, `Validate ADR format & STRIDE completeness`.
 - ✅ Require conversation resolution before merging.
 - ✅ (Recommended) Require linear history & block force pushes.
 

@@ -124,9 +124,12 @@ Baseline/
 ├── AGENTS.md                   # AI Agent Operating Contract & Non-Negotiable Rules
 ├── README.md                   # Primary English documentation
 ├── SETUP.md                    # Technical setup & configuration manual
+├── CONTRIBUTING.md             # Contribution, commit convention & PR process guide
 ├── SECURITY.md                 # Vulnerability disclosure policy
 ├── LICENSE                     # Apache-2.0 License
 ├── Makefile                    # Unified task runner (audit, mock-api, up, down)
+├── release-please-config.json  # Automated versioning & changelog config
+├── .release-please-manifest.json # Current released version (managed by release-please)
 ├── .env.example                # Hardened environment variable template
 ├── .gitattributes              # Line-ending normalization (LF)
 ├── .editorconfig               # Editor & IDE consistency rules
@@ -148,6 +151,7 @@ Baseline/
 │   ├── performance-budgets.md  # Web Vitals + bundle-size budgets (CI-enforced)
 │   ├── deployment.md           # Environment promotion & deploy strategies
 │   ├── runbook-template.md     # Per-service operational runbook template
+│   ├── testing-strategy.md     # Unified cross-domain testing strategy & gates
 │   ├── prompt-library.md       # Tested copy-paste AI prompts per phase/domain
 │   ├── blueprints/             # Architecture blueprints (web, mobile, trading)
 │   ├── agent-playbooks/        # Gated step-by-step workflows per domain
@@ -158,6 +162,7 @@ Baseline/
 └── scripts/
     ├── init-new-project.sh     # Scaffolding automation script (bash)
     ├── init-new-project.ps1    # Scaffolding automation script (PowerShell / Windows)
+    ├── validate_adrs.py        # ADR format & STRIDE-completeness validator (CI gate)
     └── devsec-check.sh         # Security audit & secret scanner script
 ```
 
