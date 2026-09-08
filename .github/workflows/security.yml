@@ -9,6 +9,10 @@ on:
 permissions:
   contents: read
   security-events: write
+  # codeql-action/upload-sarif queries the Actions API (get-a-workflow-run) to
+  # attach results to the run. Without actions:read that call returns
+  # "Resource not accessible by integration" and the upload step fails.
+  actions: read
 
 jobs:
   security-audit:
