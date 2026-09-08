@@ -75,11 +75,18 @@ jobs:
         uses: actions/checkout@v5
 
       # Lint the OpenAPI contract so a broken spec fails before any
-      # backend/mobile code is written against it.
-      - name: Validate OpenAPI Specification (Redocly)
-        uses: Redocly/redocly-cli-action@v4
+      # backend/mobile code is written against it. We invoke the Redocly CLI
+      # directly via npx (pinned) instead of a third-party GitHub Action,
+      # because the Redocly/redocly-cli-action repo is no longer resolvable
+      # and running the CLI removes that external dependency (same approach
+      # we took for Semgrep after its action was archived).
+      - name: Setup Node.js (for Redocly CLI)
+        uses: actions/setup-node@v4
         with:
-          args: lint docs/openapi.yaml
+          node-version: '20'
+
+      - name: Validate OpenAPI Specification (Redocly CLI)
+        run: npx --yes @redocly/cli@^1 lint docs/openapi.yaml
 
       # Parse-check the PostgreSQL schema inside a real Postgres container
       # so syntax/DDL errors surface in CI instead of at first `make up`.
@@ -130,6 +137,11 @@ jobs:
       - name: Run OpenSSF Scorecard
         uses: ossf/scorecard-action@v2.4.2
         with:
+          # The action needs a token to call the GitHub API for checks such as
+          # Branch-Protection and Maintained. Without repo_token it can exit
+          # silently (run for ~1s) and never write the SARIF file, which then
+          # breaks the upload step with "Path does not exist".
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
           results_file: scorecard-results.sarif
           results_format: sarif
           # publish_results pushes to the OpenSSF REST API, which requires the
@@ -140,7 +152,9 @@ jobs:
 
       - name: Upload Scorecard Results to GitHub Security Tab
         uses: github/codeql-action/upload-sarif@v3
-        if: always()
+        # Only attempt the upload when the SARIF file was actually produced,
+        # so a Scorecard hiccup doesn't turn the whole job red.
+        if: always() && hashFiles('scorecard-results.sarif') != ''
         with:
           sarif_file: scorecard-results.sarif
           category: scorecard
