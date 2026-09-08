@@ -50,9 +50,10 @@ jobs:
           category: semgrep
 
       # Pinned to a release tag instead of @master for supply-chain safety
-      # (Dependabot will propose version bumps automatically).
+      # (Dependabot will propose version bumps automatically). NOTE: tags use
+      # the "v" prefix (e.g. v0.36.0) since the project's tag migration.
       - name: Trivy Vulnerability Scan (SARIF Output)
-        uses: aquasecurity/trivy-action@0.33.1
+        uses: aquasecurity/trivy-action@v0.36.0
         with:
           scan-type: 'fs'
           format: 'sarif'
@@ -131,7 +132,11 @@ jobs:
         with:
           results_file: scorecard-results.sarif
           results_format: sarif
-          publish_results: true
+          # publish_results pushes to the OpenSSF REST API, which requires the
+          # repo to be enrolled and can fail on new/private repos. Keep it off
+          # and rely on the SARIF upload below so results still land in the
+          # GitHub Security tab without an external dependency.
+          publish_results: false
 
       - name: Upload Scorecard Results to GitHub Security Tab
         uses: github/codeql-action/upload-sarif@v3
