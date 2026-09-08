@@ -5,32 +5,34 @@
 # Combined with branch protection (see SETUP.md §Branch Protection), this
 # enforces Segregation of Duties on security-sensitive surfaces.
 #
-# Replace the placeholder handles with real GitHub users/teams in derived
-# projects. Syntax:  <pattern>  <owner> [<owner>...]
+# The baseline repo is owned by a single maintainer, so all entries point to
+# @mochrzlf. In a derived project with a real team, replace these with your
+# actual users/teams (e.g. @your-org/security-lead) to restore the intended
+# Segregation of Duties. Syntax:  <pattern>  <owner> [<owner>...]
 # ==============================================================================
 
 # Default owner for anything not matched below
-*                                           @org/maintainers
+*                                           @mochrzlf
 
 # Security policy, IAM, access matrix, threat models — Security lead must review
-/docs/security/                             @org/security-lead
-/docs/security-iam-policy.md                @org/security-lead
-/docs/security-access-matrix.md             @org/security-lead
-/docs/adr/                                  @org/security-lead @org/maintainers
-SECURITY.md                                 @org/security-lead
+/docs/security/                             @mochrzlf
+/docs/security-iam-policy.md                @mochrzlf
+/docs/security-access-matrix.md             @mochrzlf
+/docs/adr/                                  @mochrzlf
+SECURITY.md                                 @mochrzlf
 
 # CI/CD & DevSecOps pipeline — DevOps lead must review (protects the supply chain)
-/.github/workflows/                         @org/devops-lead
-/.github/dependabot.yml                     @org/devops-lead
-/.gitleaks.toml                             @org/devops-lead @org/security-lead
-/.pre-commit-config.yaml                    @org/devops-lead
-/scripts/                                   @org/devops-lead
-/docker-compose.yml                         @org/devops-lead
+/.github/workflows/                         @mochrzlf
+/.github/dependabot.yml                     @mochrzlf
+/.gitleaks.toml                             @mochrzlf
+/.pre-commit-config.yaml                    @mochrzlf
+/scripts/                                   @mochrzlf
+/docker-compose.yml                         @mochrzlf
 
 # Data layer — DBA / data owner must review schema & migrations
-/docs/schema.sql                            @org/dba-lead
-/docs/schema-template.sql                   @org/dba-lead
+/docs/schema.sql                            @mochrzlf
+/docs/schema-template.sql                   @mochrzlf
 
 # API contract — backend/API owner must review
-/docs/openapi.yaml                          @org/api-lead
-/docs/openapi-template.yaml                 @org/api-lead
+/docs/openapi.yaml                          @mochrzlf
+/docs/openapi-template.yaml                 @mochrzlf
