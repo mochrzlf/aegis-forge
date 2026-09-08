@@ -111,12 +111,36 @@ jobs:
           docker run -d --name pg-schema-check \
             -e POSTGRES_PASSWORD=ci_check \
             postgres:16-alpine
+
+          # Wait until Postgres actually accepts a real connection. `pg_isready`
+          # can report "accepting connections" one beat before the Unix socket
+          # is fully up, which raced the psql call below and intermittently
+          # failed CI with "No such file or directory". We require pg_isready
+          # to exit 0 AND keep retrying the psql run itself.
           for i in $(seq 1 30); do
-            docker exec pg-schema-check pg_isready -U postgres && break || sleep 1
+            if docker exec pg-schema-check pg_isready -U postgres -q; then
+              break
+            fi
+            sleep 1
           done
+
           docker cp docs/schema.sql pg-schema-check:/tmp/schema.sql
-          docker exec -e PGPASSWORD=ci_check pg-schema-check \
-            psql -U postgres -v ON_ERROR_STOP=1 -f /tmp/schema.sql
+
+          # Retry the schema apply a few times to ride out any remaining
+          # startup race, failing only if it still can't connect after retries.
+          for i in $(seq 1 10); do
+            if docker exec -e PGPASSWORD=ci_check pg-schema-check \
+                psql -U postgres -v ON_ERROR_STOP=1 -f /tmp/schema.sql; then
+              break
+            fi
+            echo "psql attempt $i failed; retrying in 2s..."
+            sleep 2
+            if [ "$i" -eq 10 ]; then
+              docker rm -f pg-schema-check
+              exit 1
+            fi
+          done
+
           docker rm -f pg-schema-check
 
   dependency-review:
