@@ -112,11 +112,13 @@ jobs:
 
       # Parse-check the PostgreSQL schema inside a real Postgres container
       # so syntax/DDL errors surface in CI instead of at first `make up`.
+      # NOTE: keep this image version in sync with docker-compose.yml so CI
+      # validates the schema against the same Postgres major we ship to dev.
       - name: Validate PostgreSQL Schema (docs/schema.sql)
         run: |
           docker run -d --name pg-schema-check \
             -e POSTGRES_PASSWORD=ci_check \
-            postgres:16-alpine
+            postgres:18-alpine
 
           # Wait until Postgres actually accepts a real connection. `pg_isready`
           # can report "accepting connections" one beat before the Unix socket
