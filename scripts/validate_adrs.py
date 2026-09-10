@@ -19,6 +19,13 @@ import re
 import sys
 from pathlib import Path
 
+# Force UTF-8 output so emoji/box-drawing characters (✅, ❌, ─) do not crash
+# on Windows consoles that default to legacy code pages (e.g. cp1252).
+if sys.stdout.encoding and sys.stdout.encoding.lower() != "utf-8":
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+if sys.stderr.encoding and sys.stderr.encoding.lower() != "utf-8":
+    sys.stderr.reconfigure(encoding="utf-8", errors="replace")
+
 VALID_STATUSES = ("PROPOSED", "ACCEPTED", "DEPRECATED", "SUPERSEDED")
 
 # STRIDE categories written with a bolded first letter, e.g. "**S**poofing".
