@@ -3,6 +3,11 @@
 # bumps the version and generates CHANGELOG.md. Merging that PR creates a
 # Git tag + GitHub Release. Requires commits to follow Conventional Commits
 # (see CONTRIBUTING.md §4).
+#
+# NOTE: This repo merges PRs with SQUASH MERGING only (see CONTRIBUTING.md §3).
+# Merge commits produce duplicated CHANGELOG entries (feature commit + merge
+# commit both match conventional-commit format), so squash-merge is required
+# for release-please to generate a clean changelog.
 name: Release Please
 
 on:
