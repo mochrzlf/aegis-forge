@@ -37,6 +37,13 @@ pre-commit install        # hygiene, gitleaks, lint, contract checks
 
 **Protected branch:** `main` requires PR review (incl. CODEOWNERS) and green status checks (`SETUP.md` §6). No direct pushes to `main`.
 
+**Merge method — squash only.** This repo merges PRs with **squash merging** (merge commits and rebase merging are disabled in repo settings). Each PR lands on `main` as a single commit whose message is the PR title. Reasons:
+
+- **release-please** is designed for squash-merge — with merge commits every change would be recorded twice in `CHANGELOG.md` (once from the feature-branch commit, once from the merge commit).
+- Linear history is easier to read, `git bisect`, and revert.
+
+**Corollary:** write the **PR title** as a valid Conventional Commit (e.g., `feat(skills): add prd-interviewer`), because that title becomes the squashed commit message and the changelog entry. Individual commits inside the PR can be loose — they are squashed away.
+
 ---
 
 ## 4. Commit Convention — Conventional Commits
