@@ -34,8 +34,32 @@ evals/
 
 ## Run (once a runner is adopted)
 
+**Recommended path — guarded launcher (interactive key setup + cost confirmation):**
+
+```powershell
+# Windows (PowerShell)
+pwsh scripts/run-evals.ps1          # guarded run
+pwsh scripts/run-evals.ps1 -View    # run + open results viewer
+```
+
 ```bash
-# Recommended runner (MIT): https://github.com/promptfoo/promptfoo
+# Linux / macOS / Git Bash / WSL
+bash scripts/run-evals.sh           # guarded run
+bash scripts/run-evals.sh --view    # run + open results viewer
+```
+
+The guard script:
+1. verifies `npx` is available,
+2. checks for a provider key (`OPENAI_API_KEY` / `ANTHROPIC_API_KEY` / `GOOGLE_API_KEY`) and, if missing, offers a **masked** interactive prompt that stores the key in the local `.env` (git-ignored, gitleaks-protected) — keys are never echoed or committed,
+3. asks for explicit confirmation before any **paid** API call,
+4. runs the eval suite below.
+
+**Manual path:**
+
+```bash
+# Set a provider key first (your own account), e.g.:
+export OPENAI_API_KEY="sk-..."        # PowerShell: $env:OPENAI_API_KEY = "sk-..."
+
 npx promptfoo@latest eval -c evals/promptfooconfig.yaml
 npx promptfoo@latest view   # browse results
 ```
