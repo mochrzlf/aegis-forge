@@ -19,6 +19,7 @@ the baseline's non-negotiable rules so any skills-compatible agent
 | [`mobile-appsec`](mobile-appsec/SKILL.md) | Keystore/EncryptedSharedPreferences, SSL pinning, FLAG_SECURE, Play Integrity, biometric-gated ops | `docs/security/mobile-security-checklist.md` |
 | [`api-contract-envelope`](api-contract-envelope/SKILL.md) | Standard success/error payload envelope, fixed error-code set, pagination `meta`, HTTP↔code mapping | `AGENTS.md` §3.1, `docs/openapi.yaml` |
 | [`rbac-enforcement`](rbac-enforcement/SKILL.md) | Server-side role checks, IDOR/BOLA ownership predicates, maker-checker, JML kill-switch, immutable audit trail | `AGENTS.md` §3.2, `docs/security-access-matrix.md`, `docs/security-iam-policy.md` |
+| [`prd-interviewer`](prd-interviewer/SKILL.md) | Two PRD modes (quick draft with `[ASSUMPTION]` markers vs. interview-first), ≤5 questions/round, 5-area coverage, confirmation gate before writing | `docs/PRD-template.md`, `docs/PRD-detail-template.md` |
 
 > **Coverage:** every scenario in `evals/scenarios/` now has a companion skill
 > that enforces the rule being evaluated — what is tested is also taught.

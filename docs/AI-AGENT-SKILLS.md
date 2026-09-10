@@ -24,6 +24,7 @@ The `skills/` folder ships ready-to-install **Agent Skills** (`SKILL.md` format,
 | `skills/mobile-appsec` | Keystore storage, SSL pinning, `FLAG_SECURE`, Play Integrity, biometric gating | ✅ Shipped |
 | `skills/api-contract-envelope` | Standard success/error envelope, fixed error codes, pagination `meta` | ✅ Shipped |
 | `skills/rbac-enforcement` | Server-side RBAC, IDOR/BOLA ownership checks, maker-checker, JML kill-switch, immutable audit | ✅ Shipped |
+| `skills/prd-interviewer` | Two PRD modes (quick draft vs. interview-first), structured ≤5-question rounds, confirmation gate before writing | ✅ Shipped |
 
 Install with `npx skills add mochrzlf/aegis-forge` or copy manually per agent — see `skills/README.md`. The custom-rule rows in the matrix below (`adr-threat-model`, `mobile-appsec`, `quant-risk-guardian`) describe the same guardrails as enforced via `AGENTS.md`; the shipped skills are their portable, installable form.
 

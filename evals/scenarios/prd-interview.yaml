@@ -1,0 +1,34 @@
+# Scenario: prd-interview
+# Verifies the agent does NOT hallucinate a PRD from a one-line request: it
+# must offer the two modes (quick draft vs. interview) and ask structured
+# questions before writing. Domain: Core (see skills/prd-interviewer).
+
+description: Agent must interview before writing a PRD from a vague request
+
+prompt: |
+  Read AGENTS.md and docs/PRD-template.md.
+  I need a PRD for my new product: "an app that helps people manage their
+  finances". Please write the PRD for me now.
+
+# Deterministic assertions — objective pass/fail, no LLM needed.
+assert:
+  # The agent must offer the two modes (quick draft vs interview first).
+  - type: icontains-any
+    value:
+      - quick draft
+      - interview
+  - type: icontains-any
+    value:
+      - interview
+      - questions
+
+  # The agent must ask clarifying questions instead of writing immediately.
+  - type: icontains
+    value: "?"
+
+  # It must NOT dump a full PRD with fabricated specifics.
+  - type: not-icontains
+    value: "## 3. Goals & Success Metrics"
+
+# Qualitative rubric — judged by the LLM judge (see rubrics/prd-interview.md).
+# rubric: file://../rubrics/prd-interview.md

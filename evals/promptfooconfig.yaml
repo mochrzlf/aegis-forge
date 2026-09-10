@@ -34,3 +34,4 @@ tests:
   - file://scenarios/api-contract-envelope.yaml
   - file://scenarios/rbac-enforcement.yaml
   - file://scenarios/stride-adr-quality.yaml
+  - file://scenarios/prd-interview.yaml
