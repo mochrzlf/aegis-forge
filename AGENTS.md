@@ -35,6 +35,7 @@ Every project derived from this baseline MUST uphold four universal pillars:
 | `docs/diagrams/` | Visual architecture diagrams, authentication sequences, and execution flows |
 | `docs/adr/` | Architecture Decision Records & STRIDE Threat Modeling |
 | `docs/agent-playbooks/` | Gated, step-by-step workflows per domain — follow BEFORE writing code |
+| `skills/` | Portable Agent Skills (SKILL.md) packaging the baseline's critical guardrails — install into your agent |
 | `docs/prompt-library.md` | Tested copy-paste prompts per phase & domain |
 | `docs/backend-checklist.md` | Backend/service QA checklist (contract, data, authz, observability) |
 | `docs/observability.md` | Structured anti-PII logging, RED metrics, tracing, tamper-evident audit |

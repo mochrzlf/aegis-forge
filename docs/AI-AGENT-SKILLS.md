@@ -13,7 +13,21 @@ AI agents produce significantly higher-quality code when equipped with specializ
 
 ---
 
-## 📊 AI Agent Skills Matrix
+## � Portable Skills Shipped with This Baseline
+
+The `skills/` folder ships ready-to-install **Agent Skills** (`SKILL.md` format, per the [Agent Skills specification](https://agentskills.io/specification)) that package this baseline's most critical guardrails for any skills-compatible agent (Claude Code, Codex, OpenCode):
+
+| Skill | Guards | Status |
+|---|---|---|
+| `skills/quant-risk-guardian` | Hard SL, 1–2% dynamic lot sizing, 5% daily DD circuit breaker, 10% kill-switch | ✅ Shipped |
+| `skills/adr-threat-model` | ADR format + complete STRIDE threat→control mapping (validator-compatible) | ✅ Shipped |
+| `skills/mobile-appsec` | Keystore storage, SSL pinning, `FLAG_SECURE`, Play Integrity, biometric gating | ✅ Shipped |
+
+Install with `npx skills add mochrzlf/aegis-forge` or copy manually per agent — see `skills/README.md`. The custom-rule rows in the matrix below (`adr-threat-model`, `mobile-appsec`, `quant-risk-guardian`) describe the same guardrails as enforced via `AGENTS.md`; the shipped skills are their portable, installable form.
+
+---
+
+## �📊 AI Agent Skills Matrix
 
 | Domain | Skill Identifier | Installation / Source | Primary Capability |
 |---|---|---|---|
