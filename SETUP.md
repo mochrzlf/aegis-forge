@@ -97,6 +97,28 @@ devsec-check
 
 ---
 
+## 4b. (Optional) Running Agent Output-Quality Evals
+
+The `evals/` harness measures whether your AI agent's output obeys the baseline's non-negotiable rules (API envelope, cookie security, RBAC, trading risk gates). It needs an LLM provider API key (billed to **your own** provider account).
+
+Use the interactive guard script — it checks prerequisites, helps you store the key safely in the local `.env` (git-ignored, gitleaks-protected), and confirms before any paid API call:
+
+**PowerShell (Windows):**
+```powershell
+pwsh scripts/run-evals.ps1          # guarded run
+pwsh scripts/run-evals.ps1 -View    # run + open results viewer
+```
+
+**Bash (Linux / macOS / Git Bash / WSL):**
+```bash
+bash scripts/run-evals.sh           # guarded run
+bash scripts/run-evals.sh --view    # run + open results viewer
+```
+
+Alternatively, set the key manually (any one of `OPENAI_API_KEY`, `ANTHROPIC_API_KEY`, `GOOGLE_API_KEY`) in your shell or `.env`, then run `npx promptfoo@latest eval -c evals/promptfooconfig.yaml` directly. See `evals/README.md` for details.
+
+---
+
 ## 5. (Recommended) Enable the Pre-Commit Framework
 
 Beyond the built-in security hook, the baseline ships a `.pre-commit-config.yaml`
