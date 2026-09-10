@@ -42,6 +42,8 @@ Every external tool MUST pass all four before being marked *Adopted — Recommen
 | **Stoplight Prism** | ✅ Adopted — Core | Apache-2.0 | Mock API server from `docs/openapi.yaml` (port 4010). | Already in docker-compose. |
 | **Redocly CLI** | ✅ Adopted — Core | MIT | OpenAPI lint/validation (pre-commit + CI). | Validates API contract before backend code. |
 | **sqlfluff** | ✅ Adopted — Core | MIT | PostgreSQL schema lint (pre-commit). | `--dialect postgres`. |
+| **github/awesome-copilot** | 🔗 Adopted — Reference Only | MIT ✅ | Curation source for `docs/prompt-library.md` (community agents, instructions, skills — incl. test-gap-audit / docs-sync-audit patterns). | Content is community-contributed — repo itself warns to inspect before installing. Curate & adapt into our prompt library; never bulk-install plugins/agents unreviewed. Has machine-readable `llms.txt`. |
+| **anthropics/skills** | 🔗 Adopted — Reference Only | Mixed ⚠️ (Apache-2.0 for most; docx/pdf/pptx/xlsx are source-available, NOT open source) | Official blueprint for packaging our own portable skills (quant-risk-guardian, adr-threat-model, mobile-appsec) — use `spec/` (Agent Skills spec) and `template/` as the structural reference. | NEVER copy the docx/pdf/pptx/xlsx skills into derived projects. Apache-2.0 example skills may be adapted with attribution. |
 
 ### 3.2 Frontend / UI-UX
 
@@ -86,8 +88,6 @@ These were shortlisted but not yet verified. Evaluate against the Four Gates bef
 | Phase | Candidate | Purpose | Status |
 |---|---|---|---|
 | 1 — Agent Enablement | `promptfoo/promptfoo` | Eval harness for agent output quality | 🧪 To verify |
-| 1 — Agent Enablement | `github/awesome-copilot` | Prompt/instruction library source | 🧪 To verify |
-| 1 — Agent Enablement | `anthropics/skills` | SKILL.md structure reference | 🧪 To verify |
 | 1 — Agent Enablement | `modelcontextprotocol/servers` | MCP servers (filesystem, git, postgres) | 🧪 To verify |
 | 2 — Security | `ossf/scorecard` | OpenSSF security posture scoring | 🧪 To verify |
 | 2 — Security | `anchore/sbom-action` / `syft` | SBOM generation | 🧪 To verify |
