@@ -195,6 +195,14 @@ The AI will create planning documents and analyze security risks **before** it s
 
 Now just build. Your AI agent already has all the rules (via `AGENTS.md`), ready-to-use example prompts (in `docs/prompt-library.md`), and guided workflows (in `docs/agent-playbooks/`).
 
+> 🛡️ **Want the strongest AI compliance?** Install the ready-made "rule packs" directly into your AI agent — so the rules load automatically instead of hoping the AI reads them:
+> ```bash
+> npx skills add mochrzlf/aegis-forge
+> ```
+> These cover trading risk limits, security checklists, API standards, and more. See the [`skills/`](skills/) folder for details.
+
+> 🧪 **Want proof your AI follows the rules?** The `evals/` folder can *measure* it — run `pwsh scripts/run-evals.ps1` (Windows) or `bash scripts/run-evals.sh` (Linux/Mac) with your own AI API key. See [`evals/`](evals/) for details.
+
 ### Step 5 — Check Security & Save
 
 Before saving (committing), make sure it's safe:
@@ -252,9 +260,12 @@ aegis-forge/
 │   └── prompt-library.md       ← 💬 Ready-to-use AI prompts
 │
 ├── 📁 evals/                   ← 🧪 Tests for AI output quality
+├── 📁 skills/                  ← 🛡️ Installable "rule packs" for AI agents
 └── 📁 scripts/                 ← ⚙️ Automation scripts
     ├── init-new-project.sh     ← Create project (Linux/Mac)
     ├── init-new-project.ps1    ← Create project (Windows)
+    ├── run-evals.sh            ← Test AI rule compliance (Linux/Mac)
+    ├── run-evals.ps1           ← Test AI rule compliance (Windows)
     └── devsec-check.sh         ← Manual security check
 ```
 
@@ -396,7 +407,9 @@ Install Git from [git-scm.com](https://git-scm.com)
 | 🚀 **Quick start** | `SETUP.md` | Step-by-step technical setup |
 | 📖 **AI rules** | `AGENTS.md` | Working contract for AI agents |
 | 🤖 **AI workflows** | `docs/agent-playbooks/` | Step-by-step guides per project type |
-| 💬 **Ready prompts** | `docs/prompt-library.md` | Example instructions for AI |
+| �️ **AI rule packs** | `skills/` | Installable guardrails for AI agents |
+| 🧪 **AI quality tests** | `evals/` | Measure whether AI output follows the rules |
+| �💬 **Ready prompts** | `docs/prompt-library.md` | Example instructions for AI |
 | 🔐 **Security** | `docs/security/` | Security checklists per domain |
 | 🧪 **Testing** | `docs/testing-strategy.md` | Overall testing strategy |
 | 🚢 **Deployment** | `docs/deployment.md` | How to release to production |
