@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.1.2](https://github.com/mochrzlf/aegis-forge/compare/aegis-forge-v0.1.1...aegis-forge-v0.1.2) (2026-09-11)
+
+### Features
+
+* **evals:** add guarded interactive launcher for agent evals ([6978edc](https://github.com/mochrzlf/aegis-forge/commit/6978edc41d52f6752e14a75f9e002f0778703f82))
+* **skills:** add api-contract-envelope and rbac-enforcement skills ([80c3171](https://github.com/mochrzlf/aegis-forge/commit/80c317168d5fd3e3c808a923e74e1e7f16a85ee8))
+* **skills:** add prd-interviewer — interview-before-write PRD discipline ([1da0c76](https://github.com/mochrzlf/aegis-forge/commit/1da0c76b8be3875280de125859a56a924b995a4e))
+* **skills:** ship portable Agent Skills for critical baseline guardrails ([3427cca](https://github.com/mochrzlf/aegis-forge/commit/3427cca28fef0bf4610f4d2de9df2f79437c12ab))
+
+### Bug Fixes
+
+* **scripts:** force UTF-8 output in ADR validator for Windows consoles ([033c89a](https://github.com/mochrzlf/aegis-forge/commit/033c89ac057d371b52e0e1eaceaf825617edc74a))
+
 ## [0.1.1](https://github.com/mochrzlf/aegis-forge/compare/aegis-forge-v0.1.0...aegis-forge-v0.1.1) (2026-09-08)
 
 
