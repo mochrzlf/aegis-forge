@@ -6,13 +6,16 @@
 # enforces Segregation of Duties on security-sensitive surfaces.
 #
 # The baseline repo is owned by a single maintainer, so all entries point to
-# @mochrzlf. In a derived project with a real team, replace these with your
-# actual users/teams (e.g. @your-org/security-lead) to restore the intended
-# Segregation of Duties. Syntax:  <pattern>  <owner> [<owner>...]
+# @mochrzlf. @pakel123 is added as a co-owner on the default rule so that a
+# second account can satisfy the "code owner review" branch-protection rule
+# (GitHub forbids the PR author from approving their own PR, and @mochrzlf
+# authors every PR). In a derived project with a real team, replace these with
+# your actual users/teams (e.g. @your-org/security-lead) to restore the
+# intended Segregation of Duties. Syntax:  <pattern>  <owner> [<owner>...]
 # ==============================================================================
 
 # Default owner for anything not matched below
-*                                           @mochrzlf
+*                                           @mochrzlf @pakel123
 
 # Security policy, IAM, access matrix, threat models — Security lead must review
 /docs/security/                             @mochrzlf
