@@ -1,5 +1,25 @@
 # Changelog
 
+## [0.1.2](https://github.com/mochrzlf/aegis-forge/compare/aegis-forge-v0.1.1...aegis-forge-v0.1.2) (2026-09-11)
+
+
+### Features
+
+* **evals:** add guarded interactive launcher for agent evals ([64166fc](https://github.com/mochrzlf/aegis-forge/commit/64166fc934b05363191da66b64bb1a8b1524cc8d))
+* **evals:** add guarded interactive launcher for agent evals ([6978edc](https://github.com/mochrzlf/aegis-forge/commit/6978edc41d52f6752e14a75f9e002f0778703f82))
+* **skills:** add api-contract-envelope and rbac-enforcement skills ([7d8f2b8](https://github.com/mochrzlf/aegis-forge/commit/7d8f2b86125f74dd0fe497089fef55fc51c913c3))
+* **skills:** add api-contract-envelope and rbac-enforcement skills ([80c3171](https://github.com/mochrzlf/aegis-forge/commit/80c317168d5fd3e3c808a923e74e1e7f16a85ee8))
+* **skills:** add prd-interviewer — interview-before-write PRD discipline ([50cace8](https://github.com/mochrzlf/aegis-forge/commit/50cace8766d850d6ddd85a9657385d27673e11e6))
+* **skills:** add prd-interviewer — interview-before-write PRD discipline ([1da0c76](https://github.com/mochrzlf/aegis-forge/commit/1da0c76b8be3875280de125859a56a924b995a4e))
+* **skills:** portable Agent Skills for critical baseline guardrails ([eb0faa2](https://github.com/mochrzlf/aegis-forge/commit/eb0faa29103c681427ce69c18ae1ad6183719826))
+* **skills:** ship portable Agent Skills for critical baseline guardrails ([3427cca](https://github.com/mochrzlf/aegis-forge/commit/3427cca28fef0bf4610f4d2de9df2f79437c12ab))
+
+
+### Bug Fixes
+
+* **scripts:** force UTF-8 output in ADR validator for Windows consoles ([537b0d5](https://github.com/mochrzlf/aegis-forge/commit/537b0d55a7e992ef031c96fd342fc1ce41025856))
+* **scripts:** force UTF-8 output in ADR validator for Windows consoles ([033c89a](https://github.com/mochrzlf/aegis-forge/commit/033c89ac057d371b52e0e1eaceaf825617edc74a))
+
 ## [0.1.1](https://github.com/mochrzlf/aegis-forge/compare/aegis-forge-v0.1.0...aegis-forge-v0.1.1) (2026-09-08)
 
 
