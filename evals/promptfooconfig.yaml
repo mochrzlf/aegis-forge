@@ -10,10 +10,15 @@
 description: Aegis Forge — AI agent rule-compliance evals
 
 # --- Model(s) used to PRODUCE the artifact under test ------------------------
-# Example (OpenAI-compatible). Replace with your provider of choice.
+# Provider: gutsai (https://api.gutsai.id/v1) — OpenAI-compatible endpoint.
+# Set GUTSAI_API_KEY in the local git-ignored .env file.
+# Model: claude-opus-5 (reasoning-capable; ~Rp 1000 / 1M tokens).
 providers:
-  - id: openai:chat:gpt-4o-mini
+  - id: openai:chat:claude-opus-5
     label: agent-under-test
+    config:
+      apiBaseUrl: https://api.gutsai.id/v1
+      apiKeyEnvar: GUTSAI_API_KEY
   # To run YOUR agent CLI instead of a raw model, use an exec provider, e.g.:
   # - id: exec:python evals/runners/run_agent.py --scenario {{prompt}}
   #   label: my-agent-cli
@@ -22,8 +27,11 @@ providers:
 defaultTest:
   options:
     provider:
-      id: openai:chat:gpt-4o-mini
+      id: openai:chat:claude-opus-5
       label: llm-judge
+      config:
+        apiBaseUrl: https://api.gutsai.id/v1
+        apiKeyEnvar: GUTSAI_API_KEY
 
 # --- Scenarios ---------------------------------------------------------------
 # Each YAML in scenarios/ is a test case with its own prompt + assertions.
@@ -35,3 +43,4 @@ tests:
   - file://scenarios/rbac-enforcement.yaml
   - file://scenarios/stride-adr-quality.yaml
   - file://scenarios/prd-interview.yaml
+  - file://scenarios/spec-to-tasks.yaml
