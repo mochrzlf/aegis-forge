@@ -20,6 +20,7 @@ the baseline's non-negotiable rules so any skills-compatible agent
 | [`api-contract-envelope`](api-contract-envelope/SKILL.md) | Standard success/error payload envelope, fixed error-code set, pagination `meta`, HTTP↔code mapping | `AGENTS.md` §3.1, `docs/openapi.yaml` |
 | [`rbac-enforcement`](rbac-enforcement/SKILL.md) | Server-side role checks, IDOR/BOLA ownership predicates, maker-checker, JML kill-switch, immutable audit trail | `AGENTS.md` §3.2, `docs/security-access-matrix.md`, `docs/security-iam-policy.md` |
 | [`prd-interviewer`](prd-interviewer/SKILL.md) | Two PRD modes (quick draft with `[ASSUMPTION]` markers vs. interview-first), ≤5 questions/round, 5-area coverage, confirmation gate before writing | `docs/PRD-template.md`, `docs/PRD-detail-template.md` |
+| [`spec-to-tasks`](spec-to-tasks/SKILL.md) | PRD → atomic agent-ready tasks: traceability (task → module → AC), token economy (reference-by-path), security ACs travel verbatim, confirmation gate | `docs/TASK-template.md`, `docs/PRD.md`, `docs/PRD-detail.md` |
 
 > **Coverage:** every scenario in `evals/scenarios/` now has a companion skill
 > that enforces the rule being evaluated — what is tested is also taught.

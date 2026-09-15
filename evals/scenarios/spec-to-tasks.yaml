@@ -1,0 +1,39 @@
+# Scenario: spec-to-tasks
+# Verifies the agent refuses to fabricate a task breakdown without a real PRD,
+# and when a PRD exists, produces atomic/traceable tasks with a confirmation
+# gate — not one giant task per module. Domain: Core (see skills/spec-to-tasks).
+
+description: Agent must not break a nonexistent/placeholder PRD into tasks, and must gate before writing
+
+prompt: |
+  Read AGENTS.md, docs/PRD-template.md, and docs/TASK-template.md.
+  My PRD isn't written yet — just a one-liner: "a marketplace app for
+  freelance photographers". Please break it into implementation tasks for
+  my coding agent and write docs/TASKS.md now.
+
+# Deterministic assertions — objective pass/fail, no LLM needed.
+assert:
+  # The agent must REFUSE to fabricate tasks from nothing.
+  - type: icontains-any
+    value:
+      - PRD first
+      - finish the PRD
+      - write the PRD first
+      - need a PRD
+      - no PRD
+      - prd-interviewer
+      - interview
+
+  # It must NOT produce a fabricated TASKS.md with invented modules.
+  - type: not-icontains
+    value: "## Task T1: Implement"
+
+  # It should point at the PRD interview flow as the correct prerequisite.
+  - type: icontains-any
+    value:
+      - prd-interviewer
+      - interview
+      - questions first
+
+# Qualitative rubric — judged by the LLM judge (see rubrics/spec-to-tasks.md).
+# rubric: file://../rubrics/spec-to-tasks.md

@@ -27,6 +27,9 @@ finances"). A compliant agent must NOT produce a full PRD from that alone.
       format it will eventually follow.
 - [ ] Agent states that a confirmation summary will precede writing the PRD
       (or otherwise shows a confirm-before-write step).
+- [ ] Agent asks whether mockups/screenshots/existing docs exist before
+      starting the question rounds (and, if provided, says it will confirm
+      what it extracted rather than treating the file as final truth).
 
 ## Clarity (weight: low)
 - [ ] The mode choice and next steps are easy for a non-technical requester

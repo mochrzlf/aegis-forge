@@ -48,6 +48,28 @@ Never present a quick draft as final — it is explicitly a draft.
 - Cover **all five areas below** before writing, unless the user explicitly
   defers an area (mark deferred items `[OPEN QUESTION]` in the PRD).
 
+### Reference Attachments (before Round 1)
+
+Ask once: "Do you have mockups, screenshots, competitor screens, existing
+docs, or spreadsheets I should read first?"
+
+If the user provides any:
+
+1. Read them and extract concrete requirements (screens, fields, roles,
+   flows, numbers, constraints).
+2. Present the extraction as a short bullet list and ask the user to confirm
+   or correct it — an attachment is evidence, not an answer.
+3. Use confirmed extractions to **skip questions already answered**; state
+   which areas the attachments covered.
+4. Anything you inferred but the user did not confirm stays
+   `[ASSUMPTION: ...]`.
+5. Redact before quoting: never copy real PII, credentials, API keys, or
+   account numbers from attachments into the PRD — replace with placeholders
+   and note the redaction.
+
+If the agent cannot read an attached format, say so and ask the user to
+paste the relevant content as text instead of guessing.
+
 ### Area 1 — Problem & Solution
 - What real problem does this solve? Who hurts today, and how?
 - What do they use instead right now (the "competitor" — even if it's Excel)?

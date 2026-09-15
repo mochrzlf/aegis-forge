@@ -25,6 +25,7 @@ Every project derived from this baseline MUST uphold four universal pillars:
 |---|---|
 | `docs/PRD.md` | Product summary, problem statement, personas, and success metrics |
 | `docs/PRD-detail.md` | User Stories & Acceptance Criteria (AC) per module |
+| `docs/TASKS.md` | Agent-ready atomic task breakdown (traces to PRD modules + ACs) |
 | `docs/ui-design.md` | Design System, color tokens, typography, and screen mockups |
 | `docs/openapi.yaml` | REST API Contract — 100% compliance REQUIRED |
 | `docs/schema.sql` | PostgreSQL database schema & integrity constraints |
@@ -35,7 +36,7 @@ Every project derived from this baseline MUST uphold four universal pillars:
 | `docs/diagrams/` | Visual architecture diagrams, authentication sequences, and execution flows |
 | `docs/adr/` | Architecture Decision Records & STRIDE Threat Modeling |
 | `docs/agent-playbooks/` | Gated, step-by-step workflows per domain — follow BEFORE writing code |
-| `skills/` | Portable Agent Skills (SKILL.md) packaging the baseline's critical guardrails — install into your agent. Includes `prd-interviewer`: never write a PRD without offering the interview-first mode |
+| `skills/` | Portable Agent Skills (SKILL.md) packaging the baseline's critical guardrails — install into your agent. Includes `prd-interviewer`: never write a PRD without offering the interview-first mode; and `spec-to-tasks`: never break work into tasks without a real PRD |
 | `docs/prompt-library.md` | Tested copy-paste prompts per phase & domain |
 | `docs/backend-checklist.md` | Backend/service QA checklist (contract, data, authz, observability) |
 | `docs/observability.md` | Structured anti-PII logging, RED metrics, tracing, tamper-evident audit |
