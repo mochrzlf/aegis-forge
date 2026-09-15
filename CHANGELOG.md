@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.5](https://github.com/mochrzlf/aegis-forge/compare/aegis-forge-v0.1.4...aegis-forge-v0.1.5) (2026-09-15)
+
+
+### Bug Fixes
+
+* **evals:** working promptfoo provider, per-scenario suites, generic EVAL_* config ([#29](https://github.com/mochrzlf/aegis-forge/issues/29)) ([9a877d0](https://github.com/mochrzlf/aegis-forge/commit/9a877d016f8bef8336ab77a73ea7a2e354adccb6))
+
 ## [0.1.4](https://github.com/mochrzlf/aegis-forge/compare/aegis-forge-v0.1.3...aegis-forge-v0.1.4) (2026-09-15)
 
 
