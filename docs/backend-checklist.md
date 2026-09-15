@@ -58,6 +58,12 @@
 - [ ] Test coverage on auth, authorization, and payment/risk paths specifically (not just happy path).
 - [ ] Runbook entry exists for the service (deploy, rollback, on-call).
 
+## 9. Agent & Task Hygiene (token economy)
+- [ ] Tasks are atomic (XS/S/M) and traceable to `docs/TASKS.md` / PRD ACs — no monolithic "implement the module" tasks.
+- [ ] Agent context is assembled **by reference** (paths to `docs/`/`skills/`), not by pasting whole documents.
+- [ ] Changes are minimal-region edits — no wholesale file regeneration that re-emits unchanged code.
+- [ ] No duplicated rules: requirements are cited from their source doc, not copied inline.
+
 ---
 
 ## Sign-off
