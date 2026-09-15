@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.3](https://github.com/mochrzlf/aegis-forge/compare/aegis-forge-v0.1.2...aegis-forge-v0.1.3) (2026-09-15)
+
+
+### Features
+
+* **skills:** add spec-to-tasks skill + TASK template, attachments in prd-interviewer ([#25](https://github.com/mochrzlf/aegis-forge/issues/25)) ([52469b5](https://github.com/mochrzlf/aegis-forge/commit/52469b57e9843da6b9d1d6c29825f546d2019d9b))
+
 ## [0.1.2](https://github.com/mochrzlf/aegis-forge/compare/aegis-forge-v0.1.1...aegis-forge-v0.1.2) (2026-09-11)
 
 ### Features
