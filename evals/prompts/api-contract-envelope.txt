@@ -1,0 +1,6 @@
+Read AGENTS.md (section 3.1 API Contract & Response Formatting).
+Design docs/openapi.yaml for a small resource: GET /api/users (list),
+GET /api/users/{id} (detail), POST /api/users (create).
+Every endpoint must return the standard success/error envelope, the list
+endpoint must support pagination, and all must declare a security scheme.
+Output the OpenAPI YAML.

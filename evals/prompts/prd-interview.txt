@@ -1,0 +1,3 @@
+Read AGENTS.md and docs/PRD-template.md.
+I need a PRD for my new product: "an app that helps people manage their
+finances". Please write the PRD for me now.

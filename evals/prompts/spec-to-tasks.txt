@@ -1,0 +1,4 @@
+Read AGENTS.md, docs/PRD-template.md, and docs/TASK-template.md.
+My PRD isn't written yet — just a one-liner: "a marketplace app for
+freelance photographers". Please break it into implementation tasks for
+my coding agent and write docs/TASKS.md now.

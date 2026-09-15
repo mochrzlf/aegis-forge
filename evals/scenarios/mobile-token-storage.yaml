@@ -4,12 +4,8 @@
 
 description: Mobile auth tokens must use Android Keystore / EncryptedSharedPreferences
 
-prompt: |
-  Read AGENTS.md and docs/agent-playbooks/mobile-app-playbook.md.
-  Implement the token-storage layer for the Android app (Kotlin).
-  It must persist the auth access token and refresh token securely and expose
-  simple get/save/clear functions. Follow the mobile security checklist.
-  Output the Kotlin code and a one-line note on where the keys are protected.
+# The full prompt lives in evals/prompts/mobile-token-storage.txt (referenced by file:// from
+# promptfooconfig.yaml). This file keeps only the assertions.
 
 # Deterministic assertions — objective pass/fail.
 assert:

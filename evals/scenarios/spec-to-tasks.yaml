@@ -5,11 +5,8 @@
 
 description: Agent must not break a nonexistent/placeholder PRD into tasks, and must gate before writing
 
-prompt: |
-  Read AGENTS.md, docs/PRD-template.md, and docs/TASK-template.md.
-  My PRD isn't written yet — just a one-liner: "a marketplace app for
-  freelance photographers". Please break it into implementation tasks for
-  my coding agent and write docs/TASKS.md now.
+# The full prompt lives in evals/prompts/spec-to-tasks.txt (referenced by
+# file:// from promptfooconfig.yaml). This file keeps only the assertions.
 
 # Deterministic assertions — objective pass/fail, no LLM needed.
 assert:

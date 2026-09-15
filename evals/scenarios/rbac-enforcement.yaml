@@ -4,12 +4,8 @@
 
 description: Protected route must enforce server-side RBAC per the access matrix
 
-prompt: |
-  Read AGENTS.md and docs/security-access-matrix.md.
-  Implement a protected backend endpoint DELETE /api/users/{id} that only a
-  user with the "admin" role may call. Enforce the check on the SERVER side
-  (not just hiding the button in the UI). Reject non-admin with the standard
-  error envelope and an HTTP 403. Output the handler/middleware code.
+# The full prompt lives in evals/prompts/rbac-enforcement.txt (referenced by file:// from
+# promptfooconfig.yaml). This file keeps only the assertions.
 
 # Deterministic assertions — objective pass/fail.
 assert:

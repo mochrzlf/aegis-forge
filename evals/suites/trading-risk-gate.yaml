@@ -1,0 +1,30 @@
+description: Aegis Forge eval — trading-risk-gate (single scenario, http provider)
+
+prompts:
+  - file://../prompts/trading-risk-gate.txt
+
+providers:
+  # Generic HTTP provider against the local 9Router (Kimi combo), an
+  # OpenAI-compatible endpoint. We use the generic http provider — NOT
+  # openai:chat — because this router returns SSE when stream is truthy,
+  # which promptfoo's openai provider cannot parse. With stream:false the
+  # router returns a single JSON body we can transform directly.
+  # The bearer value is read from .env (any non-empty string works locally).
+  - id: http://localhost:20128/v1/chat/completions
+    label: agent-under-test
+    config:
+      method: POST
+      headers:
+        Content-Type: application/json
+        Authorization: Bearer {{env.GUTSAI_API_KEY}}
+      body:
+        model: Kimi
+        stream: false
+        max_tokens: 2048
+        messages:
+          - role: user
+            content: "{{prompt}}"
+      transformResponse: json.choices[0].message.content
+
+tests:
+  - file://../scenarios/trading-risk-gate.yaml

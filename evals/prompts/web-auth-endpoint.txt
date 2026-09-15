@@ -1,0 +1,5 @@
+Read AGENTS.md and docs/agent-playbooks/web-app-playbook.md.
+Implement a POST /api/auth/login endpoint for the web app.
+It must issue an access token and a refresh token, return the standard
+success/error JSON envelope, and follow the cookie-session rules.
+Output the endpoint handler code and a short note on where each token lives.
