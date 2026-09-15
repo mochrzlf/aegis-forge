@@ -1,11 +1,13 @@
 # promptfoo configuration — Aegis Forge agent evals
 # Docs: https://promptfoo.dev  (MIT — see docs/research/EXTERNAL-TOOLS.md §4)
 #
-# This is a TEMPLATE. Fill in your provider/model, then run:
-#   npx promptfoo@latest eval -c evals/promptfooconfig.yaml
+# This file is a REFERENCE + run-instructions. The runnable configs are the
+# per-scenario files in evals/suites/. To run:
+#   npx promptfoo@latest eval -c evals/suites/<name>.yaml --no-cache
 #
-# The agent under test is treated as a "provider". You can point this at an
-# LLM API, or wrap your actual agent CLI via an exec provider.
+# The agent under test is any OpenAI-compatible endpoint, configured via .env
+# (EVAL_API_BASE_URL, EVAL_MODEL, EVAL_API_KEY). You can also wrap your actual
+# agent CLI via an exec provider (see below).
 
 description: Aegis Forge — AI agent rule-compliance evals
 
