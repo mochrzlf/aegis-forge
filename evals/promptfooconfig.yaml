@@ -16,9 +16,11 @@ description: Aegis Forge — AI agent rule-compliance evals
 #       npx promptfoo@latest eval -c evals/suites/<name>.yaml --no-cache
 #
 # The per-scenario configs in evals/suites/ are the source of truth. They use
-# the generic `http` provider (NOT `openai:chat`) because the local 9Router /
-# Kimi endpoint returns SSE when `stream` is truthy, which promptfoo's openai
-# provider cannot parse. See evals/suites/ for the working pattern.
+# the generic `http` provider (NOT `openai:chat`) against an OpenAI-compatible
+# endpoint whose URL / model / key are read from .env (EVAL_API_BASE_URL,
+# EVAL_MODEL, EVAL_API_KEY). The generic http provider is used because some
+# OpenAI-compatible routers return SSE when `stream` is truthy, which
+# promptfoo's openai provider cannot parse. See evals/suites/ for the pattern.
 #
 # TWO GOTCHAS this file originally got wrong (fixed in evals/suites/):
 #   1. Top-level `prompts:` + scenario `prompt:` keys were BOTH required; with
@@ -30,10 +32,12 @@ description: Aegis Forge — AI agent rule-compliance evals
 #      each with exactly 1 prompt + 1 scenario → 8 clean cases.
 # ============================================================================
 
-# Provider config is per-scenario in evals/suites/. The canonical provider is
-# the local 9Router (Kimi combo) at http://localhost:20128/v1 via the generic
-# http provider with stream:false. The bearer is read from .env (GUTSAI_API_KEY;
-# any non-empty value works against the local router).
+# Provider config is per-scenario in evals/suites/. The endpoint is any
+# OpenAI-compatible chat-completions API, configured via .env:
+#   EVAL_API_BASE_URL  e.g. https://api.openai.com/v1 (or a local router)
+#   EVAL_MODEL         the model id your endpoint serves
+#   EVAL_API_KEY       your provider key
+# See evals/suites/ for the generic http provider pattern (stream:false).
 #
 # To run YOUR agent CLI instead of a raw model, use an exec provider, e.g.:
 #   - id: exec:python evals/runners/run_agent.py --scenario {{prompt}}
