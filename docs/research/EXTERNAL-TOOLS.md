@@ -44,6 +44,7 @@ Every external tool MUST pass all four before being marked *Adopted — Recommen
 | **sqlfluff** | ✅ Adopted — Core | MIT | PostgreSQL schema lint (pre-commit). | `--dialect postgres`. |
 | **github/awesome-copilot** | 🔗 Adopted — Reference Only | MIT ✅ | Curation source for `docs/prompt-library.md` (community agents, instructions, skills — incl. test-gap-audit / docs-sync-audit patterns). | Content is community-contributed — repo itself warns to inspect before installing. Curate & adapt into our prompt library; never bulk-install plugins/agents unreviewed. Has machine-readable `llms.txt`. |
 | **anthropics/skills** | 🔗 Adopted — Reference Only | Mixed ⚠️ (Apache-2.0 for most; docx/pdf/pptx/xlsx are source-available, NOT open source) | Official blueprint for packaging our own portable skills (quant-risk-guardian, adr-threat-model, mobile-appsec) — use `spec/` (Agent Skills spec) and `template/` as the structural reference. | NEVER copy the docx/pdf/pptx/xlsx skills into derived projects. Apache-2.0 example skills may be adapted with attribution. |
+| **promptfoo/promptfoo** | ✅ Adopted — Recommended | MIT ✅ | Agent output-quality eval harness (`evals/`): scenario YAML + rubric, deterministic assertions + LLM-as-judge. Run via `scripts/run-evals.ps1/.sh` or `npx promptfoo eval -c evals/suites/<name>.yaml`. | Passes all 4 gates (2026-09-15): MIT, actively maintained, optional (not a hard dep), version-pinnable. Mechanism verified end-to-end (scenario→model→assertion). **Provider note:** the `openai:chat` provider cannot parse SSE-only OpenAI-compatible routers — use the generic `http` provider with `stream:false` + `transformResponse: json.choices[0].message.content` (see `evals/suites/`). Pass/fail of individual scenarios depends on the model under test, not the harness. |
 
 ### 3.2 Frontend / UI-UX
 
@@ -87,7 +88,6 @@ These were shortlisted but not yet verified. Evaluate against the Four Gates bef
 
 | Phase | Candidate | Purpose | Status |
 |---|---|---|---|
-| 1 — Agent Enablement | `promptfoo/promptfoo` | Eval harness for agent output quality | 🧪 To verify |
 | 1 — Agent Enablement | `modelcontextprotocol/servers` | MCP servers (filesystem, git, postgres) | 🧪 To verify |
 | 2 — Security | `ossf/scorecard` | OpenSSF security posture scoring | 🧪 To verify |
 | 2 — Security | `anchore/sbom-action` / `syft` | SBOM generation | 🧪 To verify |

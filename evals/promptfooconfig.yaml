@@ -9,32 +9,41 @@
 
 description: Aegis Forge — AI agent rule-compliance evals
 
-# --- Model(s) used to PRODUCE the artifact under test ------------------------
-# Provider: gutsai (https://api.gutsai.id/v1) — OpenAI-compatible endpoint.
-# Set GUTSAI_API_KEY in the local git-ignored .env file.
-# Model: claude-opus-5 (reasoning-capable; ~Rp 1000 / 1M tokens).
-providers:
-  - id: openai:chat:claude-opus-5
-    label: agent-under-test
-    config:
-      apiBaseUrl: https://api.gutsai.id/v1
-      apiKeyEnvar: GUTSAI_API_KEY
-  # To run YOUR agent CLI instead of a raw model, use an exec provider, e.g.:
-  # - id: exec:python evals/runners/run_agent.py --scenario {{prompt}}
-  #   label: my-agent-cli
+# ============================================================================
+# HOW TO RUN (verified 2026-09-15):
+#
+#   Run ONE scenario against the working local provider:
+#       npx promptfoo@latest eval -c evals/suites/<name>.yaml --no-cache
+#
+# The per-scenario configs in evals/suites/ are the source of truth. They use
+# the generic `http` provider (NOT `openai:chat`) against an OpenAI-compatible
+# endpoint whose URL / model / key are read from .env (EVAL_API_BASE_URL,
+# EVAL_MODEL, EVAL_API_KEY). The generic http provider is used because some
+# OpenAI-compatible routers return SSE when `stream` is truthy, which
+# promptfoo's openai provider cannot parse. See evals/suites/ for the pattern.
+#
+# TWO GOTCHAS this file originally got wrong (fixed in evals/suites/):
+#   1. Top-level `prompts:` + scenario `prompt:` keys were BOTH required; with
+#      neither, promptfoo sent `messages: []` → API 400 "messages_required".
+#      Prompts now live in evals/prompts/<name>.txt as top-level file:// refs.
+#   2. A single config with N prompts × M scenarios produces an N×M CROSS
+#      PRODUCT (8 prompts × 8 scenarios = 64 mismatched cases). promptfoo does
+#      NOT reliably pair by `label:`. Fix: one config per scenario (suites/),
+#      each with exactly 1 prompt + 1 scenario → 8 clean cases.
+# ============================================================================
 
-# --- Model used as the LLM JUDGE for rubric items ---------------------------
-defaultTest:
-  options:
-    provider:
-      id: openai:chat:claude-opus-5
-      label: llm-judge
-      config:
-        apiBaseUrl: https://api.gutsai.id/v1
-        apiKeyEnvar: GUTSAI_API_KEY
+# Provider config is per-scenario in evals/suites/. The endpoint is any
+# OpenAI-compatible chat-completions API, configured via .env:
+#   EVAL_API_BASE_URL  e.g. https://api.openai.com/v1 (or a local router)
+#   EVAL_MODEL         the model id your endpoint serves
+#   EVAL_API_KEY       your provider key
+# See evals/suites/ for the generic http provider pattern (stream:false).
+#
+# To run YOUR agent CLI instead of a raw model, use an exec provider, e.g.:
+#   - id: exec:python evals/runners/run_agent.py --scenario {{prompt}}
+#     label: my-agent-cli
 
-# --- Scenarios ---------------------------------------------------------------
-# Each YAML in scenarios/ is a test case with its own prompt + assertions.
+# --- Scenarios (reference only — run via evals/suites/<name>.yaml) ----------
 tests:
   - file://scenarios/web-auth-endpoint.yaml
   - file://scenarios/mobile-token-storage.yaml

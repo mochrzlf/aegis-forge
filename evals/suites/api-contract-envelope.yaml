@@ -1,0 +1,33 @@
+description: Aegis Forge eval — api-contract-envelope (single scenario, generic http provider)
+
+prompts:
+  - file://../prompts/api-contract-envelope.txt
+
+providers:
+  # Generic OpenAI-compatible chat endpoint, configured entirely via .env:
+  #   EVAL_API_BASE_URL  e.g. https://api.openai.com/v1  (or a local router)
+  #   EVAL_MODEL         e.g. gpt-4o-mini  (or whatever your endpoint serves)
+  #   EVAL_API_KEY       your provider key
+  #
+  # We use the generic http provider — NOT openai:chat — so the request body
+  # is fully explicit (stream:false) and the response transform is fixed.
+  # This avoids SSE-parsing failures against OpenAI-compatible routers that
+  # force streaming when stream is truthy.
+  - id: "{{env.EVAL_API_BASE_URL}}/chat/completions"
+    label: agent-under-test
+    config:
+      method: POST
+      headers:
+        Content-Type: application/json
+        Authorization: "Bearer {{env.EVAL_API_KEY}}"
+      body:
+        model: "{{env.EVAL_MODEL}}"
+        stream: false
+        max_tokens: 2048
+        messages:
+          - role: user
+            content: "{{prompt}}"
+      transformResponse: json.choices[0].message.content
+
+tests:
+  - file://../scenarios/api-contract-envelope.yaml

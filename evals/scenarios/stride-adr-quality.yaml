@@ -4,12 +4,8 @@
 
 description: STRIDE ADR must map each threat category to a concrete control
 
-prompt: |
-  Read AGENTS.md and docs/adr/ADR-001-Threat-Modeling-Standard.md.
-  Create a new Architecture Decision Record performing a STRIDE threat analysis
-  for a web application's user-authentication feature.
-  For each STRIDE category, identify at least one threat and map it to a
-  concrete mitigation/control. Output the ADR in Markdown.
+# The full prompt lives in evals/prompts/stride-adr-quality.txt (referenced by file:// from
+# promptfooconfig.yaml). This file keeps only the assertions.
 
 # Deterministic assertions — objective pass/fail.
 assert:
