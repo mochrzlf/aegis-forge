@@ -11,12 +11,22 @@
 ```
 evals/
 ├── README.md                 ← this file
-├── promptfooconfig.yaml      ← runner config (promptfoo) — optional until runner is chosen
-├── scenarios/                ← one YAML per task the agent must perform
+├── promptfooconfig.yaml      ← reference config + run instructions
+├── prompts/                  ← one .txt per scenario (the task text sent to the model)
+│   └── web-auth-endpoint.txt
+├── scenarios/                ← one YAML per scenario (description + assertions)
+│   └── web-auth-endpoint.yaml
+├── suites/                   ← one runnable promptfoo config per scenario (1 prompt ↔ 1 scenario)
 │   └── web-auth-endpoint.yaml
 └── rubrics/                  ← scoring criteria per scenario
     └── web-auth-endpoint.md
 ```
+
+> **Why `suites/`?** A single promptfoo config with N prompts × M scenarios
+> produces an N×M cross product (mismatched assertions). One config per
+> scenario in `suites/` keeps each prompt paired 1:1 with its assertions.
+> The provider is any OpenAI-compatible endpoint read from `.env`
+> (`EVAL_API_BASE_URL`, `EVAL_MODEL`, `EVAL_API_KEY`).
 
 ---
 
@@ -38,33 +48,37 @@ evals/
 
 ```powershell
 # Windows (PowerShell)
-pwsh scripts/run-evals.ps1          # guarded run
-pwsh scripts/run-evals.ps1 -View    # run + open results viewer
+pwsh scripts/run-evals.ps1                      # guarded run, all suites
+pwsh scripts/run-evals.ps1 -Suite prd-interview # run one suite
+pwsh scripts/run-evals.ps1 -View                # run + open results viewer
 ```
 
 ```bash
 # Linux / macOS / Git Bash / WSL
-bash scripts/run-evals.sh           # guarded run
-bash scripts/run-evals.sh --view    # run + open results viewer
+bash scripts/run-evals.sh                       # guarded run, all suites
+bash scripts/run-evals.sh prd-interview         # run one suite
+bash scripts/run-evals.sh --view                # run + open results viewer
 ```
 
 The guard script:
 1. verifies `npx` is available,
-2. checks for a provider key (`OPENAI_API_KEY` / `ANTHROPIC_API_KEY` / `GOOGLE_API_KEY`) and, if missing, offers a **masked** interactive prompt that stores the key in the local `.env` (git-ignored, gitleaks-protected) — keys are never echoed or committed,
+2. checks for a generic OpenAI-compatible provider in `.env` (`EVAL_API_BASE_URL` / `EVAL_MODEL` / `EVAL_API_KEY`) and, if missing, offers a **masked** interactive prompt that stores them in the local `.env` (git-ignored, gitleaks-protected) — keys are never echoed or committed,
 3. asks for explicit confirmation before any **paid** API call,
-4. runs the eval suite below.
+4. runs the per-scenario configs in `evals/suites/`.
 
-**Manual path:**
+**Manual path (single scenario):**
 
 ```bash
-# Set a provider key first (your own account), e.g.:
-export OPENAI_API_KEY="sk-..."        # PowerShell: $env:OPENAI_API_KEY = "sk-..."
-
-npx promptfoo@latest eval -c evals/promptfooconfig.yaml
+# Set the provider in .env first (EVAL_API_BASE_URL / EVAL_MODEL / EVAL_API_KEY),
+# or export them in your shell, then:
+npx promptfoo@latest eval -c evals/suites/web-auth-endpoint.yaml --no-cache
 npx promptfoo@latest view   # browse results
 ```
 
-> The provided `promptfooconfig.yaml` is a ready-to-adapt template. Fill in your provider/model and point `tests` at `scenarios/*.yaml`.
+> The suites use promptfoo's generic `http` provider (not `openai:chat`) so the
+> request body is explicit (`stream:false`) and the response transform is fixed
+> — this avoids SSE-parsing failures against OpenAI-compatible routers that
+> force streaming. See `evals/suites/` for the pattern.
 
 ---
 

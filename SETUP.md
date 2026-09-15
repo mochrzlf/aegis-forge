@@ -105,17 +105,19 @@ Use the interactive guard script — it checks prerequisites, helps you store th
 
 **PowerShell (Windows):**
 ```powershell
-pwsh scripts/run-evals.ps1          # guarded run
-pwsh scripts/run-evals.ps1 -View    # run + open results viewer
+pwsh scripts/run-evals.ps1                      # guarded run, all suites
+pwsh scripts/run-evals.ps1 -Suite prd-interview # run one suite
+pwsh scripts/run-evals.ps1 -View                # run + open results viewer
 ```
 
 **Bash (Linux / macOS / Git Bash / WSL):**
 ```bash
-bash scripts/run-evals.sh           # guarded run
-bash scripts/run-evals.sh --view    # run + open results viewer
+bash scripts/run-evals.sh                       # guarded run, all suites
+bash scripts/run-evals.sh prd-interview         # run one suite
+bash scripts/run-evals.sh --view                # run + open results viewer
 ```
 
-Alternatively, set the key manually (any one of `OPENAI_API_KEY`, `ANTHROPIC_API_KEY`, `GOOGLE_API_KEY`) in your shell or `.env`, then run `npx promptfoo@latest eval -c evals/promptfooconfig.yaml` directly. See `evals/README.md` for details.
+Alternatively, set the provider manually in `.env` (`EVAL_API_BASE_URL`, `EVAL_MODEL`, `EVAL_API_KEY` — any OpenAI-compatible endpoint), then run a single scenario with `npx promptfoo@latest eval -c evals/suites/<name>.yaml --no-cache`. See `evals/README.md` for details.
 
 ---
 
