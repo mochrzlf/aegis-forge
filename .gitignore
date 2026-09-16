@@ -68,3 +68,6 @@ Thumbs.db
 # Test Coverage
 coverage/
 .nyc_output/
+
+# Local-only reference notes (never commit / never upload)
+*.local.md
