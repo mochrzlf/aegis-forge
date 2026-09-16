@@ -1,0 +1,20 @@
+# Never send secrets / local junk into the image build context.
+.env
+.env.*
+!.env.example
+*.local.md
+.git
+.gitignore
+.github/
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.coverage
+htmlcov/
+smoke-cookies*.txt
+build.log
+README.md
+Makefile
+docker-compose.yml

@@ -28,9 +28,17 @@ split it further.
 | **Depends on** | None (or: T0 must be merged first) |
 | **Type** | Backend / Frontend / DB-migration / Infra / Test |
 | **Size** | XS (≪½ day) · S · M — anything L must be split |
+| **Skeleton hint** | [`templates/web-app/` path to EDIT, or `new` if no skeleton file exists] |
 
 ### Objective
 [One sentence: what will be true when this task is done.]
+
+### Skeleton Hint
+[Point at the EXISTING file in the starter skeleton (`templates/<domain>/`)
+that this task should MODIFY, so the agent edits instead of generating from
+scratch (token economy). Examples: `templates/web-app/backend/app/api/auth.py`
+(extend) or `new module — no skeleton equivalent` (then justify why). Leave
+blank only if the project is not built from a skeleton.]
 
 ### Files Touched
 - `backend/src/auth/routes.py` — add `POST /auth/login`

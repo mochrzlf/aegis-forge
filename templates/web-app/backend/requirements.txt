@@ -1,0 +1,11 @@
+fastapi==0.115.*
+uvicorn[standard]==0.32.*
+pydantic==2.*
+pydantic-settings==2.*
+SQLAlchemy==2.*
+asyncpg==0.30.*
+alembic==1.*
+redis==5.*
+passlib[argon2]==1.*
+PyJWT==2.*
+email-validator==2.*

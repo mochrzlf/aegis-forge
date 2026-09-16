@@ -43,6 +43,11 @@ For each module, propose tasks. Rules:
 - **Context by reference:** the "Context the Agent Needs" field lists paths
   (`AGENTS.md` §, `docs/...`, `skills/...`). NEVER paste document contents
   into the task — token economy is a baseline requirement.
+- **Skeleton hint is mandatory when a starter skeleton exists** (`templates/`
+  has the project's domain): each task names the EXISTING skeleton file to
+  EDIT (e.g. `templates/web-app/backend/app/api/auth.py`) so the agent
+  modifies rather than generates from scratch. If no skeleton file covers the
+  task, write `new` and justify why the skeleton doesn't cover it.
 - **Out of Scope is mandatory:** every task states what it will NOT do, so
   the agent doesn't gold-plate.
 
