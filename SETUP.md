@@ -66,8 +66,22 @@ Open the `.env` file and generate secure cryptographic keys:
 
 ### 🌐 A. If You Are Building a Web Project:
 1. Refer to the blueprint in `docs/blueprints/web-application-blueprint.md`.
-2. Prompt Hermes Agent:
-   > *"Hermes, please design docs/PRD.md and docs/ui-design.md for this web application using Zustand for state management and HttpOnly session cookies."*
+2. **Plan first (don't code yet).** Use the planning skills with your AI agent:
+   > *"Use the prd-interviewer skill to draft docs/PRD.md and docs/PRD-detail.md — interview me first. Then use spec-to-tasks to break the PRD into docs/TASKS.md with a skeleton_hint per task."*
+3. **Start from a ready-made skeleton** (see §3a below) so the AI edits working code instead of starting from zero.
+
+#### 3a. Choose a Starter Skeleton (`templates/`)
+Aegis Forge ships runnable skeletons — login, database, and security already work. Pick one, copy it into your project, and run it:
+
+| Skeleton | Best for | Quick run |
+|---|---|---|
+| **`templates/web-app/`** ⭐ default | Secure backend/API (FastAPI + Postgres + Redis; RTR, RBAC/anti-IDOR, audit trail — runtime-verified) | `cp -r templates/web-app/* . && make first-run` → http://localhost:8000 |
+| **`templates/web-app-nextjs-supabase/`** | Full website with a UI (Next.js + Supabase; pages, login, RLS dashboard) | See its `README.md` first — it trades some security strictness for speed |
+
+> **Which one?** For maximum security and no external vendor, use `web-app`.
+> For a full website with a frontend fast (and you accept Supabase as a vendor),
+> use `web-app-nextjs-supabase` — read its README's "Security stance deviations"
+> before choosing.
 
 ### 📱 B. If You Are Building a Mobile Project (Android/iOS):
 1. Refer to the blueprint in `docs/blueprints/mobile-application-blueprint.md` and the checklist in `docs/security/mobile-security-checklist.md`.
@@ -76,13 +90,13 @@ Open the `.env` file and generate secure cryptographic keys:
    make mock-api
    ```
    *(Access `http://localhost:4010` or `http://10.0.2.2:4010` in an Android emulator to immediately test API requests & responses).*
-3. Prompt Hermes Agent:
-   > *"Hermes, please design an Android Jetpack Compose application following Clean Architecture and store tokens in EncryptedSharedPreferences (Android Keystore)."*
+3. Plan with the skills, then build:
+   > *"Use the prd-interviewer skill to draft docs/PRD.md (interview me first), then spec-to-tasks to break it into docs/TASKS.md. Design an Android Jetpack Compose app following Clean Architecture and store tokens in EncryptedSharedPreferences (Android Keystore)."*
 
 ### 📈 C. If You Are Building an EA / Algorithmic Trading Project:
 1. Refer to the blueprint in `docs/blueprints/ea-trading-blueprint.md` and the risk policy in `docs/security/trading-risk-policy.md`.
-2. Prompt Hermes Agent:
-   > *"Hermes, please design an EA Trading architecture for XAUUSD/EURUSD instruments with Hard Stop Loss rules, dynamic lot sizing capped at 1% capital risk, and a Circuit Breaker triggered when daily drawdown reaches 5%."*
+2. Plan with the skills, then build:
+   > *"Use the prd-interviewer skill to draft docs/PRD.md (interview me first), then spec-to-tasks to break it into docs/TASKS.md. Design an EA Trading architecture for XAUUSD/EURUSD with Hard Stop Loss, dynamic lot sizing capped at 1% capital risk, and a Circuit Breaker at 5% daily drawdown."*
 
 ---
 
