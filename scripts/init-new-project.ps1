@@ -116,6 +116,40 @@ if (Test-Path $envExample) {
     Write-Host "🔑 Secure cryptographic keys (JWT & AES-256 FLE) successfully generated in .env."
 }
 
+# --- Interactive: optionally copy a runnable starter skeleton (web domain only)
+# Copies templates/<choice>/ into the project so it runs without a manual `cp`.
+$SkeletonChoice = ''
+if ($Type -eq 'web') {
+    Write-Host ""
+    Write-Host "🏠 Starter skeleton (optional) — runnable code with security pre-wired."
+    Write-Host "   Choose one to copy into your project, or skip to start from a blank canvas:"
+    Write-Host "   1) web-app (default)   FastAPI + Postgres + Redis — secure backend/API (runtime-verified)"
+    Write-Host "   2) nextjs-supabase     Next.js + Supabase — full website with a UI (read its README first)"
+    Write-Host "   0) skip                no skeleton — I'll build from scratch"
+    $pick = Read-Host "Select skeleton [1/2/0] (default: 1)"
+    switch ($pick) {
+        '2'      { $SkeletonChoice = 'web-app-nextjs-supabase' }
+        '0'      { $SkeletonChoice = '' }
+        default  { $SkeletonChoice = 'web-app' }
+    }
+    if ($SkeletonChoice) {
+        $skelSrc = Join-Path $BaselineDir "templates/$SkeletonChoice"
+        if (Test-Path $skelSrc) {
+            Write-Host "📦 Copying skeleton 'templates/$SkeletonChoice' into the project..."
+            Copy-Item -Path (Join-Path $skelSrc '*') -Destination $TargetPath -Recurse -Force
+            # Copy dotfiles too (Copy-Item '*' misses hidden files like .github, .env.example)
+            Get-ChildItem -Path $skelSrc -Force | Where-Object { $_.Name -like '.*' } | ForEach-Object {
+                Copy-Item -Path $_.FullName -Destination $TargetPath -Recurse -Force
+            }
+            Write-Host "✅ Skeleton applied. Run 'make first-run' inside the project to start it."
+        } else {
+            Write-Host "⚠️  Skeleton 'templates/$SkeletonChoice' not found in baseline — skipping."
+        }
+    } else {
+        Write-Host "⏭️  No skeleton selected — starting from a blank canvas."
+    }
+}
+
 # --- Initialise local Git repository
 Push-Location $TargetPath
 try {
@@ -164,7 +198,12 @@ switch ($Type) {
         Write-Host "  3. Instruct: 'Read AGENTS.md and design EA Trading System for $ProjectName referring to docs/blueprints/ea-trading-blueprint.md and docs/security/trading-risk-policy.md'"
     }
     'web'     {
-        Write-Host "  3. Instruct: 'Read AGENTS.md and design Web Application for $ProjectName referring to docs/blueprints/web-application-blueprint.md'"
+        if ($SkeletonChoice) {
+            Write-Host "  3. Start the skeleton: make first-run   (app → http://localhost:8000 or :3000)"
+            Write-Host "  4. Instruct agent: 'Use prd-interviewer for docs/PRD.md, then spec-to-tasks for docs/TASKS.md — EDIT the skeleton files per skeleton_hint (do not generate from scratch).'"
+        } else {
+            Write-Host "  3. Instruct: 'Read AGENTS.md and design Web Application for $ProjectName referring to docs/blueprints/web-application-blueprint.md'"
+        }
     }
     default   {
         Write-Host "  3. Instruct: 'Read AGENTS.md and design complete specifications for $ProjectName'"
