@@ -1,0 +1,18 @@
+# Dependencies
+node_modules/
+.next/
+out/
+
+# Env / secrets
+.env
+.env.local
+.env.*.local
+
+# Supabase local
+supabase/.branches/
+supabase/.temp/
+
+# Misc
+*.tsbuildinfo
+next-env.d.ts
+.DS_Store

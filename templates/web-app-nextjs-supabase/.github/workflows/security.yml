@@ -1,0 +1,56 @@
+name: Security & SAST Scans (web-app-nextjs-supabase template)
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+  security-events: write
+  actions: read
+
+jobs:
+  gitleaks:
+    name: Gitleaks (secret scan)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          fetch-depth: 0
+      - uses: gitleaks/gitleaks-action@dcedce43c6f43de0b836d1fe38946645c9c638dc # v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  semgrep:
+    name: Semgrep SAST
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: "22"
+      - name: Run Semgrep (findings reported, not blocking in template)
+        run: |
+          pipx run semgrep ci --config p/owasp-top-ten --config p/typescript --sarif-output=semgrep.sarif || true
+      - name: Upload SARIF
+        if: hashFiles('semgrep.sarif') != ''
+        uses: github/codeql-action/upload-sarif@311b4ee155dcdab395044f00946f664bd51ff173 # v4
+        with:
+          sarif_file: semgrep.sarif
+
+  trivy:
+    name: Trivy FS scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - uses: aquasecurity/trivy-action@0.33.1
+        with:
+          scan-type: fs
+          format: sarif
+          output: trivy.sarif
+          exit-code: "0"
+      - name: Upload SARIF
+        if: hashFiles('trivy.sarif') != ''
+        uses: github/codeql-action/upload-sarif@311b4ee155dcdab395044f00946f664bd51ff173 # v4
+        with:
+          sarif_file: trivy.sarif

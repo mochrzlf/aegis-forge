@@ -49,7 +49,7 @@ Every project derived from this baseline MUST uphold four universal pillars:
 | `docs/testing-strategy.md` | Unified cross-domain testing strategy, coverage & quality gates |
 | `docs/research/EXTERNAL-TOOLS.md` | Adoption register for all external tools/skills (verdict, license, constraints) |
 | `evals/` | Agent output-quality harness (7 scenarios + rubrics, incl. PRD-interview discipline) |
-| `templates/` | Runnable starter skeletons per domain (e.g. `templates/web-app/` — FastAPI+Postgres+Redis with RTR, RBAC/anti-IDOR, audit_logs pre-wired). Copied into new projects so agents EDIT instead of generate |
+| `templates/` | Runnable starter skeletons per domain. **Default:** `templates/web-app/` (FastAPI+Postgres+Redis — RTR, RBAC/anti-IDOR, audit_logs, no external vendor). **Opt-in alternative:** `templates/web-app-nextjs-supabase/` (full-stack Next.js+Supabase — deviates from the §4.1 auth stance and the Dependency Gate; see its README before choosing). Copied into new projects so agents EDIT instead of generate |
 
 ---
 
