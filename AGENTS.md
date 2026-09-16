@@ -51,6 +51,25 @@ Every project derived from this baseline MUST uphold four universal pillars:
 | `evals/` | Agent output-quality harness (7 scenarios + rubrics, incl. PRD-interview discipline) |
 | `templates/` | Runnable starter skeletons per domain. **Default:** `templates/web-app/` (FastAPI+Postgres+Redis — RTR, RBAC/anti-IDOR, audit_logs, no external vendor). **Opt-in alternative:** `templates/web-app-nextjs-supabase/` (full-stack Next.js+Supabase — deviates from the §4.1 auth stance and the Dependency Gate; see its README before choosing). Copied into new projects so agents EDIT instead of generate |
 
+### ⚡ Token Economy & Context Discipline (agent working principle)
+
+Context is a finite, billable resource. An agent that wastes it produces
+shallower reasoning and blows budgets. These rules are **non-negotiable** and
+are already enforced structurally by `docs/TASK-template.md` +
+`skills/spec-to-tasks`:
+
+1. **Reference by path, never by paste.** Point at `docs/...`, `AGENTS.md` §,
+   `skills/...` — do not paste whole documents into prompts, tasks, or code
+   comments. Give the agent enough to *find* context, not to *contain* it.
+2. **Smallest sufficient context.** Read/quote only the sections relevant to
+   the current task. Prefer `grep`/targeted reads over whole-file dumps.
+3. **Small tasks = small context.** A task that needs "the whole repo" in
+   context is too big — split it (see `docs/TASK-template.md`, size XS/S/M).
+4. **Edit, don't regenerate.** Modify the minimal region of an existing file
+   instead of rewriting it wholesale; don't re-emit unchanged code.
+5. **No redundant restatement.** If a rule is already in a referenced doc, cite
+   it — never copy it inline where it can drift out of sync.
+
 ---
 
 ## 🏗️ 2. Standard Tech Stack per Domain
