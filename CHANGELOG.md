@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.6](https://github.com/mochrzlf/aegis-forge/compare/aegis-forge-v0.1.5...aegis-forge-v0.1.6) (2026-09-16)
+
+
+### Features
+
+* **templates:** auto-copy skeleton in init-new-project + CI smoke test ([#36](https://github.com/mochrzlf/aegis-forge/issues/36)) ([7e5135b](https://github.com/mochrzlf/aegis-forge/commit/7e5135b95cb04af3cb5e959b41b9ea8eef468322))
+
 ## [0.1.5](https://github.com/mochrzlf/aegis-forge/compare/aegis-forge-v0.1.4...aegis-forge-v0.1.5) (2026-09-16)
 
 
