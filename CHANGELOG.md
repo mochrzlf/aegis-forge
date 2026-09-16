@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.1.5](https://github.com/mochrzlf/aegis-forge/compare/aegis-forge-v0.1.4...aegis-forge-v0.1.5) (2026-09-16)
+
+
+### Features
+
+* **templates:** opt-in Next.js+Supabase full-stack alternative template ([#33](https://github.com/mochrzlf/aegis-forge/issues/33)) ([0cbf2ab](https://github.com/mochrzlf/aegis-forge/commit/0cbf2ab5a7d69818ea42fc0225643d20919afec9))
+* **templates:** runtime-verified web-app starter skeleton (FastAPI+P… ([#32](https://github.com/mochrzlf/aegis-forge/issues/32)) ([0b5b6b0](https://github.com/mochrzlf/aegis-forge/commit/0b5b6b0f97a532e3e68f7e30be92d8d6dbbb4b09))
+
+
+### Bug Fixes
+
+* **evals:** working promptfoo provider, per-scenario suites, generic EVAL_* config ([#29](https://github.com/mochrzlf/aegis-forge/issues/29)) ([9a877d0](https://github.com/mochrzlf/aegis-forge/commit/9a877d016f8bef8336ab77a73ea7a2e354adccb6))
+
 ## [0.1.4](https://github.com/mochrzlf/aegis-forge/compare/aegis-forge-v0.1.3...aegis-forge-v0.1.4) (2026-09-15)
 
 
