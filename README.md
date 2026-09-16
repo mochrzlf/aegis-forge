@@ -105,6 +105,7 @@ Aegis Forge supports **4 main project types**:
 **Examples:** Clinic information system, customer portal, business dashboard, online store.
 
 **Already prepared for you:**
+- **A runnable starter skeleton** (`templates/web-app/` or `templates/web-app-nextjs-supabase/`) — login, database & security already working; you just add features
 - Secure login (encrypted passwords, auto-expiring sessions)
 - Protection from common attacks (XSS, CSRF — hackers can't inject malicious code)
 - A clear "API contract" (frontend & backend never misunderstand each other)
@@ -135,7 +136,7 @@ Aegis Forge supports **4 main project types**:
 
 ---
 
-## 🚀 Getting Started: 5 Easy Steps
+## 🚀 Getting Started: 7 Easy Steps
 
 > 💡 **Easiest way:** open this folder in **VS Code**, then click **"Reopen in Container"** when prompted. All the tools you need will be installed automatically — no manual setup required.
 
@@ -187,11 +188,38 @@ bash scripts/init-new-project.sh "YourProjectName" "../YourProjectName" fullstac
 
 If you're using an AI agent (Claude, Cursor, etc.), give it this instruction:
 
-> *"Read AGENTS.md. Draft docs/PRD.md and docs/PRD-detail.md for my project based on the blueprint in docs/blueprints/. Then run a STRIDE security analysis in docs/adr/ before writing application code."*
+> *"Use the prd-interviewer skill. Read AGENTS.md, then draft docs/PRD.md and docs/PRD-detail.md for my project based on the blueprint in docs/blueprints/ — interview me first. Then run a STRIDE security analysis in docs/adr/ before writing application code."*
 
 The AI will create planning documents and analyze security risks **before** it starts programming — just like an architect draws blueprints before building.
 
-### Step 4 — Build Your Features
+### Step 4 — Break the Plan into Tasks
+
+Don't let the AI start coding from a one-page idea. Have it turn the PRD into a list of small, ordered tasks first:
+
+> *"Use the spec-to-tasks skill. Break docs/PRD.md into docs/TASKS.md — atomic tasks with dependencies and a skeleton_hint for each."*
+
+The result is `docs/TASKS.md`: bite-sized tasks the AI (or you) can finish one at a time — each pointing at the exact file to edit. This keeps the AI on-track and prevents "hallucinated" big-bang code.
+
+### Step 5 — Start from a Ready-Made Skeleton (Don't Start from Zero)
+
+This is the biggest time-saver. Aegis Forge ships **runnable starter skeletons** in `templates/` — the login, database, and security are **already working**. You copy one and your AI *edits* it, instead of writing everything from scratch.
+
+| Skeleton | Best for | What's inside |
+|---|---|---|
+| **`templates/web-app/`** ⭐ default | A secure backend/API | FastAPI + Postgres + Redis. Login (RTR), RBAC/anti-IDOR, audit trail — **runtime-verified**. |
+| **`templates/web-app-nextjs-supabase/`** | A full website with a UI, fast | Next.js + Supabase. Pages, login, dashboard (RLS). Reads its README first — it trades some security strictness for speed. |
+
+Copy a skeleton into your project and run it:
+
+```bash
+# Example: secure backend skeleton
+cp -r templates/web-app/* .
+make first-run     # copies .env, builds, runs migrations → app live at localhost:8000
+```
+
+> 💡 Your AI's tasks in `TASKS.md` already say *which skeleton file to edit* (the `skeleton_hint`) — so it modifies existing safe code instead of generating new code from nothing.
+
+### Step 6 — Build Your Features
 
 Now just build. Your AI agent already has all the rules (via `AGENTS.md`), ready-to-use example prompts (in `docs/prompt-library.md`), and guided workflows (in `docs/agent-playbooks/`).
 
@@ -203,7 +231,7 @@ Now just build. Your AI agent already has all the rules (via `AGENTS.md`), ready
 
 > 🧪 **Want proof your AI follows the rules?** The `evals/` folder can *measure* it — run `pwsh scripts/run-evals.ps1` (Windows) or `bash scripts/run-evals.sh` (Linux/Mac) with your own AI API key. See [`evals/`](evals/) for details.
 
-### Step 5 — Check Security & Save
+### Step 7 — Check Security & Save
 
 Before saving (committing), make sure it's safe:
 
@@ -261,6 +289,9 @@ aegis-forge/
 │
 ├── 📁 evals/                   ← 🧪 Tests for AI output quality
 ├── 📁 skills/                  ← 🛡️ Installable "rule packs" for AI agents
+├── 📁 templates/               ← 🏠 Runnable starter skeletons (copy & run!)
+│   ├── web-app/                ←   FastAPI + Postgres + Redis (secure backend)
+│   └── web-app-nextjs-supabase/←   Next.js + Supabase (full website + UI)
 └── 📁 scripts/                 ← ⚙️ Automation scripts
     ├── init-new-project.sh     ← Create project (Linux/Mac)
     ├── init-new-project.ps1    ← Create project (Windows)
