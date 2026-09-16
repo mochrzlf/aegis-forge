@@ -71,3 +71,4 @@ coverage/
 
 # Local-only reference notes (never commit / never upload)
 *.local.md
+_local/
