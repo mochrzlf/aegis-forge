@@ -112,6 +112,37 @@ if command -v openssl >/dev/null 2>&1; then
     echo "🔑 Secure cryptographic keys (JWT & AES-256 FLE) successfully generated in .env."
 fi
 
+# --- Interactive: optionally copy a runnable starter skeleton (web domain only)
+# Copies templates/<choice>/ into the project so it runs without a manual `cp`.
+SKELETON_CHOICE=""
+if [ "$PROJECT_TYPE" = "web" ]; then
+    echo ""
+    echo "🏠 Starter skeleton (optional) — runnable code with security pre-wired."
+    echo "   Choose one to copy into your project, or skip to start from a blank canvas:"
+    echo "   1) web-app (default)   FastAPI + Postgres + Redis — secure backend/API (runtime-verified)"
+    echo "   2) nextjs-supabase     Next.js + Supabase — full website with a UI (read its README first)"
+    echo "   0) skip                no skeleton — I'll build from scratch"
+    read -r -p "Select skeleton [1/2/0] (default: 1): " pick
+    case "$pick" in
+        2)  SKELETON_CHOICE="web-app-nextjs-supabase" ;;
+        0)  SKELETON_CHOICE="" ;;
+        *)  SKELETON_CHOICE="web-app" ;;
+    esac
+    if [ -n "$SKELETON_CHOICE" ]; then
+        SKEL_SRC="$BASELINE_DIR/templates/$SKELETON_CHOICE"
+        if [ -d "$SKEL_SRC" ]; then
+            echo "📦 Copying skeleton 'templates/$SKELETON_CHOICE' into the project..."
+            # cp -a src/. dst/ copies ALL contents incl. dotfiles without nesting.
+            cp -a "$SKEL_SRC/." "$TARGET_DIR/"
+            echo "✅ Skeleton applied. Run 'make first-run' inside the project to start it."
+        else
+            echo "⚠️  Skeleton 'templates/$SKELETON_CHOICE' not found in baseline — skipping."
+        fi
+    else
+        echo "⏭️  No skeleton selected — starting from a blank canvas."
+    fi
+fi
+
 echo "=================================================================="
 echo "✨ Project $PROJECT_NAME (${PROJECT_TYPE^^}) successfully created at $TARGET_DIR!"
 echo "Next steps:"
@@ -124,7 +155,12 @@ if [ "$PROJECT_TYPE" = "mobile" ]; then
 elif [ "$PROJECT_TYPE" = "trading" ]; then
     echo "  3. Instruct: 'Read AGENTS.md and design EA Trading System for $PROJECT_NAME referring to docs/blueprints/ea-trading-blueprint.md and docs/security/trading-risk-policy.md'"
 elif [ "$PROJECT_TYPE" = "web" ]; then
-    echo "  3. Instruct: 'Read AGENTS.md and design Web Application for $PROJECT_NAME referring to docs/blueprints/web-application-blueprint.md'"
+    if [ -n "$SKELETON_CHOICE" ]; then
+        echo "  3. Start the skeleton: make first-run   (app → http://localhost:8000 or :3000)"
+        echo "  4. Instruct agent: 'Use prd-interviewer for docs/PRD.md, then spec-to-tasks for docs/TASKS.md — EDIT the skeleton files per skeleton_hint (do not generate from scratch).'"
+    else
+        echo "  3. Instruct: 'Read AGENTS.md and design Web Application for $PROJECT_NAME referring to docs/blueprints/web-application-blueprint.md'"
+    fi
 else
     echo "  3. Instruct: 'Read AGENTS.md and design complete specifications for $PROJECT_NAME'"
 fi

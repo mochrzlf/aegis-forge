@@ -1,0 +1,91 @@
+# Starter-Skeleton Smoke Test
+# Guards against template drift: any change under templates/ must still build
+# and pass a real runtime smoke test (docker compose up + auth/RTR flow).
+# Path-filtered so it only runs when a template (or this workflow) changes —
+# same pattern as adr-validation.yml.
+name: Skeleton Smoke Test
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'templates/**'
+      - '.github/workflows/skeleton-smoke-test.yml'
+  pull_request:
+    paths:
+      - 'templates/**'
+      - '.github/workflows/skeleton-smoke-test.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  web-app-fastapi:
+    name: Smoke test — templates/web-app (FastAPI)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+
+      - name: Prepare .env from example (dev values)
+        working-directory: templates/web-app
+        run: |
+          cp .env.example .env
+          # Generate dev secrets (non-production, CI only)
+          JWT=$(openssl rand -base64 48 | tr -d '\n\r')
+          PG=$(openssl rand -hex 24 | tr -d '\n\r')
+          sed -i "s|CHANGE_ME_48_urlsafe_bytes|$JWT|g" .env
+          sed -i "s|CHANGE_ME_strong_password|$PG|g" .env
+
+      - name: Build images
+        working-directory: templates/web-app
+        run: docker compose build
+
+      - name: Start stack (db + cache + api, runs alembic migrations)
+        working-directory: templates/web-app
+        run: docker compose up -d --wait
+
+      - name: Smoke test — health, register, login, protected, refresh
+        working-directory: templates/web-app
+        run: |
+          set -e
+          base="http://localhost:8000/api/v1"
+
+          echo "== healthz =="
+          curl -fsS "$base/healthz" | grep -q '"success":true'
+
+          echo "== readyz =="
+          curl -fsS "$base/readyz" | grep -q '"status":"ready"'
+
+          echo "== register (user A) =="
+          reg=$(curl -fsS -X POST "$base/auth/register" \
+            -H "Content-Type: application/json" \
+            -d '{"email":"alice@test.dev","password":"a-very-long-password-1"}' -c jar)
+          access=$(echo "$reg" | python3 -c "import sys,json;print(json.load(sys.stdin)['data']['access_token'])")
+          [ -n "$access" ]
+
+          echo "== /users/me (valid token) =="
+          curl -fsS "$base/users/me" -H "Authorization: Bearer $access" | grep -q '"success":true'
+
+          echo "== /users/me (no token -> 401) =="
+          code=$(curl -s -o /dev/null -w '%{http_code}' "$base/users/me")
+          [ "$code" = "401" ]
+
+          echo "== refresh (rotate) =="
+          curl -fsS -X POST "$base/auth/refresh" -b jar -c jar | grep -q '"access_token"'
+
+          echo "== refresh (no cookie -> 401) =="
+          code=$(curl -s -o /dev/null -w '%{http_code}' -X POST "$base/auth/refresh")
+          [ "$code" = "401" ]
+
+          echo "✅ web-app skeleton smoke test passed"
+
+      - name: Dump logs on failure
+        if: failure()
+        working-directory: templates/web-app
+        run: docker compose logs --no-color
+
+      - name: Tear down
+        if: always()
+        working-directory: templates/web-app
+        run: docker compose down -v

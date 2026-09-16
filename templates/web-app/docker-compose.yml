@@ -41,6 +41,15 @@ services:
     command: >
       sh -c "alembic upgrade head &&
              uvicorn app.main:app --host 0.0.0.0 --port 8000"
+    # Healthcheck lets `docker compose up -d --wait` (used by CI) block until
+    # uvicorn is actually serving — without it, --wait returns once db/cache
+    # are healthy while the API is still booting/migrating (connection reset).
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request,sys;\ntry:\n urllib.request.urlopen('http://localhost:8000/api/v1/healthz', timeout=3)\nexcept Exception:\n sys.exit(1)"]
+      interval: 5s
+      timeout: 4s
+      retries: 24
+      start_period: 15s
 
 volumes:
   db_data:
