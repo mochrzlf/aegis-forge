@@ -162,7 +162,7 @@ jobs:
       # Blocks PRs that introduce dependencies with known vulnerabilities
       # or non-compliant licenses before they reach main.
       - name: Dependency Review
-        uses: actions/dependency-review-action@v4
+        uses: actions/dependency-review-action@v5
         with:
           fail-on-severity: high
 
