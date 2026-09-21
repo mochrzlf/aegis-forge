@@ -1,5 +1,8 @@
 version: '3.8'
 
+# Baseline infra stack for docs & mock APIs only (PostgreSQL, Redis, Mailpit, Prism).
+# No application service runs here — derived projects bring their own app container.
+
 services:
   postgres:
     image: postgres:18-alpine
@@ -34,7 +37,7 @@ services:
       timeout: 5s
       retries: 5
 
-  # Mailpit: Local SMTP Server Mailpit: Local SMTP Server & Webmail untuk testing OTP/Email tanpa spamming email asli Webmail for testing OTP/Emails without spamming real email accounts
+  # Mailpit: local SMTP server + web UI for testing OTP/email without spamming real accounts
   mailpit:
     image: axllent/mailpit:latest
     container_name: ${APP_NAME:-baseline}_mailpit
@@ -45,7 +48,7 @@ services:
     environment:
       MP_MAX_MESSAGES: 500
 
-  # Prism: Instant Mock API Server from docs/openapi.yaml for Mobile Prism: Mock API Server instan dari docs/openapi.yaml untuk pengujian Mobile & Frontend Frontend testing
+  # Prism: instant mock API server from docs/openapi.yaml for Mobile & Frontend testing
   prism:
     image: stoplight/prism:5
     container_name: ${APP_NAME:-baseline}_mock_api
