@@ -8,7 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.config import settings
 from app.core.deps import get_db, get_redis
 from app.core.envelope import ErrorCode, err, ok
-from app.core.lockout import is_locked, register_failure, unlock as clear_lockout
+from app.core.lockout import is_locked, register_failure
 from app.core.ratelimit import client_ip, enforce_rate_limit
 from app.schemas import LoginIn, RegisterIn, TokenOut, UserOut
 from app.services import auth_service
