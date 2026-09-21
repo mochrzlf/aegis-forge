@@ -35,7 +35,7 @@ jobs:
       # directly via the official CLI container and emits SARIF so findings
       # appear in the GitHub Security tab alongside Trivy results.
       - name: Semgrep SAST Scan (OWASP Top 10, SARIF Output)
-        uses: actions/setup-python@v6
+        uses: actions/setup-python@v7
         with:
           python-version: '3.12'
 
