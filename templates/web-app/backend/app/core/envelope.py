@@ -44,3 +44,7 @@ class ErrorCode:
     VALIDATION_ERROR = "VALIDATION_ERROR"
     NOT_FOUND = "NOT_FOUND"
     INTERNAL_ERROR = "INTERNAL_ERROR"
+    # Skeleton-local extension of the baseline envelope (documented in ADR-003):
+    # auth endpoints can also be throttled, and callers need a distinct code to
+    # tell "slow down" apart from "your input is wrong".
+    RATE_LIMITED = "RATE_LIMITED"

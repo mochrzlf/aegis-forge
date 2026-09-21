@@ -30,7 +30,7 @@ README menjual **4 tipe project** (Web, Mobile, Trading, Enterprise), tapi yang 
 
 | Wajib oleh doktrin | Ada di skeleton? | Bukti |
 |---|---|---|
-| Rate limiting / brute-force defense | ❌ **tidak ada** | Redis dideklarasi (`config.py:29`, `deps.py`) tapi hanya dipakai untuk `health.py` ping. `README` web-app bahkan nulis "Redis 7 — session/refresh-token store + **rate limiter**" → klaim palsu |
+| Rate limiting / brute-force defense | ✅ **Gelombang 1 item 1.1 selesai** (sebelumnya ❌) | `app/core/ratelimit.py`; ADR-003. Klaim lama "Redis dipakai hanya untuk healthz ping" sudah tidak berlaku |
 | MFA / 2FA / step-up auth | ❌ tidak ada | — |
 | Password reset flow | ❌ tidak ada | — |
 | Email verification | ❌ tidak ada | — |
@@ -77,7 +77,7 @@ Alasan ini didahulukan: (a) `templates/web-app` adalah **satu-satunya bukti nyat
 
 | # | Tugas | File yang akan tersentuh | Detail teknis | Status |
 |---|---|---|---|---|
-| 1.1 | **Rate limiter di `/auth/*`** | `app/core/ratelimit.py` (new), `app/api/auth.py` | Sliding window counter via Redis yang sudah ada (~30 baris, **tanpa library baru** — ganti klaim palsu "rate limiter" di README jadi nyata). Endpoint: login, register, refresh. Per-user + per-IP | ⬜ |
+| 1.1 | **Rate limiter di `/auth/*`** | `app/core/ratelimit.py` (new), `app/api/auth.py` | Sliding window counter via Redis yang sudah ada (~30 baris, **tanpa library baru** — ganti klaim palsu "rate limiter" di README jadi nyata). Endpoint: login, register, refresh. Per-user + per-IP | ✅ 2026-09-21 — sliding-window ZSET; per-account 10 + per-IP 30 (login), per-IP 5 (register), per-IP 60 (refresh); `429` + `RATE_LIMITED` + `Retry-After`; ADR-003; self-check `backend/tests/check_ratelimit.py` + e2e 429 terverifikasi (fakeredis, tanpa DB) |
 | 1.2 | **Account lockout** | `app/services/auth_service.py`, `app/api/auth.py` | Redis counter untuk login gagal → lock sementara. Audit-log setiap event lock/unlock. Opsi: unlock manual oleh admin (audit-logged) | ⬜ |
 | 1.3 | **JML Kill-Switch** ⭐ | `app/services/auth_service.py`, `app/api/users.py` (endpoint status), migration baru | Kini `User.status` mati. Ubah: status → `suspended` ⇒ revoke semua `refresh_tokens` aktif (`revoked_at = now()`) + tolak login baru. Audit-log. **Ini signature move dari background IAM banking — harus jadi showcase, bukan TODO** | ⬜ |
 | 1.4 | **Maker-Checker endpoint** ⭐ | migration baru, `app/models/__init__.py`, `app/services/approval_service.py` (new), `app/api/approvals.py` (new), `docs/schema*.sql` | Tabel `approval_requests` sudah direferensikan `security-access-matrix.md` tapi tidak ada di schema. Buat: kolom `maker_user_id <> checker_user_id` (wajib beda orang), 1 endpoint contoh (role promotion, dual-control), audit-log approvals. Lanjutkan rantai Maker-Checker di audit trail | ⬜ |

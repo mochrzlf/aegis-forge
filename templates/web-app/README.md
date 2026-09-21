@@ -16,6 +16,7 @@
 |---|---|---|
 | **Auth + RTR** | Access token (15 min) + Refresh Token Rotation; refresh token ONLY in `HttpOnly; Secure; SameSite=Strict` cookie (never JSON body); reuse/replay → revoke descendant sessions + audit incident | `backend/app/api/auth.py`, `backend/app/core/security.py`, `backend/app/services/auth_service.py` |
 | **RBAC / anti-IDOR** | Server-side role check dependency + ownership predicate on every mutation | `backend/app/core/deps.py`, `backend/app/repositories/__init__.py` |
+| **Rate limiting** | Sliding-window limiter on `/auth/*`: per-account + per-IP on login, per-IP on register/refresh; breach → `429 RATE_LIMITED` + `Retry-After` | `backend/app/core/ratelimit.py`, `backend/app/api/auth.py` (ADR-003) |
 | **Audit trail** | Append-only `audit_logs` (DB trigger blocks UPDATE/DELETE) written on every mutation | `backend/app/models/__init__.py`, `backend/app/services/audit_service.py`, `backend/alembic/versions/0001_init.py` |
 | **Secrets** | All config from env (pydantic-settings); nothing hardcoded | `backend/app/core/config.py`, `.env.example` |
 | **API envelope** | `{success, data, meta}` / `{success, error:{code,message}}` on every response | `backend/app/core/envelope.py` |

@@ -1,10 +1,12 @@
 """Auth endpoints — refresh token ONLY via HttpOnly cookie."""
 from fastapi import APIRouter, Depends, HTTPException, Response, Request, status
+from redis.asyncio import Redis
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import settings
-from app.core.deps import get_db
+from app.core.deps import get_db, get_redis
 from app.core.envelope import ErrorCode, err, ok
+from app.core.ratelimit import client_ip, enforce_rate_limit
 from app.schemas import LoginIn, RegisterIn, TokenOut, UserOut
 from app.services import auth_service
 from app.services.auth_service import AuthError
@@ -43,7 +45,21 @@ def _auth_error(exc: AuthError) -> HTTPException:
 
 
 @router.post("/register", status_code=status.HTTP_201_CREATED)
-async def register(payload: RegisterIn, response: Response, db: AsyncSession = Depends(get_db)):
+async def register(
+    payload: RegisterIn,
+    request: Request,
+    response: Response,
+    db: AsyncSession = Depends(get_db),
+    redis: Redis = Depends(get_redis),
+):
+    # Open registration is the cheapest denial-of-service vector here, so it
+    # carries the tightest limit and needs no account to hit it.
+    await enforce_rate_limit(
+        redis,
+        f"rl:register:ip:{client_ip(request)}",
+        settings.RATE_LIMIT_REGISTER_IP,
+        settings.RATE_LIMIT_WINDOW_SECONDS,
+    )
     try:
         await auth_service.register(db, payload.email, payload.password)
         access, refresh, expires = await auth_service.login(db, payload.email, payload.password)
@@ -54,7 +70,28 @@ async def register(payload: RegisterIn, response: Response, db: AsyncSession = D
 
 
 @router.post("/login")
-async def login(payload: LoginIn, response: Response, db: AsyncSession = Depends(get_db)):
+async def login(
+    payload: LoginIn,
+    request: Request,
+    response: Response,
+    db: AsyncSession = Depends(get_db),
+    redis: Redis = Depends(get_redis),
+):
+    # Two bounds: a per-account limit that stalls password guessing, and a
+    # looser per-IP limit that stalls the same guessing spread across many
+    # accounts (AGENTS.md §3.2; ADR-003).
+    await enforce_rate_limit(
+        redis,
+        f"rl:login:user:{payload.email.lower()}",
+        settings.RATE_LIMIT_LOGIN_USER,
+        settings.RATE_LIMIT_WINDOW_SECONDS,
+    )
+    await enforce_rate_limit(
+        redis,
+        f"rl:login:ip:{client_ip(request)}",
+        settings.RATE_LIMIT_LOGIN_IP,
+        settings.RATE_LIMIT_WINDOW_SECONDS,
+    )
     try:
         access, refresh, expires = await auth_service.login(db, payload.email, payload.password)
     except AuthError as exc:
@@ -64,7 +101,20 @@ async def login(payload: LoginIn, response: Response, db: AsyncSession = Depends
 
 
 @router.post("/refresh")
-async def refresh(request: Request, response: Response, db: AsyncSession = Depends(get_db)):
+async def refresh(
+    request: Request,
+    response: Response,
+    db: AsyncSession = Depends(get_db),
+    redis: Redis = Depends(get_redis),
+):
+    # Throttled by IP only: the caller cannot be identified until the presented
+    # token is validated, so a per-user bound is not available yet.
+    await enforce_rate_limit(
+        redis,
+        f"rl:refresh:ip:{client_ip(request)}",
+        settings.RATE_LIMIT_REFRESH_IP,
+        settings.RATE_LIMIT_WINDOW_SECONDS,
+    )
     token = request.cookies.get(REFRESH_COOKIE)
     if not token:
         raise HTTPException(
