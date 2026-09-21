@@ -1,4 +1,6 @@
 """Auth endpoints — refresh token ONLY via HttpOnly cookie."""
+import hashlib
+
 from fastapi import APIRouter, Depends, HTTPException, Response, Request, status
 from redis.asyncio import Redis
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -6,9 +8,11 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.config import settings
 from app.core.deps import get_db, get_redis
 from app.core.envelope import ErrorCode, err, ok
+from app.core.lockout import is_locked, register_failure, unlock as clear_lockout
 from app.core.ratelimit import client_ip, enforce_rate_limit
 from app.schemas import LoginIn, RegisterIn, TokenOut, UserOut
 from app.services import auth_service
+from app.services.audit_service import write_audit
 from app.services.auth_service import AuthError
 
 router = APIRouter(prefix="/auth", tags=["auth"])
@@ -42,6 +46,11 @@ def _auth_error(exc: AuthError) -> HTTPException:
         status_code=status_map.get(exc.code, status.HTTP_400_BAD_REQUEST),
         detail=err(exc.code, exc.message),
     )
+
+
+def _hash_email(email: str) -> str:
+    """SHA-256 prefix for audit references — email is PII, never logged raw."""
+    return hashlib.sha256(email.encode("utf-8")).hexdigest()[:16]
 
 
 @router.post("/register", status_code=status.HTTP_201_CREATED)
@@ -92,9 +101,29 @@ async def login(
         settings.RATE_LIMIT_LOGIN_IP,
         settings.RATE_LIMIT_WINDOW_SECONDS,
     )
+    # Locked accounts are refused before any password is hashed or compared.
+    if await is_locked(redis, payload.email):
+        raise HTTPException(
+            status_code=status.HTTP_423_LOCKED,
+            detail=err(
+                ErrorCode.LOCKED,
+                "Account temporarily locked after repeated failed logins. Try again later.",
+            ),
+        )
     try:
         access, refresh, expires = await auth_service.login(db, payload.email, payload.password)
     except AuthError as exc:
+        # Only a genuine credential failure counts towards the lock — a
+        # non-active account (FORBIDDEN) or validation errors must not.
+        if exc.code == ErrorCode.UNAUTHORIZED:
+            if await register_failure(redis, payload.email):
+                await write_audit(
+                    db,
+                    actor_user_id=None,
+                    action="user.locked",
+                    resource=f"auth:lockout:{_hash_email(payload.email)}",
+                    detail=f"Locked after {settings.LOCKOUT_MAX_FAILURES} failed logins",
+                )
         raise _auth_error(exc)
     _set_refresh_cookie(response, refresh)
     return ok(TokenOut(access_token=access, expires_in=expires).model_dump())

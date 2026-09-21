@@ -37,6 +37,11 @@ class Settings(BaseSettings):
     RATE_LIMIT_REGISTER_IP: int = 5
     RATE_LIMIT_REFRESH_IP: int = 60
 
+    # Account lockout after repeated login failures (ADR-004). Both knobs share
+    # one horizon: failures age out after the same span a lock lasts.
+    LOCKOUT_MAX_FAILURES: int = 5
+    LOCKOUT_SECONDS: int = 900
+
     LOG_LEVEL: str = "info"
 
     @property
