@@ -194,9 +194,7 @@ Ini peta proyek Anda. **Jangan hafal semua** — cukup tahu yang penting.
 │   │
 │   ├── PRD-template.md       ← Template "apa yang mau dibuat"
 │   ├── PRD-detail-template.md← Template detail fitur
-│   ├── schema-template.sql   ← Template database (JANGAN diubah!)
 │   ├── schema.sql            ← Database aktif proyek (BOLEH diubah)
-│   ├── openapi-template.yaml ← Template kontrak API
 │   ├── openapi.yaml          ← Kontrak API aktif proyek
 │   ├── ui-design-template.md ← Template desain tampilan
 │   └── prompt-library.md     ← 💬 Contoh perintah siap pakai untuk AI
@@ -463,7 +461,7 @@ Contoh nyata bagaimana Aegis-Forge digunakan.
 
 1. **Buat proyek:** `pwsh scripts/init-new-project.ps1 "WartegBot" "../WartegBot" fullstack`
 2. **Yang dipakai dari Aegis-Forge:**
-   - ✅ `schema-template.sql` → rancang tabel `menu`, `orders`, `order_items`
+   - ✅ `schema.sql` → rancang tabel `menu`, `orders`, `order_items`
    - ✅ `security baseline` → simpan API key WA & LLM terenkripsi
    - ✅ `AGENTS.md` → AI menulis kode dengan aman
    - ✅ `PRD-template.md` → dokumentasikan requirement bot

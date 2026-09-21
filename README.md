@@ -281,9 +281,7 @@ aegis-forge/
 │   ├── 📁 diagrams/            ← 🎨 Visual architecture diagrams
 │   │
 │   ├── PRD-template.md         ← Template "what to build"
-│   ├── schema-template.sql     ← Database template (DON'T edit!)
 │   ├── schema.sql              ← Your active database schema (OK to edit)
-│   ├── openapi-template.yaml   ← API contract template
 │   ├── openapi.yaml            ← Your active API contract
 │   └── prompt-library.md       ← 💬 Ready-to-use AI prompts
 │
@@ -343,7 +341,7 @@ aegis-forge/
 **Need:** You sell food in your apartment building. Customers chat on WhatsApp; a bot replies automatically (menu, selection, total price), then forwards the order to you.
 
 **How Aegis Forge helps:**
-- ✅ `schema-template.sql` → design `menu`, `orders`, `order_items` tables
+- ✅ `schema.sql` → design `menu`, `orders`, `order_items` tables
 - ✅ Security baseline → store WhatsApp & LLM API keys **encrypted**
 - ✅ `AGENTS.md` → AI writes code safely
 - ✅ Audit trail → order history can't be manipulated

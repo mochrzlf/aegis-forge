@@ -73,8 +73,6 @@ $templateMap = @{
     'docs/PRD-template.md'         = 'docs/PRD.md'
     'docs/PRD-detail-template.md'  = 'docs/PRD-detail.md'
     'docs/ui-design-template.md'   = 'docs/ui-design.md'
-    'docs/schema-template.sql'     = 'docs/schema.sql'
-    'docs/openapi-template.yaml'   = 'docs/openapi.yaml'
 }
 foreach ($src in $templateMap.Keys) {
     $srcFull  = Join-Path $TargetPath $src

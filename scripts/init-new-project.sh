@@ -59,8 +59,6 @@ cp -r "$BASELINE_DIR/evals" "$TARGET_DIR/" 2>/dev/null || true
 cp "$TARGET_DIR/docs/PRD-template.md" "$TARGET_DIR/docs/PRD.md"
 cp "$TARGET_DIR/docs/PRD-detail-template.md" "$TARGET_DIR/docs/PRD-detail.md"
 cp "$TARGET_DIR/docs/ui-design-template.md" "$TARGET_DIR/docs/ui-design.md"
-cp "$TARGET_DIR/docs/schema-template.sql" "$TARGET_DIR/docs/schema.sql"
-cp "$TARGET_DIR/docs/openapi-template.yaml" "$TARGET_DIR/docs/openapi.yaml"
 
 # Replace [PROJECT_NAME] placeholder across all text files
 find "$TARGET_DIR" -type f \( -name "*.md" -o -name "*.yaml" -o -name "*.sql" -o -name ".env.example" \) | while read -r file; do
