@@ -35,6 +35,7 @@ Every project derived from this baseline MUST uphold four universal pillars:
 | `docs/security/` | Domain-specific security checklists (Mobile AppSec, Trading Risk Policy) |
 | `docs/diagrams/` | Visual architecture diagrams, authentication sequences, and execution flows |
 | `docs/adr/` | Architecture Decision Records & STRIDE Threat Modeling |
+| **`docs/gap-analysis.md`** | **🎯 BACKLOG WAJIB — gap audit + roadmap perbaikan per gelombang. Baca ini SEBELUM mulai kerja apapun di repo ini.** |
 | `docs/agent-playbooks/` | Gated, step-by-step workflows per domain — follow BEFORE writing code |
 | `skills/` | Portable Agent Skills (SKILL.md) packaging the baseline's critical guardrails — install into your agent. Includes `prd-interviewer`: never write a PRD without offering the interview-first mode; and `spec-to-tasks`: never break work into tasks without a real PRD |
 | `docs/prompt-library.md` | Tested copy-paste prompts per phase & domain |

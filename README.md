@@ -433,6 +433,9 @@ Install Git from [git-scm.com](https://git-scm.com)
 
 ## 📚 Full Documentation
 
+> **🔧 Kontributor & AI agent:** baca [`docs/gap-analysis.md`](docs/gap-analysis.md) dulu — backlog audit + roadmap perbaikan per gelombang. Jangan mulai fitur baru sebelum gelombang sebelumnya selesai.
+
+
 | Topic | File | What it's for |
 |---|---|---|
 | 🚀 **Quick start** | `SETUP.md` | Step-by-step technical setup |
