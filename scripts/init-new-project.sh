@@ -38,7 +38,6 @@ mkdir -p "$TARGET_DIR"
 # Copy baseline directories & files
 cp -r "$BASELINE_DIR/AGENTS.md" "$TARGET_DIR/"
 cp -r "$BASELINE_DIR/README.md" "$TARGET_DIR/"
-cp -r "$BASELINE_DIR/README.id.md" "$TARGET_DIR/" 2>/dev/null || true
 cp -r "$BASELINE_DIR/SETUP.md" "$TARGET_DIR/"
 cp -r "$BASELINE_DIR/SECURITY.md" "$TARGET_DIR/"
 cp -r "$BASELINE_DIR/LICENSE" "$TARGET_DIR/"

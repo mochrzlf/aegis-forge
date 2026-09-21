@@ -62,7 +62,7 @@ Tugas kecil yang bikin repo terlihat tidak rapi / menyesatkan.
 |---|---|---|---|
 | 0.1 | Hapus salah satu pasangan duplikat (md5 identik): `docs/schema.sql` == `docs/schema-template.sql`, dan `docs/openapi.yaml` == `docs/openapi-template.yaml`. `init-new-project.sh` menangani copy-nya, jadi file asli hanya nambah noise | `docs/*.sql`, `docs/*.yaml` | ✅ |
 | 0.2 | Perbaiki comment rusak (bilingual teks menyampur jadi 1 baris) pada service `prism` | `docker-compose.yml:48` | ✅ |
-| 0.3 | Hapus dead reference `README.id.md` dari init script (di-mask `2>/dev/null \|\| true`, file tidak pernah ada), atau buat file-nya | `scripts/init-new-project.sh` | ⬜ |
+| 0.3 | Hapus dead reference `README.id.md` dari init script (di-mask `2>/dev/null \|\| true`, file tidak pernah ada), atau buat file-nya | `scripts/init-new-project.sh` | ✅ |
 | 0.4 | Root `make up` menyalakan 4 container (Postgres, Redis, Mailpit, Prism) **tanpa app service** → beri komentar bahwa ini untuk docs/mock-only | `Makefile:35-40`, `docker-compose.yml` | ⬜ |
 | 0.5 | Merge / close 5 PR dependabot yang menumpuk (bukan code change, cuma action version bumps) | PR #38–#42 | ⬜ |
 | 0.6 | Bongkar monolit `docs/PANDUAN-AWAM.md` (620 baris) → pindahkan materi security/IAM yang berbobot ke `docs/security-iam-policy.md` (sudah ada), sisakan pandangan umum saja | `docs/PANDUAN-AWAM.md` | ⬜ |

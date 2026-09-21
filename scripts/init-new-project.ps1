@@ -56,7 +56,7 @@ New-Item -ItemType Directory -Path $TargetPath -Force | Out-Null
 
 # --- Copy baseline directories & files (skip missing, like the bash `|| true`)
 $items = @(
-    'AGENTS.md', 'README.md', 'README.id.md', 'SETUP.md', 'SECURITY.md',
+    'AGENTS.md', 'README.md', 'SETUP.md', 'SECURITY.md',
     'LICENSE', 'Makefile', '.env.example', '.gitignore', '.gitattributes',
     '.editorconfig', '.gitleaks.toml', '.pre-commit-config.yaml',
     'docker-compose.yml', '.github', 'docs', 'scripts', 'evals', '.devcontainer'
