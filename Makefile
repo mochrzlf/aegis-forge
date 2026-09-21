@@ -32,8 +32,8 @@ mock-api: ## Start Prism Mock API server (port 4010) for Mobile & Frontend testi
 	@docker compose up -d prism
 
 .PHONY: up
-up: ## Start local services stack (PostgreSQL, Redis, Mailpit, Prism)
-	@echo -e "$(GREEN)🚀 Starting Docker Compose services...$(RESET)"
+up: ## Start local infra stack (PostgreSQL, Redis, Mailpit, Prism) — docs/mock only, no app service
+	@echo -e "$(GREEN)🚀 Starting Docker Compose services (infra for docs/mock, no app service)...$(RESET)"
 	@docker compose up -d
 
 .PHONY: down

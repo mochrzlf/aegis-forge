@@ -34,8 +34,6 @@ SECURITY.md                                 @mochrzlf
 
 # Data layer — DBA / data owner must review schema & migrations
 /docs/schema.sql                            @mochrzlf
-/docs/schema-template.sql                   @mochrzlf
 
 # API contract — backend/API owner must review
 /docs/openapi.yaml                          @mochrzlf
-/docs/openapi-template.yaml                 @mochrzlf

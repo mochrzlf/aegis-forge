@@ -11,7 +11,7 @@
 3. [Istilah-Istilah Penting (Kamus Awam)](#3-kamus-istilah-awam)
 4. [Apa Saja yang Bisa Dibuat dengan Aegis-Forge?](#4-apa-yang-bisa-dibuat)
 5. [Struktur Folder: Peta Jalan Proyek](#5-struktur-folder)
-6. [Keamanan yang Sudah Terpasang Otomatis](#6-keamanan-bawaan)
+6. [Keamanan Bawaan](#6-keamanan-bawaan)
 7. [Tutorial: Cara Membuat Proyek Baru (Langkah demi Langkah)](#7-tutorial-membuat-proyek)
 8. [Cara Kerja dengan AI (Claude, Cursor, dll)](#8-cara-kerja-dengan-ai)
 9. [Perintah-Perintah Penting (Cheat Sheet)](#9-perintah-penting)
@@ -194,9 +194,7 @@ Ini peta proyek Anda. **Jangan hafal semua** — cukup tahu yang penting.
 │   │
 │   ├── PRD-template.md       ← Template "apa yang mau dibuat"
 │   ├── PRD-detail-template.md← Template detail fitur
-│   ├── schema-template.sql   ← Template database (JANGAN diubah!)
 │   ├── schema.sql            ← Database aktif proyek (BOLEH diubah)
-│   ├── openapi-template.yaml ← Template kontrak API
 │   ├── openapi.yaml          ← Kontrak API aktif proyek
 │   ├── ui-design-template.md ← Template desain tampilan
 │   └── prompt-library.md     ← 💬 Contoh perintah siap pakai untuk AI
@@ -229,37 +227,20 @@ Ini peta proyek Anda. **Jangan hafal semua** — cukup tahu yang penting.
 
 ## 6. Keamanan Bawaan
 
-Anda **tidak perlu jadi ahli keamanan** — perlindungan ini sudah aktif sejak awal.
+Anda **tidak perlu jadi ahli keamanan** — Aegis-Forge sudah memasang "pagar pengaman" dasar sejak awal.
 
-### 🛡️ A. Alarm Kebocoran Otomatis (Gitleaks)
+**Yang sudah aktif di proyek turunan (ada kodenya, bukan klaim):**
+- 🛡️ **Alarm kebocoran** — setiap `git commit` dipindai (Gitleaks). Ada password atau API key yang terbawa? **Commit ditolak.**
+- 📜 **Jejak audit anti-manipulasi** — setiap aksi penting tercatat di database dan **tidak bisa dihapus atau diedit**, bahkan oleh admin.
+- 🔐 **Kebijakan keamanan tertulis** — standar IAM, RBAC, rate limiting, enkripsi, dan checklist per domain.
 
-**Apa yang terjadi:** Setiap kali Anda menyimpan perubahan (`git commit`), sistem otomatis memindai kode. Jika ada password atau API key yang tertinggal, **commit DITOLAK**.
+**Yang baru berupa spesifikasi di v0.1.x (kodenya menyusul, lihat `docs/gap-analysis.md`):**
+- 🔒 Penyimpanan mobile terenkripsi (Keystore) dan SSL pinning
+- 🛑 Rem darurat trading (circuit breaker) dan pembatasan izin API key trading
 
-**Analogi:** Seperti **metal detector di bandara** — kalau ada barang berbahaya, Anda tidak boleh masuk.
-
-### 🔒 B. Penyimpanan Mobile Terenkripsi
-
-**Apa yang terjadi:** Di Android, data sensitif (token login, dll) disimpan di **brankas khusus perangkat** (Keystore), bukan di file biasa yang mudah dibaca.
-
-**Analogi:** Seperti **menyimpan uang di brankas bank**, bukan di laci meja.
-
-### 🛑 C. Rem Darurat Trading
-
-**Apa yang terjadi:** Kalau robot trading rugi mencapai batas harian (mis. 5% modal), sistem **otomatis berhenti trading**.
-
-**Analogi:** Seperti **rem darurat kereta** — kalau ada bahaya, berhenti dulu, pikir nanti.
-
-### 📜 D. Jejak Audit Anti-Manipulasi
-
-**Apa yang terjadi:** Setiap aksi penting dicatat di database, dan catatan itu **TIDAK BISA dihapus atau diedit** — bahkan oleh admin.
-
-**Analogi:** Seperti **tinta permanen** — sekali ditulis, tidak bisa dihapus.
-
-### 🚫 E. API Key Trading Terbatas
-
-**Apa yang terjadi:** API key untuk robot trading **dilarang** memiliki izin penarikan dana.
-
-**Analogi:** Seperti **kartu ATM yang hanya bisa cek saldo** — tidak bisa tarik tunai.
+> 📖 **Bacaan lengkapnya (untuk Anda maupun AI Anda):**
+> `docs/security-iam-policy.md` · `docs/security-access-matrix.md` · `docs/security/` · `docs/adr/`
+> Sebelum menulis kode fitur baru, AI Anda wajib baca file-file di atas.
 
 ---
 
@@ -463,7 +444,7 @@ Contoh nyata bagaimana Aegis-Forge digunakan.
 
 1. **Buat proyek:** `pwsh scripts/init-new-project.ps1 "WartegBot" "../WartegBot" fullstack`
 2. **Yang dipakai dari Aegis-Forge:**
-   - ✅ `schema-template.sql` → rancang tabel `menu`, `orders`, `order_items`
+   - ✅ `schema.sql` → rancang tabel `menu`, `orders`, `order_items`
    - ✅ `security baseline` → simpan API key WA & LLM terenkripsi
    - ✅ `AGENTS.md` → AI menulis kode dengan aman
    - ✅ `PRD-template.md` → dokumentasikan requirement bot
