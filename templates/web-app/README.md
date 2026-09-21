@@ -18,6 +18,7 @@
 | **RBAC / anti-IDOR** | Server-side role check dependency + ownership predicate on every mutation | `backend/app/core/deps.py`, `backend/app/repositories/__init__.py` |
 | **Rate limiting** | Sliding-window limiter on `/auth/*`: per-account + per-IP on login, per-IP on register/refresh; breach → `429 RATE_LIMITED` + `Retry-After` | `backend/app/core/ratelimit.py`, `backend/app/api/auth.py` (ADR-003) |
 | **Account lockout** | 5 failed logins → 15-min self-expiring lock → `423 LOCKED` before any password work; admin-only unlock, audit-logged; locks/unlocks written to append-only audit trail | `backend/app/core/lockout.py`, `backend/app/api/auth.py`, `backend/app/api/users.py` (ADR-004) |
+| **JML kill-switch** | Admin sets status → `suspended`/`terminated` revokes ALL that user's live sessions in one scoped UPDATE (idempotent, cannot cross users); login refused for non-active; audited with reason in one transaction; admins can't self-suspend | `backend/app/repositories/__init__.py`, `backend/app/api/users.py` (ADR-005) |
 | **Audit trail** | Append-only `audit_logs` (DB trigger blocks UPDATE/DELETE) written on every mutation | `backend/app/models/__init__.py`, `backend/app/services/audit_service.py`, `backend/alembic/versions/0001_init.py` |
 | **Secrets** | All config from env (pydantic-settings); nothing hardcoded | `backend/app/core/config.py`, `.env.example` |
 | **API envelope** | `{success, data, meta}` / `{success, error:{code,message}}` on every response | `backend/app/core/envelope.py` |

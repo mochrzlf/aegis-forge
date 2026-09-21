@@ -26,3 +26,9 @@ class UserOut(BaseModel):
 
     class Config:
         from_attributes = True
+
+
+class UserStatusIn(BaseModel):
+    """Admin-only account status change (JML kill-switch, ADR-005)."""
+    status: str = Field(pattern="^(active|suspended|terminated)$")
+    reason: str | None = Field(default=None, max_length=256)
