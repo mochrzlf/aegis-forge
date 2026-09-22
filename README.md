@@ -57,7 +57,26 @@ Every time someone starts a software project, they spend the **first few days** 
 3. **"How do I stop API keys from leaking to the internet?"** — one small mistake = data stolen.
 4. **"How do I organize folders so code doesn't become a mess as it grows?"**
 
-**Aegis Forge solves all of this *upfront*.** Whether you're building a SaaS portal, an Android app, or an automated trading bot — all core architecture patterns, security checklists, and AI agent rules are ready on day one.
+### 🤖 The Real Problem: Why AI Coding Agents Need Guardrails
+
+Modern AI coding agents (Claude Code, Cursor, Copilot, Hermes) write code at blistering speed. But when asked to build an application from scratch on a blank canvas, **AI agents are notoriously careless with security**:
+
+- 🔓 **Fragile Authentication:** They frequently dump raw JWT tokens into browser `localStorage` (trivially vulnerable to XSS credential theft).
+- 🚪 **Missing Rate Limits:** They omit brute-force defenses, leaving login endpoints vulnerable to automated credential stuffing.
+- 🕳️ **Broken Access Controls:** They forget object-level authorization checks, creating Insecure Direct Object References (IDOR).
+- 💥 **Reckless Trading Algorithms:** If asked to write a trading bot, they often author unhedged grid or martingale algorithms that inevitably liquidate user accounts on market volatility.
+- 🌀 **Hallucinated Scope:** Without an immutable technical contract, they drift from requirements and invent speculative abstractions.
+
+### 🛡️ How Aegis Forge Solves It (The "Earthquake-Proof Bunker" Analogy)
+
+Think of building software like constructing a building:
+- **Hiring an AI agent without Aegis Forge** is like giving a power tool to an eager worker on an empty plot with no blueprint. They might throw up walls in record time, but the foundation is cracked, the plumbing leaks, and the front door has no lock.
+- **Aegis Forge is the earthquake-proof bunker foundation.** It provides:
+  1. ⚡ **An "Electric Fence" for AI Agents (`AGENTS.md` + Spec-First):** AI tools are strictly pinned to verified contracts (`docs/openapi.yaml`, PRD, STRIDE threat models). They are prevented from hallucinating or cutting security corners.
+  2. 🏦 **Enterprise Banking-Grade IAM from Day One:** Zero Trust session management, Refresh Token Rotation (RTR) with replay detection, JML session kill-switches, database-enforced Maker-Checker dual control, and automated lockout.
+  3. 🧱 **Pre-Tested Starter Skeletons:** You never start from zero. The core FastAPI backend, Android Kotlin module, and MQL5 EA trading engine are already built, runtime-verified, and protected by automated CI test suites.
+
+**Aegis Forge solves all of this upfront.** Whether you're building a SaaS portal, an Android app, or an automated trading bot — all core architecture patterns, security checklists, and AI agent rules are ready on day one.
 
 ---
 
