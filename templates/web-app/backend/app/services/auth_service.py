@@ -7,6 +7,7 @@ Refresh Token Rotation (RTR) + reuse detection (AGENTS.md §4.1 / ADR-002):
 """
 from datetime import datetime, timezone
 
+from redis.asyncio import Redis
 from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
