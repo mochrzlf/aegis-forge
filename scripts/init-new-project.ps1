@@ -80,6 +80,10 @@ foreach ($src in $templateMap.Keys) {
     if (Test-Path $srcFull) { Copy-Item $srcFull $destFull -Force }
 }
 
+# --- Remove internal baseline maintenance files from downstream project
+$internalGapFile = Join-Path $TargetPath 'docs/gap-analysis.md'
+if (Test-Path $internalGapFile) { Remove-Item $internalGapFile -Force }
+
 # --- Replace [PROJECT_NAME] placeholder across all text files
 $textExt = '.md', '.yaml', '.yml', '.sql', '.example'
 Get-ChildItem -Path $TargetPath -Recurse -File | Where-Object {

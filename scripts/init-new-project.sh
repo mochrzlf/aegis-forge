@@ -59,6 +59,9 @@ cp "$TARGET_DIR/docs/PRD-template.md" "$TARGET_DIR/docs/PRD.md"
 cp "$TARGET_DIR/docs/PRD-detail-template.md" "$TARGET_DIR/docs/PRD-detail.md"
 cp "$TARGET_DIR/docs/ui-design-template.md" "$TARGET_DIR/docs/ui-design.md"
 
+# Remove internal baseline maintenance files from downstream project
+rm -f "$TARGET_DIR/docs/gap-analysis.md"
+
 # Replace [PROJECT_NAME] placeholder across all text files
 find "$TARGET_DIR" -type f \( -name "*.md" -o -name "*.yaml" -o -name "*.sql" -o -name ".env.example" \) | while read -r file; do
     sed -i "s/\[PROJECT_NAME\]/$PROJECT_NAME/g" "$file"

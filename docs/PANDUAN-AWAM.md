@@ -232,11 +232,9 @@ Anda **tidak perlu jadi ahli keamanan** — Aegis-Forge sudah memasang "pagar pe
 **Yang sudah aktif di proyek turunan (ada kodenya, bukan klaim):**
 - 🛡️ **Alarm kebocoran** — setiap `git commit` dipindai (Gitleaks). Ada password atau API key yang terbawa? **Commit ditolak.**
 - 📜 **Jejak audit anti-manipulasi** — setiap aksi penting tercatat di database dan **tidak bisa dihapus atau diedit**, bahkan oleh admin.
-- 🔐 **Kebijakan keamanan tertulis** — standar IAM, RBAC, rate limiting, enkripsi, dan checklist per domain.
-
-**Yang baru berupa spesifikasi di v0.1.x (kodenya menyusul, lihat `docs/gap-analysis.md`):**
-- 🔒 Penyimpanan mobile terenkripsi (Keystore) dan SSL pinning
-- 🛑 Rem darurat trading (circuit breaker) dan pembatasan izin API key trading
+- 🔐 **Pondasi IAM standar bank** — token rotation (RTR), proteksi brute force/lockout, JML session kill-switch, dan Maker-Checker dual control di level database.
+- 🔒 **Penyimpanan mobile terenkripsi** — Android Keystore (`EncryptedSharedPreferences`), SSL pinning, dan anti-screenshot `FLAG_SECURE` di `templates/mobile-android`.
+- 🛑 **Rem darurat trading (Circuit Breaker)** — bot trading otomatis close-all dan berhenti jika drawdown harian 5%, wajib Hard Stop Loss, serta penolakan izin withdrawal API key di `templates/trading-ea`.
 
 > 📖 **Bacaan lengkapnya (untuk Anda maupun AI Anda):**
 > `docs/security-iam-policy.md` · `docs/security-access-matrix.md` · `docs/security/` · `docs/adr/`
