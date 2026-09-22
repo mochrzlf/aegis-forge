@@ -10,7 +10,7 @@ from datetime import datetime, timedelta, timezone
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.models import ApprovalRequest, User
+from app.models import ApprovalRequest
 from app.repositories import get_user_by_id, revoke_all_refresh_tokens
 from app.services.audit_service import write_audit
 

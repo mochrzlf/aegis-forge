@@ -22,7 +22,6 @@ from app.schemas import (
     PasswordResetRequestIn,
     RegisterIn,
     TokenOut,
-    UserOut,
 )
 from app.services import auth_service, mfa_service
 from app.services.audit_service import write_audit
