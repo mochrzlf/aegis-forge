@@ -278,6 +278,20 @@ git commit -m "feat: add user registration feature"
 
 **Done!** 🎉 Your project now stands on a secure foundation.
 
+### 🎯 Concrete Walkthrough: Building an E-Commerce Store ("TokoKeren")
+
+Here is exactly how the 7 steps look in practice when building an online store:
+
+| Stage | Command / Prompt | What Happens |
+|---|---|---|
+| **1. Initialize (Step 2)** | `bash scripts/init-new-project.sh TokoKeren ../TokoKeren web`<br>*(Select `1` for FastAPI)* | Generates `../TokoKeren/` with pre-wired IAM, unique `.env` crypto keys, gitleaks pre-commit hooks, and starter code. |
+| **2. Navigate** | `cd ../TokoKeren` | Enter your new project workspace. |
+| **3. Plan Specs (Step 3)** | Prompt AI: *"Use the `prd-interviewer` skill to interview me and draft `docs/PRD.md` for TokoKeren (product catalog, cart, checkout, payment webhooks, and buyer/admin roles)."* | AI interviews you and creates an airtight requirement spec without hallucinating scope. |
+| **4. Break Tasks (Step 4)** | Prompt AI: *"Use the `spec-to-tasks` skill to turn `docs/PRD.md` into atomic tasks in `docs/TASKS.md` with explicit `skeleton_hint`."* | AI generates manageable tasks, each pointing to the exact skeleton file to edit. |
+| **5. Start Stack (Step 5)** | `make first-run` | Starts PostgreSQL, Redis, runs DB migrations, and launches FastAPI at `http://localhost:8000` (docs at `/docs`). |
+| **6. Build Feature (Step 6)** | Prompt AI: *"Execute Task 1 from `docs/TASKS.md`: Implement product catalog endpoints per skeleton_hint."* | AI edits existing safe code rather than writing fragile boilerplate from scratch. |
+| **7. Verify & Save (Step 7)** | `make test && make audit`<br>`git add . && git commit -m "feat: add product catalog"` | Runs 20+ automated tests, scans for leaked secrets, and commits cleanly. |
+
 ---
 
 ## 🔐 Security That's Already Built In
