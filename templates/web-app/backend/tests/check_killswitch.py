@@ -21,7 +21,7 @@ from datetime import datetime, timedelta, timezone  # noqa: E402
 
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine  # noqa: E402
 
-from app.models import Base, RefreshToken, User  # noqa: E402
+from app.models import Base, RefreshToken  # noqa: E402
 from app.repositories import (  # noqa: E402
     count_active_refresh_tokens,
     create_user,

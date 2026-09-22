@@ -90,3 +90,17 @@ repos:
         language: system
         files: ^docs/schema.*\.sql$
         pass_filenames: false
+
+
+  # --------------------------------------------------------------------------
+  # 7. Pyflakes lint (ruff, rules F) — catches undefined names and unused
+  #    imports before push. This guards the bug class that crashed the api
+  #    container in the skeleton smoke test (run #7): a type annotation
+  #    referencing a name that was never imported, raised at import time.
+  #    Pyflakes rules only — no style opinions, so it stays fast and quiet.
+  # --------------------------------------------------------------------------
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.16.8
+    hooks:
+      - id: ruff
+        args: ['check', '--select', 'F']
