@@ -380,6 +380,7 @@ This directory holds the frontend codebase for **$ProjectName**.
     $securityPolicyBlock = if ($BankingIam -eq 'yes') {
 @"
    PROYEK INI WAJIB MEMATUHI STANDAR KEAMANAN PERBANKAN (Banking-Grade Zero Trust IAM):
+   - Role-Based Access Control (RBAC) & Anti-IDOR: Enforce server-side role check pada tiap endpoint (superadmin, admin, support, member, guest) dan pastikan kepemilikan resource (Ownership Bound: WHERE id = :id AND user_id = :current_user_id) untuk mengeliminasi celah IDOR/BOLA.
    - Auth & RTR: Gunakan Refresh Token Rotation (RTR). Simpan refresh token HANYA di cookie HttpOnly; Secure; SameSite=Strict. Deteksi Replay Attack (jika token lama dipakai ulang, revoke seluruh keluarga token session tersebut seketika). Dilarang simpan JWT di localStorage.
    - Account Lockout (ADR-004): 5x gagal login berturut-turut WAJIB mengunci akun selama 15 menit (HTTP 423 Locked) SEBELUM komputasi hash password berat (anti-DoS). Sediakan endpoint admin unlock manual.
    - JML Session Kill-Switch (ADR-005): Saat user berstatus 'suspended' atau 'terminated', batalkan semua sesi aktif & token dalam transaksi atomik yang sama. Admin dilarang men-suspend diri sendiri.

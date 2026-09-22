@@ -5,7 +5,21 @@
 
 ---
 
-## 🛡️ 1. Refresh Token Rotation (RTR) & Replay Attack Revocation
+## 🛡️ 1. Role-Based Access Control (RBAC) & Anti-IDOR (BOLA)
+- **Role Hierarchy Standard:**
+  1. `superadmin` (Level 0): Emergency break-glass root account; configuration & security auditing.
+  2. `admin` (Level 1): Operational system manager; user status moderation & approvals review.
+  3. `support` (Level 2): Helpdesk with masked PII data (e.g. view only last 4 digits of email/phone).
+  4. `member` / `user` (Level 3): Standard customer; access strictly bounded to self-owned records.
+  5. `guest` (Level 4): Unauthenticated public endpoints.
+- **Server-Side Guard Enforcement:**
+  Every protected route must inspect the user's role on the server side (`403 FORBIDDEN` if unauthorized).
+- **Anti-IDOR / Anti-BOLA Principle:**
+  Never trust client-supplied entity IDs blindly. Resources must be query-bound to the authenticated user ID (`WHERE id = :id AND user_id = :current_user_id`).
+
+---
+
+## 🛡️ 2. Refresh Token Rotation (RTR) & Replay Attack Revocation
 - **Access Token:** Short-lived JWT (maximum 15 minutes), stateless, containing `sub` (User ID), `role`, and `jti` (unique UUID).
 - **Refresh Token:** Long-lived (7 days), stored in the database ONLY as a cryptographically secure hash (`SHA-256`).
 - **Transport Security:** Refresh token must ONLY be transmitted via HTTP headers using:
@@ -17,7 +31,7 @@
 
 ---
 
-## 🔒 2. Brute-Force Defense & Sliding-Window Account Lockout (ADR-004)
+## 🔒 3. Brute-Force Defense & Sliding-Window Account Lockout (ADR-004)
 - **Failure Threshold:** 5 consecutive failed login attempts.
 - **Lockout Duration:** 15 minutes (`locked_until = now() + 15 minutes`).
 - **Response Code:** `423 Locked` (Error Code: `ACCOUNT_LOCKED`).
@@ -26,7 +40,7 @@
 
 ---
 
-## ⚡ 3. Joiner-Mover-Leaver (JML) Instant Session Kill-Switch (ADR-005)
+## ⚡ 4. Joiner-Mover-Leaver (JML) Instant Session Kill-Switch (ADR-005)
 - **Account State Change:** When a user transitions to `suspended` or `terminated` status:
   1. The user record is updated in the database.
   2. All active refresh tokens, session records, and cached tokens belonging to that user must be **revoked immediately in the same database transaction**.
@@ -35,7 +49,7 @@
 
 ---
 
-## 👁️ 4. Segregation of Duties & Dual Control / Maker-Checker (ADR-006)
+## 👁️ 5. Segregation of Duties & Dual Control / Maker-Checker (ADR-006)
 - **Four-Eyes Principle:** Sensitive and high-risk state mutations (e.g. promoting user roles to admin, financial disbursements, security parameter adjustments, account deactivations) CANNOT be executed directly by a single individual.
 - **Workflow:**
   1. **Maker:** Creates a change request (`status = pending`, `maker_user_id = requester_id`).
@@ -48,7 +62,7 @@
 
 ---
 
-## 📜 5. Tamper-Proof & Append-Only Audit Trail
+## 📜 6. Tamper-Proof & Append-Only Audit Trail
 - **Immutable Table:** The `audit_logs` table must be strictly **append-only**.
 - **Database Trigger:** Prohibit `UPDATE` and `DELETE` operations via database triggers or row-level permissions (SQL state `55000` / Exception).
 - **Anti-PII Logging:**
@@ -58,7 +72,7 @@
 
 ---
 
-## 🌐 6. Hardened Security Headers & Context-Aware Rate Limiting
+## 🌐 7. Hardened Security Headers & Context-Aware Rate Limiting
 - **Security Headers:**
   - `Content-Security-Policy: default-src 'self'`
   - `X-Frame-Options: DENY`
