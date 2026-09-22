@@ -44,3 +44,13 @@ class ErrorCode:
     VALIDATION_ERROR = "VALIDATION_ERROR"
     NOT_FOUND = "NOT_FOUND"
     INTERNAL_ERROR = "INTERNAL_ERROR"
+    # Skeleton-local extensions of the baseline envelope (documented in ADR-003
+    # and ADR-004): auth endpoints can be throttled or locked, and callers need
+    # codes that "slow down" and "account locked" cannot be confused with
+    # "your input is wrong" (VALIDATION_ERROR).
+    RATE_LIMITED = "RATE_LIMITED"
+    LOCKED = "LOCKED"
+    # Skeleton-local extension (documented in ADR-006): a Maker-Checker request
+    # exists for this target already, so the new one is refused rather than
+    # queued — two pending approvals for one role change is a confusion bug.
+    CONFLICT = "CONFLICT"

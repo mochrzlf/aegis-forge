@@ -28,6 +28,20 @@ class Settings(BaseSettings):
     REDIS_PORT: int = 6379
     REDIS_URL: str = "redis://cache:6379/0"
 
+    # Rate limiting on /auth/* (ADR-003). Limits are per identifier per window.
+    # Two bounds each: a tight per-user limit and a looser shared per-IP limit
+    # that stops one attacker spreading guesses across many accounts.
+    RATE_LIMIT_WINDOW_SECONDS: int = 60
+    RATE_LIMIT_LOGIN_USER: int = 10
+    RATE_LIMIT_LOGIN_IP: int = 30
+    RATE_LIMIT_REGISTER_IP: int = 5
+    RATE_LIMIT_REFRESH_IP: int = 60
+
+    # Account lockout after repeated login failures (ADR-004). Both knobs share
+    # one horizon: failures age out after the same span a lock lasts.
+    LOCKOUT_MAX_FAILURES: int = 5
+    LOCKOUT_SECONDS: int = 900
+
     LOG_LEVEL: str = "info"
 
     @property

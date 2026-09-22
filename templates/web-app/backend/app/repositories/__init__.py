@@ -1,8 +1,10 @@
 """Data access with ownership predicates (anti-IDOR)."""
-from sqlalchemy import select
+from datetime import datetime, timezone
+
+from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.models import User
+from app.models import RefreshToken, User
 
 
 async def get_user_by_email(db: AsyncSession, email: str) -> User | None:
@@ -30,3 +32,28 @@ async def get_owned_user(db: AsyncSession, user_id: str, current_user_id: str) -
         select(User).where(User.id == user_id, User.id == current_user_id)
     )
     return res.scalar_one_or_none()
+
+
+async def count_active_refresh_tokens(db: AsyncSession, user_id: str) -> int:
+    res = await db.execute(
+        select(RefreshToken.id)
+        .where(RefreshToken.user_id == user_id, RefreshToken.revoked_at.is_(None))
+    )
+    return len(res.scalars().all())
+
+
+async def revoke_all_refresh_tokens(db: AsyncSession, user_id: str) -> int:
+    """Kill-switch primitive: revoke every live session for a user (AGENTS.md §3.2.1).
+
+    Returns the number of sessions revoked, for audit context. The WHERE clause
+    is scoped to `user_id` so one user's suspension can never touch another's
+    tokens — the ownership rule applied at the data layer, not just the API.
+    """
+    now = datetime.now(timezone.utc)
+    res = await db.execute(
+        update(RefreshToken)
+        .where(RefreshToken.user_id == user_id, RefreshToken.revoked_at.is_(None))
+        .values(revoked_at=now)
+    )
+    return res.rowcount
+

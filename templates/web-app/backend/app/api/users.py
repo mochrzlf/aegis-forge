@@ -1,11 +1,16 @@
 """Users endpoints — demonstrates RBAC + anti-IDOR ownership predicate."""
 from fastapi import APIRouter, Depends, HTTPException, status
+from redis.asyncio import Redis
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.deps import CurrentUser, get_current_user, get_db, require_roles
+from app.core.deps import CurrentUser, get_current_user, get_db, get_redis, require_roles
 from app.core.envelope import ErrorCode, err, ok
-from app.repositories import get_owned_user, get_user_by_id
-from app.schemas import UserOut
+from app.core.lockout import unlock as clear_lockout
+from app.models import User
+from app.repositories import get_owned_user, get_user_by_id, revoke_all_refresh_tokens
+from app.schemas import UserOut, UserStatusIn
+from app.services.audit_service import write_audit
 
 router = APIRouter(prefix="/users", tags=["users"])
 
@@ -38,8 +43,83 @@ async def read_user(
 
 @router.get("", dependencies=[Depends(require_roles("admin"))])
 async def list_users(db: AsyncSession = Depends(get_db)):
-    from sqlalchemy import select
-    from app.models import User
     res = await db.execute(select(User))
     users = [UserOut.model_validate(u).model_dump() for u in res.scalars().all()]
     return ok(users, meta={"page": 1, "per_page": len(users), "total": len(users)})
+
+
+@router.post("/{user_id}/unlock")
+async def unlock_account(
+    user_id: str,
+    actor: CurrentUser = Depends(require_roles("admin")),
+    db: AsyncSession = Depends(get_db),
+    redis: Redis = Depends(get_redis),
+):
+    """Admin-only: lift a temporary login lock (ADR-004).
+
+    Deliberately a state-changing, audit-logged action — not a silent one —
+    because unlocking an account under attack removes a protective control.
+    """
+    db_user = await get_user_by_id(db, user_id)
+    if not db_user:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, detail=err(ErrorCode.NOT_FOUND, "User not found"))
+    await clear_lockout(redis, db_user.email)
+    await write_audit(
+        db,
+        actor_user_id=actor.id,
+        action="user.unlock",
+        resource=f"user:{db_user.id}",
+        detail="Admin lifted login lockout",
+    )
+    return ok({"user_id": db_user.id, "lockout_cleared": True})
+
+
+@router.put("/{user_id}/status")
+async def set_user_status(
+    user_id: str,
+    payload: UserStatusIn,
+    actor: CurrentUser = Depends(require_roles("admin")),
+    db: AsyncSession = Depends(get_db),
+    redis: Redis = Depends(get_redis),
+):
+    """JML kill-switch: change account status (ADR-005).
+
+    Suspending or terminating a user immediately revokes every live session, so
+    a dismissed or compromised account cannot keep using an issued token.
+    """
+    db_user = await get_user_by_id(db, user_id)
+    if not db_user:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, detail=err(ErrorCode.NOT_FOUND, "User not found"))
+
+    previous = db_user.status
+    if previous == payload.status:
+        return ok({"user_id": db_user.id, "status": payload.status, "sessions_revoked": 0})
+
+    # Self-protection: an admin removing their own access would lock out every
+    # other admin's ability to manage the account. Guard, and say so plainly.
+    if payload.status in {"suspended", "terminated"} and actor.id == db_user.id:
+        raise HTTPException(
+            status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail=err(ErrorCode.VALIDATION_ERROR, "Admins may not suspend or terminate their own account"),
+        )
+
+    db_user.status = payload.status
+
+    sessions_revoked = 0
+    if payload.status in {"suspended", "terminated"}:
+        sessions_revoked = await revoke_all_refresh_tokens(db, db_user.id)
+        await clear_lockout(redis, db_user.email)
+
+    await write_audit(
+        db,
+        actor_user_id=actor.id,
+        action=f"user.status.{previous}_to_{payload.status}",
+        resource=f"user:{db_user.id}",
+        detail=payload.reason or f"Status changed from {previous} to {payload.status}",
+    )
+    return ok({
+        "user_id": db_user.id,
+        "previous_status": previous,
+        "status": payload.status,
+        "sessions_revoked": sessions_revoked,
+    })

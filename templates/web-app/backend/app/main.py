@@ -3,7 +3,7 @@ from fastapi import FastAPI, Request, status
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 
-from app.api import auth, health, users
+from app.api import approvals, auth, health, users
 from app.core.config import settings
 from app.core.envelope import ErrorCode, err
 from app.core.logging import configure_logging
@@ -38,3 +38,4 @@ async def unhandled_handler(request: Request, exc: Exception):
 app.include_router(health.router, prefix=settings.API_PREFIX)
 app.include_router(auth.router, prefix=settings.API_PREFIX)
 app.include_router(users.router, prefix=settings.API_PREFIX)
+app.include_router(approvals.router, prefix=settings.API_PREFIX)
