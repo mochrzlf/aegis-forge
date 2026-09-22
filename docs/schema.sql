@@ -231,3 +231,25 @@ CREATE TRIGGER set_timestamp_credentials
     BEFORE UPDATE ON third_party_credentials
     FOR EACH ROW
     EXECUTE PROCEDURE trigger_set_timestamp();
+
+-- -----------------------------------------------------------------------------
+-- 8. AUTH TOKENS (Password Reset + Email Verification — Single-Use, Hashed)
+-- -----------------------------------------------------------------------------
+-- Opaque bearer secrets, emailed to the user exactly once. Only the SHA-256
+-- hash is stored, so a database leak yields no usable links (same storage
+-- pattern as refresh_tokens, ADR-002 / ADR-007). `consumed_at` is the
+-- single-use marker; verification state itself lands on
+-- users.email_verified_at above (§1).
+CREATE TABLE auth_tokens (
+    id                      UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id                 UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    token_hash              VARCHAR(64) NOT NULL UNIQUE,        -- SHA-256 of the raw token
+    purpose                 VARCHAR(32) NOT NULL,               -- 'password_reset' | 'email_verification'
+    expires_at              TIMESTAMPTZ NOT NULL,
+    consumed_at             TIMESTAMPTZ,                        -- set once, on redemption
+    created_at              TIMESTAMPTZ NOT NULL DEFAULT now(),
+
+    CONSTRAINT chk_auth_token_purpose CHECK (purpose IN ('password_reset', 'email_verification'))
+);
+CREATE INDEX idx_auth_tokens_hash ON auth_tokens(token_hash);
+CREATE INDEX idx_auth_tokens_user_purpose ON auth_tokens(user_id, purpose);

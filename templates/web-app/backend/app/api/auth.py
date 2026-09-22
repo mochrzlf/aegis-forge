@@ -1,16 +1,25 @@
 """Auth endpoints — refresh token ONLY via HttpOnly cookie."""
-import hashlib
-
 from fastapi import APIRouter, Depends, HTTPException, Response, Request, status
 from redis.asyncio import Redis
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core import security
 from app.core.config import settings
-from app.core.deps import get_db, get_redis
+from app.core.deps import CurrentUser, get_current_user, get_db, get_redis
 from app.core.envelope import ErrorCode, err, ok
 from app.core.lockout import is_locked, register_failure
+from app.core.mailer import send_email
 from app.core.ratelimit import client_ip, enforce_rate_limit
-from app.schemas import LoginIn, RegisterIn, TokenOut, UserOut
+from app.repositories import get_user_by_id
+from app.schemas import (
+    EmailVerificationConfirmIn,
+    LoginIn,
+    PasswordResetConfirmIn,
+    PasswordResetRequestIn,
+    RegisterIn,
+    TokenOut,
+    UserOut,
+)
 from app.services import auth_service
 from app.services.audit_service import write_audit
 from app.services.auth_service import AuthError
@@ -40,6 +49,7 @@ def _auth_error(exc: AuthError) -> HTTPException:
     status_map = {
         ErrorCode.UNAUTHORIZED: status.HTTP_401_UNAUTHORIZED,
         ErrorCode.FORBIDDEN: status.HTTP_403_FORBIDDEN,
+        ErrorCode.NOT_FOUND: status.HTTP_404_NOT_FOUND,
         ErrorCode.VALIDATION_ERROR: status.HTTP_422_UNPROCESSABLE_ENTITY,
     }
     return HTTPException(
@@ -50,7 +60,7 @@ def _auth_error(exc: AuthError) -> HTTPException:
 
 def _hash_email(email: str) -> str:
     """SHA-256 prefix for audit references — email is PII, never logged raw."""
-    return hashlib.sha256(email.encode("utf-8")).hexdigest()[:16]
+    return security.email_fingerprint(email)
 
 
 @router.post("/register", status_code=status.HTTP_201_CREATED)
@@ -70,10 +80,18 @@ async def register(
         settings.RATE_LIMIT_WINDOW_SECONDS,
     )
     try:
-        await auth_service.register(db, payload.email, payload.password)
+        new_user = await auth_service.register(db, payload.email, payload.password)
         access, refresh, expires = await auth_service.login(db, payload.email, payload.password)
+        verify_token = await auth_service.request_email_verification(db, new_user.id)
     except AuthError as exc:
         raise _auth_error(exc)
+    await send_email(
+        payload.email,
+        "Verify your email",
+        f"Verify your account (link valid {settings.EMAIL_VERIFICATION_TOKEN_HOURS} h): "
+        f"{settings.APP_BASE_URL}/verify-email?token={verify_token}\n"
+        "If you did not create this account, ignore this email.",
+    )
     _set_refresh_cookie(response, refresh)
     return ok(TokenOut(access_token=access, expires_in=expires).model_dump())
 
@@ -166,3 +184,110 @@ async def logout(request: Request, response: Response, db: AsyncSession = Depend
         await auth_service.logout(db, token)
     _clear_refresh_cookie(response)
     return ok({"logged_out": True})
+
+
+@router.post("/password-reset/request")
+async def request_password_reset(
+    payload: PasswordResetRequestIn,
+    request: Request,
+    db: AsyncSession = Depends(get_db),
+    redis: Redis = Depends(get_redis),
+):
+    """Email a single-use reset link (ADR-007).
+
+    The response is identical whether or not the address is registered — an
+    unauthenticated caller may not learn which accounts exist.
+    """
+    await enforce_rate_limit(
+        redis,
+        f"rl:pwreset:ip:{client_ip(request)}",
+        settings.RATE_LIMIT_PASSWORD_RESET_REQUEST_IP,
+        settings.RATE_LIMIT_WINDOW_SECONDS,
+    )
+    await enforce_rate_limit(
+        redis,
+        f"rl:pwreset:user:{payload.email.lower()}",
+        settings.RATE_LIMIT_PASSWORD_RESET_EMAIL,
+        settings.RATE_LIMIT_WINDOW_SECONDS,
+    )
+    token = await auth_service.request_password_reset(db, payload.email)
+    if token is not None:
+        await send_email(
+            payload.email,
+            "Reset your password",
+            f"Reset link (valid {settings.PASSWORD_RESET_TOKEN_MINUTES} min): "
+            f"{settings.APP_BASE_URL}/reset-password?token={token}\n"
+            "If you did not request this, ignore this email — your password is unchanged.",
+        )
+    return ok({"requested": True})
+
+
+@router.post("/password-reset/confirm")
+async def confirm_password_reset(
+    payload: PasswordResetConfirmIn,
+    request: Request,
+    db: AsyncSession = Depends(get_db),
+    redis: Redis = Depends(get_redis),
+):
+    """Redeem a reset link and set a new password (ADR-007)."""
+    await enforce_rate_limit(
+        redis,
+        f"rl:pwreset-confirm:ip:{client_ip(request)}",
+        settings.RATE_LIMIT_PASSWORD_RESET_CONFIRM_IP,
+        settings.RATE_LIMIT_WINDOW_SECONDS,
+    )
+    try:
+        user = await auth_service.confirm_password_reset(db, payload.token, payload.new_password)
+    except AuthError as exc:
+        raise _auth_error(exc)
+    return ok({"user_id": user.id, "password_changed": True})
+
+
+@router.post("/email-verification/request")
+async def request_email_verification(
+    request: Request,
+    user: CurrentUser = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+    redis: Redis = Depends(get_redis),
+):
+    """Send (or resend) a verification link for the caller's own address (ADR-007)."""
+    await enforce_rate_limit(
+        redis,
+        f"rl:verifyreq:ip:{client_ip(request)}",
+        settings.RATE_LIMIT_EMAIL_VERIFICATION_REQUEST_IP,
+        settings.RATE_LIMIT_WINDOW_SECONDS,
+    )
+    try:
+        token = await auth_service.request_email_verification(db, user.id)
+    except AuthError as exc:
+        raise _auth_error(exc)
+    db_user = await get_user_by_id(db, user.id)
+    await send_email(
+        db_user.email,
+        "Verify your email",
+        f"Verify your account (link valid {settings.EMAIL_VERIFICATION_TOKEN_HOURS} h): "
+        f"{settings.APP_BASE_URL}/verify-email?token={token}\n"
+        "If you did not request this, ignore this email.",
+    )
+    return ok({"verification_sent": True})
+
+
+@router.post("/email-verification/confirm")
+async def confirm_email_verification(
+    payload: EmailVerificationConfirmIn,
+    request: Request,
+    db: AsyncSession = Depends(get_db),
+    redis: Redis = Depends(get_redis),
+):
+    """Redeem a verification link (ADR-007)."""
+    await enforce_rate_limit(
+        redis,
+        f"rl:verifyconf:ip:{client_ip(request)}",
+        settings.RATE_LIMIT_EMAIL_VERIFICATION_CONFIRM_IP,
+        settings.RATE_LIMIT_WINDOW_SECONDS,
+    )
+    try:
+        user = await auth_service.confirm_email_verification(db, payload.token)
+    except AuthError as exc:
+        raise _auth_error(exc)
+    return ok({"user_id": user.id, "email_verified": True})
