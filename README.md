@@ -249,8 +249,8 @@ This is the biggest time-saver. Aegis Forge ships **runnable starter skeletons**
 | Skeleton | Best for | What's inside |
 |---|---|---|
 | **`templates/web-app/`** ⭐ default | A secure backend/API (Python) | FastAPI + Postgres + Redis. Login (RTR), RBAC/anti-IDOR, lockout, JML kill-switch, Maker-Checker, MFA/TOTP, audit trail — **CI smoke-tested & Pytest verified (20 tests)**. |
-| **`templates/web-app-express/`** | A secure backend/API (TypeScript) | Express.js + Postgres + Redis. Login (RTR), lockout, JML kill-switch, Maker-Checker DB constraint, audit trigger — **Vitest verified (9 tests)**. |
-| **`templates/web-app-laravel/`** | A secure backend/API (PHP) | Laravel 11 + Postgres + Redis. Login (RTR), lockout, JML kill-switch, Maker-Checker DB constraint, audit trail — **PHPUnit verified (10 tests)**. |
+| **`templates/web-app-express/`** | A secure backend/API (TypeScript) | Express.js + Postgres + Redis. Login (RTR), RBAC/anti-IDOR, lockout, JML kill-switch, Maker-Checker DB constraint, audit trigger — **Vitest verified (9 tests)**. |
+| **`templates/web-app-laravel/`** | A secure backend/API (PHP) | Laravel 11 + Postgres + Redis. Login (RTR), RBAC/anti-IDOR, lockout, JML kill-switch, Maker-Checker DB constraint, audit trail — **PHPUnit verified (10 tests)**. |
 | **`templates/trading-ea/`** | Algo trading & Expert Advisors | FastAPI Risk Guardian bridge + native MQL5 EA template (`AegisRiskGuardianEA.mq5`). Dynamic lot sizing (1-2%), hard SL, 5% drawdown circuit breaker — **Pytest verified (6 tests)**. |
 | **`templates/mobile-android/`** | Secure native Android app | Kotlin Native with Android Keystore `SecureStorage` (AES256-GCM), `network_security_config.xml` (SSL Pinning), `FLAG_SECURE` screen protection, and ProGuard/R8 rules. |
 | **`templates/web-app-nextjs-supabase/`** | Fast website with UI | Next.js + Supabase. Pages, login, dashboard (RLS). Reference-only alternative. |
@@ -330,6 +330,9 @@ You **don't need to be a security expert** — these protections are active from
 - 🛑 **Trading Emergency Brake:** If the trading bot loses up to the daily limit (e.g., 5% of capital), the system **automatically stops** to protect your funds.
 - 📜 **Tamper-Proof Audit Trail:** Every important action is recorded in the database and **cannot be deleted or edited** — useful for audits and investigations.
 - 🚫 **Restricted Trading API Keys:** API keys for the trading bot are **forbidden** from having withdrawal permission — so even if they leak, your funds stay safe.
+- 👥 **Role-Based Access Control (RBAC):** Strict 5-level role hierarchy (`superadmin`, `admin`, `support`, `member`, `guest`) with anti-IDOR/BOLA query binding (`WHERE id = :id AND user_id = :current_user_id`).
+- ⚡ **JML Instant Kill-Switch:** Suspending or terminating a user account revokes all active refresh tokens and sessions immediately.
+- 👁️ **Dual Control / Maker-Checker:** High-risk actions (role promotions, fund disbursements) require dual authorization with database-level constraint prevention (`maker_id <> checker_id`).
 
 ---
 
@@ -361,7 +364,11 @@ aegis-forge/
 ├── 📁 evals/                   ← 🧪 Tests for AI output quality
 ├── 📁 skills/                  ← 🛡️ Installable "rule packs" for AI agents
 ├── 📁 templates/               ← 🏠 Runnable starter skeletons (copy & run!)
-│   ├── web-app/                ←   FastAPI + Postgres + Redis (secure backend)
+│   ├── web-app/                ←   FastAPI + Postgres + Redis (secure Python backend)
+│   ├── web-app-express/        ←   Express.js + TypeScript + Postgres + Redis (Node.js)
+│   ├── web-app-laravel/        ←   Laravel 11 + Postgres + Redis + Nginx (PHP)
+│   ├── trading-ea/             ←   FastAPI Risk Guardian + MQL5 EA (Algo Trading)
+│   ├── mobile-android/         ←   Android Kotlin (Keystore + Pinning + FLAG_SECURE)
 │   └── web-app-nextjs-supabase/←   Next.js + Supabase (full website + UI)
 └── 📁 scripts/                 ← ⚙️ Automation scripts
     ├── init-new-project.sh     ← Create project (Linux/Mac)
