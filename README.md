@@ -249,6 +249,19 @@ cp -r templates/web-app/* .
 make first-run     # copies .env, builds, runs migrations → app live at localhost:8000
 ```
 
+> 🖥️ **Where does the Frontend UI go? (Option A vs. Option B)**
+>
+> The default skeleton (`templates/web-app/`) is an **API-first / Headless Backend** (FastAPI + Postgres + Redis). Right after `make first-run`, you have:
+> - Interactive API documentation at `http://localhost:8000/docs` (Swagger UI)
+> - Mailpit web client at `http://localhost:8025` (simulated inbox for password reset & verify emails)
+>
+> **When and where do you create your frontend (React, Vite, Next.js, or Vue)?**
+> - **In Step 3 (Define Specs):** Define your UI mockups, screens, and design tokens in `docs/ui-design.md` and `docs/PRD.md`.
+> - **In Step 6 (Build Features):** Ask your AI agent:
+>   > *"Scaffold a frontend in `frontend/` using React + Vite + Tailwind CSS that connects to our FastAPI backend at `http://localhost:8000`."*
+>
+> *(Prefer a skeleton with a pre-built web UI from day one? Choose `2) web-app-nextjs-supabase` in Step 2).*
+
 > 💡 Your AI's tasks in `TASKS.md` already say *which skeleton file to edit* (the `skeleton_hint`) — so it modifies existing safe code instead of generating new code from nothing.
 
 ### Step 6 — Build Your Features
@@ -289,7 +302,7 @@ Here is exactly how the 7 steps look in practice when building an online store:
 | **3. Plan Specs (Step 3)** | Prompt AI: *"Use the `prd-interviewer` skill to interview me and draft `docs/PRD.md` for TokoKeren (product catalog, cart, checkout, payment webhooks, and buyer/admin roles)."* | AI interviews you and creates an airtight requirement spec without hallucinating scope. |
 | **4. Break Tasks (Step 4)** | Prompt AI: *"Use the `spec-to-tasks` skill to turn `docs/PRD.md` into atomic tasks in `docs/TASKS.md` with explicit `skeleton_hint`."* | AI generates manageable tasks, each pointing to the exact skeleton file to edit. |
 | **5. Start Stack (Step 5)** | `make first-run` | Starts PostgreSQL, Redis, runs DB migrations, and launches FastAPI at `http://localhost:8000` (docs at `/docs`). |
-| **6. Build Feature (Step 6)** | Prompt AI: *"Execute Task 1 from `docs/TASKS.md`: Implement product catalog endpoints per skeleton_hint."* | AI edits existing safe code rather than writing fragile boilerplate from scratch. |
+| **6. Build Backend & UI (Step 6)** | Prompt AI:<br>• *(Backend)* *"Execute Task 1 from `docs/TASKS.md`: Implement product catalog endpoints per skeleton_hint."*<br>• *(Frontend UI - Option A)* *"Scaffold a web frontend in `frontend/` using Vite + React + Tailwind CSS that connects to `http://localhost:8000`."* | AI edits existing safe backend code first, then scaffolds the decoupled web UI. |
 | **7. Verify & Save (Step 7)** | `make test && make audit`<br>`git add . && git commit -m "feat: add product catalog"` | Runs 20+ automated tests, scans for leaked secrets, and commits cleanly. |
 
 ---
