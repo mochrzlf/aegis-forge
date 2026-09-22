@@ -51,6 +51,22 @@ class EmailVerificationConfirmIn(BaseModel):
     token: str = Field(min_length=1, max_length=128)
 
 
+class MfaCodeIn(BaseModel):
+    """A 6-digit TOTP code or a one-time backup code (ADR-008)."""
+    code: str = Field(min_length=6, max_length=64)
+
+
+class MfaEnrollOut(BaseModel):
+    """TOTP secret + provisioning URI for a QR code. Shown once, client-side."""
+    secret: str
+    otpauth_uri: str
+
+
+class BackupCodesOut(BaseModel):
+    """Backup codes are returned exactly once at activation (ADR-008)."""
+    backup_codes: list[str]
+
+
 class UserStatusIn(BaseModel):
     """Admin-only account status change (JML kill-switch, ADR-005)."""
     status: str = Field(pattern="^(active|suspended|terminated)$")

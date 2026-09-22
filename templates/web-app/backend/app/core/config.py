@@ -65,6 +65,13 @@ class Settings(BaseSettings):
     RATE_LIMIT_EMAIL_VERIFICATION_REQUEST_IP: int = 5
     RATE_LIMIT_EMAIL_VERIFICATION_CONFIRM_IP: int = 10
 
+    # MFA / TOTP step-up (ADR-008). pyotp is the one sanctioned new dependency
+    # (gap-analysis rule 5). The step-up token is deliberately minutes-scoped.
+    MFA_STEP_UP_TOKEN_MINUTES: int = 5
+    MFA_BACKUP_CODE_COUNT: int = 10
+    TOTP_REPLAY_TTL_SECONDS: int = 90   # covers pyotp's ±1 window (3 x 30s)
+    RATE_LIMIT_MFA_IP: int = 10         # per IP — 6-digit brute-force bound
+
     LOG_LEVEL: str = "info"
 
     @property

@@ -48,15 +48,92 @@ async def _issue_token_pair(db: AsyncSession, user: User, parent_id: str | None 
     return access, refresh
 
 
-async def login(db: AsyncSession, email: str, password: str) -> tuple[str, str, int]:
+async def authenticate(db: AsyncSession, email: str, password: str) -> User:
+    """Check credentials and account state.
+
+    The shared precondition of every login path, so MFA and plain login cannot
+    drift on what "valid credentials" means.
+    """
     user = await get_user_by_email(db, email)
     if not user or not security.verify_password(password, user.hashed_password):
         raise AuthError("UNAUTHORIZED", "Invalid credentials")
     if user.status != "active":
         raise AuthError("FORBIDDEN", "Account is not active")
+    return user
+
+
+async def login(db: AsyncSession, email: str, password: str) -> tuple[str, str, int]:
+    user = await authenticate(db, email, password)
+    return await issue_session(db, user)
+
+
+async def issue_session(db: AsyncSession, user: User) -> tuple[str, str, int]:
+    """Full login for a user who has passed every factor."""
     access, refresh = await _issue_token_pair(db, user)
     await write_audit(db, actor_user_id=user.id, action="user.login", resource=f"user:{user.id}")
     return access, refresh, settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60
+
+
+async def issue_mfa_session(db: AsyncSession, user: User) -> str:
+    """Half-authenticated session: a refresh token exists, but no access token
+    is issued until the second factor is proven (ADR-008)."""
+    _, refresh = await _issue_token_pair(db, user)
+    await write_audit(
+        db,
+        actor_user_id=user.id,
+        action="user.login_mfa_challenge",
+        resource=f"user:{user.id}",
+    )
+    return refresh
+
+
+async def complete_mfa_login(
+    db: AsyncSession, redis: Redis, presented_token: str, code: str
+) -> tuple[str, str, int]:
+    """Finish an MFA login: validate the pending refresh token and the TOTP
+    code, then rotate to a fully authenticated session."""
+    from app.services import mfa_service
+
+    token_hash = security.hash_refresh_token(presented_token)
+    res = await db.execute(select(RefreshToken).where(RefreshToken.token_hash == token_hash))
+    stored = res.scalar_one_or_none()
+    if stored is None:
+        raise AuthError("UNAUTHORIZED", "Invalid refresh token")
+
+    now = datetime.now(timezone.utc)
+    expires_at = stored.expires_at
+    if expires_at.tzinfo is None:
+        expires_at = expires_at.replace(tzinfo=timezone.utc)
+    if stored.revoked_at is not None or expires_at < now:
+        raise AuthError("UNAUTHORIZED", "Invalid refresh token")
+
+    res_user = await db.execute(select(User).where(User.id == stored.user_id))
+    user = res_user.scalar_one_or_none()
+    if not user or not user.mfa_enabled:
+        raise AuthError("FORBIDDEN", "MFA is not required for this account")
+
+    method = await mfa_service.verify_code(db, redis, user, code)
+    if method is None:
+        await write_audit(
+            db,
+            actor_user_id=user.id,
+            action="user.mfa.login_failed",
+            resource=f"user:{user.id}",
+            detail="Failed second factor on MFA login",
+        )
+        await db.commit()
+        raise AuthError("UNAUTHORIZED", "Invalid TOTP code")
+
+    stored.revoked_at = now
+    access, new_refresh = await _issue_token_pair(db, user, parent_id=stored.id)
+    await write_audit(
+        db,
+        actor_user_id=user.id,
+        action="user.login",
+        resource=f"user:{user.id}",
+        detail=f"Login completed via MFA ({method})",
+    )
+    return access, new_refresh, settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60
 
 
 async def refresh(db: AsyncSession, presented_token: str) -> tuple[str, str, int]:

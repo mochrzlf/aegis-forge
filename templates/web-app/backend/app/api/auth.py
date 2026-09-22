@@ -10,23 +10,26 @@ from app.core.envelope import ErrorCode, err, ok
 from app.core.lockout import is_locked, register_failure
 from app.core.mailer import send_email
 from app.core.ratelimit import client_ip, enforce_rate_limit
+from app.core.security import REFRESH_COOKIE
 from app.repositories import get_user_by_id
 from app.schemas import (
+    BackupCodesOut,
     EmailVerificationConfirmIn,
     LoginIn,
+    MfaCodeIn,
+    MfaEnrollOut,
     PasswordResetConfirmIn,
     PasswordResetRequestIn,
     RegisterIn,
     TokenOut,
     UserOut,
 )
-from app.services import auth_service
+from app.services import auth_service, mfa_service
 from app.services.audit_service import write_audit
 from app.services.auth_service import AuthError
+from app.services.mfa_service import MfaError
 
 router = APIRouter(prefix="/auth", tags=["auth"])
-
-REFRESH_COOKIE = "refresh_token"
 
 
 def _set_refresh_cookie(response: Response, refresh_token: str) -> None:
@@ -51,6 +54,21 @@ def _auth_error(exc: AuthError) -> HTTPException:
         ErrorCode.FORBIDDEN: status.HTTP_403_FORBIDDEN,
         ErrorCode.NOT_FOUND: status.HTTP_404_NOT_FOUND,
         ErrorCode.VALIDATION_ERROR: status.HTTP_422_UNPROCESSABLE_ENTITY,
+        ErrorCode.CONFLICT: status.HTTP_409_CONFLICT,
+    }
+    return HTTPException(
+        status_code=status_map.get(exc.code, status.HTTP_400_BAD_REQUEST),
+        detail=err(exc.code, exc.message),
+    )
+
+
+def _mfa_error(exc: MfaError) -> HTTPException:
+    status_map = {
+        ErrorCode.UNAUTHORIZED: status.HTTP_401_UNAUTHORIZED,
+        ErrorCode.FORBIDDEN: status.HTTP_403_FORBIDDEN,
+        ErrorCode.NOT_FOUND: status.HTTP_404_NOT_FOUND,
+        ErrorCode.VALIDATION_ERROR: status.HTTP_422_UNPROCESSABLE_ENTITY,
+        ErrorCode.CONFLICT: status.HTTP_409_CONFLICT,
     }
     return HTTPException(
         status_code=status_map.get(exc.code, status.HTTP_400_BAD_REQUEST),
@@ -129,7 +147,7 @@ async def login(
             ),
         )
     try:
-        access, refresh, expires = await auth_service.login(db, payload.email, payload.password)
+        user = await auth_service.authenticate(db, payload.email, payload.password)
     except AuthError as exc:
         # Only a genuine credential failure counts towards the lock — a
         # non-active account (FORBIDDEN) or validation errors must not.
@@ -143,6 +161,15 @@ async def login(
                     detail=f"Locked after {settings.LOCKOUT_MAX_FAILURES} failed logins",
                 )
         raise _auth_error(exc)
+    if user.mfa_enabled:
+        # Half-authenticated: the refresh cookie is set, but no access token is
+        # issued until the second factor is proven (ADR-008). The client
+        # completes the flow at /auth/login/totp.
+        refresh = await auth_service.issue_mfa_session(db, user)
+        _set_refresh_cookie(response, refresh)
+        response.status_code = status.HTTP_202_ACCEPTED
+        return ok({"mfa_required": True})
+    access, refresh, expires = await auth_service.issue_session(db, user)
     _set_refresh_cookie(response, refresh)
     return ok(TokenOut(access_token=access, expires_in=expires).model_dump())
 
@@ -291,3 +318,164 @@ async def confirm_email_verification(
     except AuthError as exc:
         raise _auth_error(exc)
     return ok({"user_id": user.id, "email_verified": True})
+
+
+# --- MFA / TOTP step-up (ADR-008) --------------------------------------------
+
+
+@router.post("/mfa/enroll")
+async def enroll_mfa(
+    request: Request,
+    user: CurrentUser = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+    redis: Redis = Depends(get_redis),
+):
+    """Mint a TOTP secret. Inactive until the client proves it at /activate."""
+    await enforce_rate_limit(
+        redis,
+        f"rl:mfa:ip:{client_ip(request)}",
+        settings.RATE_LIMIT_MFA_IP,
+        settings.RATE_LIMIT_WINDOW_SECONDS,
+    )
+    try:
+        secret, otpauth_uri = await mfa_service.enroll(db, user.id)
+    except MfaError as exc:
+        raise _mfa_error(exc)
+    # The secret is shown once, in-band, for manual entry — it is not emailed
+    # and it is not logged.
+    return ok(MfaEnrollOut(secret=secret, otpauth_uri=otpauth_uri).model_dump())
+
+
+@router.post("/mfa/activate")
+async def activate_mfa(
+    payload: MfaCodeIn,
+    request: Request,
+    user: CurrentUser = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+    redis: Redis = Depends(get_redis),
+):
+    """Confirm the first TOTP code and switch MFA on. Backup codes: once only."""
+    await enforce_rate_limit(
+        redis,
+        f"rl:mfa:ip:{client_ip(request)}",
+        settings.RATE_LIMIT_MFA_IP,
+        settings.RATE_LIMIT_WINDOW_SECONDS,
+    )
+    try:
+        codes = await mfa_service.activate(db, redis, user.id, payload.code)
+    except MfaError as exc:
+        raise _mfa_error(exc)
+    return ok(BackupCodesOut(backup_codes=codes).model_dump())
+
+
+@router.post("/login/totp")
+async def login_totp(
+    payload: MfaCodeIn,
+    request: Request,
+    response: Response,
+    db: AsyncSession = Depends(get_db),
+    redis: Redis = Depends(get_redis),
+):
+    """Complete the half-authenticated login from /auth/login (ADR-008)."""
+    await enforce_rate_limit(
+        redis,
+        f"rl:mfa:ip:{client_ip(request)}",
+        settings.RATE_LIMIT_MFA_IP,
+        settings.RATE_LIMIT_WINDOW_SECONDS,
+    )
+    presented = request.cookies.get(REFRESH_COOKIE)
+    if not presented:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail=err(ErrorCode.UNAUTHORIZED, "Missing refresh token"),
+        )
+    try:
+        access, refresh, expires = await auth_service.complete_mfa_login(
+            db, redis, presented, payload.code
+        )
+    except AuthError as exc:
+        # A failed second factor voids the pending session — the client must
+        # re-authenticate from /auth/login.
+        _clear_refresh_cookie(response)
+        raise _auth_error(exc)
+    _set_refresh_cookie(response, refresh)
+    return ok(TokenOut(access_token=access, expires_in=expires).model_dump())
+
+
+@router.post("/step-up")
+async def step_up(
+    payload: MfaCodeIn,
+    request: Request,
+    user: CurrentUser = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+    redis: Redis = Depends(get_redis),
+):
+    """Trade a TOTP code for a short-lived step-up token (security-iam-policy
+    §41, ADR-008). Required by /users/me DELETE and every later step-up consumer."""
+    await enforce_rate_limit(
+        redis,
+        f"rl:mfa:ip:{client_ip(request)}",
+        settings.RATE_LIMIT_MFA_IP,
+        settings.RATE_LIMIT_WINDOW_SECONDS,
+    )
+    db_user = await get_user_by_id(db, user.id)
+    if not db_user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=err(ErrorCode.NOT_FOUND, "Account not found"),
+        )
+    if not db_user.mfa_enabled:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail=err(ErrorCode.FORBIDDEN, "MFA is not active on this account"),
+        )
+    method = await mfa_service.verify_code(db, redis, db_user, payload.code)
+    if method is None:
+        await write_audit(
+            db,
+            actor_user_id=user.id,
+            action="user.mfa.step_up_failed",
+            resource=f"user:{user.id}",
+        )
+        await db.commit()
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail=err(ErrorCode.UNAUTHORIZED, "Invalid TOTP code"),
+        )
+    token = security.create_step_up_token(db_user.id, db_user.role)
+    await write_audit(
+        db,
+        actor_user_id=user.id,
+        action="user.mfa.step_up",
+        resource=f"user:{user.id}",
+        detail=f"Step-up granted via {method}",
+    )
+    await db.commit()
+    return ok(
+        {
+            "step_up_token": token,
+            "expires_in": settings.MFA_STEP_UP_TOKEN_MINUTES * 60,
+        }
+    )
+
+
+@router.post("/mfa/disable")
+async def disable_mfa(
+    payload: MfaCodeIn,
+    request: Request,
+    user: CurrentUser = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+    redis: Redis = Depends(get_redis),
+):
+    """Turn MFA off. A live code is required — weakening an account is not free."""
+    await enforce_rate_limit(
+        redis,
+        f"rl:mfa:ip:{client_ip(request)}",
+        settings.RATE_LIMIT_MFA_IP,
+        settings.RATE_LIMIT_WINDOW_SECONDS,
+    )
+    try:
+        await mfa_service.disable(db, redis, user.id, payload.code)
+    except MfaError as exc:
+        raise _mfa_error(exc)
+    return ok({"mfa_disabled": True})

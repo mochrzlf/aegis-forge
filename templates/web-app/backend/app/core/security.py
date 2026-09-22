@@ -73,3 +73,20 @@ def password_reset_token_expiry() -> datetime:
 
 def email_verification_token_expiry() -> datetime:
     return datetime.now(timezone.utc) + timedelta(hours=settings.EMAIL_VERIFICATION_TOKEN_HOURS)
+
+
+# HttpOnly refresh-token cookie name (AGENTS.md §4.1); shared by auth + users.
+REFRESH_COOKIE = "refresh_token"
+
+
+def create_step_up_token(subject: str, role: str) -> str:
+    """Short-lived JWT: holder cleared a fresh TOTP challenge (ADR-008)."""
+    now = datetime.now(timezone.utc)
+    payload = {
+        "sub": subject,
+        "role": role,
+        "step_up": True,
+        "iat": now,
+        "exp": now + timedelta(minutes=settings.MFA_STEP_UP_TOKEN_MINUTES),
+    }
+    return jwt.encode(payload, settings.JWT_SECRET, algorithm=settings.JWT_ALGORITHM)

@@ -8,4 +8,5 @@ alembic==1.*
 redis==5.*
 passlib[argon2]==1.*
 PyJWT==2.*
+pyotp==2.*
 email-validator==2.*

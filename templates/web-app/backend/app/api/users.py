@@ -1,10 +1,19 @@
 """Users endpoints — demonstrates RBAC + anti-IDOR ownership predicate."""
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Response, status
 from redis.asyncio import Redis
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.deps import CurrentUser, get_current_user, get_db, get_redis, require_roles
+from app.core.config import settings
+from app.core.security import REFRESH_COOKIE
+from app.core.deps import (
+    CurrentUser,
+    get_current_user,
+    get_db,
+    get_redis,
+    require_roles,
+    require_step_up,
+)
 from app.core.envelope import ErrorCode, err, ok
 from app.core.lockout import unlock as clear_lockout
 from app.models import User
@@ -123,3 +132,49 @@ async def set_user_status(
         "status": payload.status,
         "sessions_revoked": sessions_revoked,
     })
+
+
+@router.delete("/me")
+async def delete_own_account(
+    response: Response,
+    user: CurrentUser = Depends(require_step_up()),
+    db: AsyncSession = Depends(get_db),
+    redis: Redis = Depends(get_redis),
+):
+    """Self-service account closure — requires a fresh TOTP step-up (ADR-008).
+
+    The first step-up consumer in the skeleton: security-iam-policy.md §41
+    demands re-authentication for account deletion, and JML revocation applies
+    just as much to a self-terminated account as to an admin-terminated one.
+    """
+    db_user = await get_user_by_id(db, user.id)
+    if not db_user:
+        raise HTTPException(
+            status.HTTP_404_NOT_FOUND, detail=err(ErrorCode.NOT_FOUND, "User not found")
+        )
+    if db_user.status == "terminated":
+        raise HTTPException(
+            status.HTTP_409_CONFLICT,
+            detail=err(ErrorCode.CONFLICT, "Account is already terminated"),
+        )
+
+    previous = db_user.status
+    db_user.status = "terminated"
+    sessions_revoked = await revoke_all_refresh_tokens(db, db_user.id)
+    await clear_lockout(redis, db_user.email)
+
+    await write_audit(
+        db,
+        actor_user_id=db_user.id,
+        action="user.self_deleted",
+        resource=f"user:{db_user.id}",
+        detail=f"Self-terminated from status {previous}; {sessions_revoked} session(s) revoked",
+    )
+    response.delete_cookie(REFRESH_COOKIE, path=settings.COOKIE_PATH)
+    return ok(
+        {
+            "user_id": db_user.id,
+            "status": "terminated",
+            "sessions_revoked": sessions_revoked,
+        }
+    )

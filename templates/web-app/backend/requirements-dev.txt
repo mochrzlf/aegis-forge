@@ -2,4 +2,5 @@
 # Not shipped in the app image (requirements.txt stays the runtime surface).
 # Run a check:  python3 tests/check_killswitch.py
 #               python3 tests/check_reset_verify.py
+#               python3 tests/check_mfa.py
 aiosqlite>=0.20.0
