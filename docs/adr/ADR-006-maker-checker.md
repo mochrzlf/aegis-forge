@@ -1,10 +1,20 @@
 # ADR-006: Maker-Checker (Four-Eyes) Approval Workflow
 
-**Status:** Accepted — implemented in `templates/web-app`
-**Date:** 2026-09-22
-**Gap item:** `docs/gap-analysis.md` 1.4
-**Supersedes / extends:** ADR-005 §4, which named `PUT /users/{id}/status` as the
-natural first consumer of this mechanism
+## Architecture Decision Record
+
+| | |
+|---|---|
+| **ID** | ADR-006 |
+| **Title** | Maker-Checker (four-eyes) approval workflow for privileged changes |
+| **Status** | **ACCEPTED** |
+| **Date** | 2026-09-22 |
+| **Decided by** | Security Lead / Architecture |
+| **Impacts** | `approval_requests` table, role promotion path, session revocation, audit trail, `app/core/envelope.py` |
+
+Implements gap item `docs/gap-analysis.md` 1.4. Extends ADR-005 §3, which
+originally named `PUT /users/{id}/status` as the natural first consumer of this
+mechanism — that forward reference is corrected below.
+
 
 ---
 
@@ -131,9 +141,9 @@ envelope, documented here rather than silently added. Callers can now distinguis
 | **S**poofing | Attacker forges a checker identity | Checker must hold a valid admin access token (`require_roles`); `checker_user_id` is taken from the token subject, never from the request body |
 | **T**ampering | Attacker alters a pending request's payload | `payload` is written once at creation and never updated; `audit_logs` is append-only by trigger (`0001_init.py`); role mutation happens only inside `decide_role_change` on a row fetched by ID |
 | **R**epudiation | Maker or checker denies acting | Every transition writes `audit_logs` with the acting user's ID (`actor_user_id`), the `approval:{id}` resource, and the before/after role in `detail` |
-| **I**nformation disclosure | Non-admin reads the approval queue | All four endpoints are admin-only; the response never returns passwords, hashes, or PII beyond the target's user ID, which the caller (an admin) can already see |
-| **D**enial of service | Flood of approval requests | Rate limiting from ADR-003 applies to all routes through the same `/auth`-style guard pattern; the duplicate-request guard bounds pending rows per target to one |
-| **E**levation of privilege | **The core threat** — one person promotes themselves | Three layers: service refuses self-target and self-check; `require_roles("admin")` gates every endpoint; DB `CHECK (maker_user_id <> checker_user_id)` rejects the write itself. A compromised admin token alone cannot complete a promotion |
+| **I**nformation Disclosure | Non-admin reads the approval queue | All four endpoints are admin-only; the response never returns passwords, hashes, or PII beyond the target's user ID, which the caller (an admin) can already see |
+| **D**enial of Service | Flood of approval requests | Rate limiting from ADR-003 applies to all routes through the same `/auth`-style guard pattern; the duplicate-request guard bounds pending rows per target to one |
+| **E**levation of Privilege | **The core threat** — one person promotes themselves | Three layers: service refuses self-target and self-check; `require_roles("admin")` gates every endpoint; DB `CHECK (maker_user_id <> checker_user_id)` rejects the write itself. A compromised admin token alone cannot complete a promotion |
 
 ---
 
