@@ -90,9 +90,9 @@ Alasan ini didahulukan: (a) `templates/web-app` adalah **satu-satunya bukti nyat
 
 | # | Tugas | File | Status |
 |---|---|---|---|
-| 2.1 | Test suite pertama untuk `templates/web-app` | `tests/` (new) | Kasus wajib: RTR replay detection → revoke descendants; RBAC 403; audit trigger menolak UPDATE/DELETE; rate limiter ter-trigger; JML kill-switch efektif; Maker-Checker menolak self-approve | ⬜ |
-| 2.2 | Pisahkan `requirements-dev.txt` (pytest, testcontainers) agar image produksi tetap ramping | `templates/web-app/backend/` | ⬜ |
-| 2.3 | Tambah job pytest di CI yang sudah ada (path-filtered, sama polanya) | `.github/workflows/skeleton-smoke-test.yml` | ⬜ |
+| 2.1 | Test suite pertama untuk `templates/web-app` | `backend/tests/test_*.py` | ✅ 2026-09-23 — 20 test cases pytest (`test_approvals.py`, `test_killswitch.py`, `test_lockout.py`, `test_mfa.py`, `test_ratelimit.py`, `test_reset_verify.py`), 100% PASS via in-memory SQLite & FakeRedis |
+| 2.2 | Pisahkan `requirements-dev.txt` (pytest, testcontainers) agar image produksi tetap ramping | `templates/web-app/backend/` | ✅ 2026-09-23 — `requirements-dev.txt` berisi `pytest`, `pytest-asyncio`, `httpx`, `aiosqlite`; image app runtime tetap bersih |
+| 2.3 | Tambah job pytest di CI yang sudah ada (path-filtered, sama polanya) | `.github/workflows/skeleton-smoke-test.yml` | ✅ 2026-09-23 — job `web-app-unit-tests` menjalankan `pytest -v` di GitHub Actions |
 | 2.4 | Ubah label "runtime-verified" di README menjadi akurat: "CI smoke-tested (docker), unit tests added in v0.X" | `README.md` | ⬜ |
 
 ---
