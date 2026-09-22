@@ -206,7 +206,7 @@ This is the biggest time-saver. Aegis Forge ships **runnable starter skeletons**
 
 | Skeleton | Best for | What's inside |
 |---|---|---|
-| **`templates/web-app/`** ⭐ default | A secure backend/API | FastAPI + Postgres + Redis. Login (RTR), RBAC/anti-IDOR, audit trail — **runtime-verified**. |
+| **`templates/web-app/`** ⭐ default | A secure backend/API | FastAPI + Postgres + Redis. Login (RTR), RBAC/anti-IDOR, lockout, JML kill-switch, Maker-Checker, MFA/TOTP, audit trail — **CI smoke-tested (Docker) & Pytest suite verified (20 tests)**. |
 | **`templates/web-app-nextjs-supabase/`** | A full website with a UI, fast | Next.js + Supabase. Pages, login, dashboard (RLS). Reads its README first — it trades some security strictness for speed. |
 
 Copy a skeleton into your project and run it:
