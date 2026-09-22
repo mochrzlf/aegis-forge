@@ -109,14 +109,14 @@ if command -v openssl >/dev/null 2>&1; then
     echo "🔑 Secure cryptographic keys (JWT & AES-256 FLE) successfully generated in .env."
 fi
 
-# --- Interactive: optionally copy a runnable starter skeleton (web domain only)
+# --- Interactive: optionally copy a runnable starter skeleton
 # Copies templates/<choice>/ into the project so it runs without a manual `cp`.
 SKELETON_CHOICE=""
 if [ "$PROJECT_TYPE" = "web" ]; then
     echo ""
     echo "🏠 Starter skeleton (optional) — runnable code with security pre-wired."
     echo "   Choose one to copy into your project, or skip to start from a blank canvas:"
-    echo "   1) web-app (default)   FastAPI + Postgres + Redis — secure backend/API (runtime-verified)"
+    echo "   1) web-app (default)   FastAPI + Postgres + Redis — secure backend/API (CI tested)"
     echo "   2) nextjs-supabase     Next.js + Supabase — full website with a UI (read its README first)"
     echo "   0) skip                no skeleton — I'll build from scratch"
     read -r -p "Select skeleton [1/2/0] (default: 1): " pick
@@ -125,19 +125,40 @@ if [ "$PROJECT_TYPE" = "web" ]; then
         0)  SKELETON_CHOICE="" ;;
         *)  SKELETON_CHOICE="web-app" ;;
     esac
-    if [ -n "$SKELETON_CHOICE" ]; then
-        SKEL_SRC="$BASELINE_DIR/templates/$SKELETON_CHOICE"
-        if [ -d "$SKEL_SRC" ]; then
-            echo "📦 Copying skeleton 'templates/$SKELETON_CHOICE' into the project..."
-            # cp -a src/. dst/ copies ALL contents incl. dotfiles without nesting.
-            cp -a "$SKEL_SRC/." "$TARGET_DIR/"
-            echo "✅ Skeleton applied. Run 'make first-run' inside the project to start it."
-        else
-            echo "⚠️  Skeleton 'templates/$SKELETON_CHOICE' not found in baseline — skipping."
-        fi
+elif [ "$PROJECT_TYPE" = "trading" ]; then
+    echo ""
+    echo "🏠 Starter skeleton (optional) — quantitative trading with risk guardrails."
+    echo "   1) trading-ea (default) FastAPI Risk Guardian bridge + MQL5 EA template"
+    echo "   0) skip                 no skeleton — I'll build from scratch"
+    read -r -p "Select skeleton [1/0] (default: 1): " pick
+    case "$pick" in
+        0)  SKELETON_CHOICE="" ;;
+        *)  SKELETON_CHOICE="trading-ea" ;;
+    esac
+elif [ "$PROJECT_TYPE" = "mobile" ]; then
+    echo ""
+    echo "🏠 Starter skeleton (optional) — mobile app with Keystore & SSL pinning."
+    echo "   1) mobile-android (default) Kotlin Native with Keystore, SSL Pinning, & FLAG_SECURE"
+    echo "   0) skip                     no skeleton — I'll build from scratch"
+    read -r -p "Select skeleton [1/0] (default: 1): " pick
+    case "$pick" in
+        0)  SKELETON_CHOICE="" ;;
+        *)  SKELETON_CHOICE="mobile-android" ;;
+    esac
+fi
+
+if [ -n "$SKELETON_CHOICE" ]; then
+    SKEL_SRC="$BASELINE_DIR/templates/$SKELETON_CHOICE"
+    if [ -d "$SKEL_SRC" ]; then
+        echo "📦 Copying skeleton 'templates/$SKELETON_CHOICE' into the project..."
+        # cp -a src/. dst/ copies ALL contents incl. dotfiles without nesting.
+        cp -a "$SKEL_SRC/." "$TARGET_DIR/"
+        echo "✅ Skeleton applied successfully."
     else
-        echo "⏭️  No skeleton selected — starting from a blank canvas."
+        echo "⚠️  Skeleton 'templates/$SKELETON_CHOICE' not found in baseline — skipping."
     fi
+else
+    echo "⏭️  No skeleton selected — starting from a blank canvas."
 fi
 
 echo "=================================================================="

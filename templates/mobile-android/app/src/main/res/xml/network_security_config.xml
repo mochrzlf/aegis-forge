@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<network-security-config>
+    <!-- Disable cleartext HTTP globally -->
+    <base-config cleartextTrafficPermitted="false">
+        <trust-anchors>
+            <certificates src="system" />
+        </trust-anchors>
+    </base-config>
+
+    <!-- Enforce Public Key Pinning (HPKP) on production backend domain -->
+    <domain-config cleartextTrafficPermitted="false">
+        <domain includeSubdomains="true">api.production.local</domain>
+        <pin-set expiration="2027-12-31">
+            <!-- Primary Pin (SHA-256 SPKI fingerprint) -->
+            <pin digest="SHA-256">AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</pin>
+            <!-- Backup Pin for zero-downtime certificate rotation -->
+            <pin digest="SHA-256">BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB=</pin>
+        </pin-set>
+    </domain-config>
+</network-security-config>

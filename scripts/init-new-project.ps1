@@ -114,14 +114,14 @@ if (Test-Path $envExample) {
     Write-Host "🔑 Secure cryptographic keys (JWT & AES-256 FLE) successfully generated in .env."
 }
 
-# --- Interactive: optionally copy a runnable starter skeleton (web domain only)
+# --- Interactive: optionally copy a runnable starter skeleton
 # Copies templates/<choice>/ into the project so it runs without a manual `cp`.
 $SkeletonChoice = ''
 if ($Type -eq 'web') {
     Write-Host ""
     Write-Host "🏠 Starter skeleton (optional) — runnable code with security pre-wired."
     Write-Host "   Choose one to copy into your project, or skip to start from a blank canvas:"
-    Write-Host "   1) web-app (default)   FastAPI + Postgres + Redis — secure backend/API (runtime-verified)"
+    Write-Host "   1) web-app (default)   FastAPI + Postgres + Redis — secure backend/API (CI tested)"
     Write-Host "   2) nextjs-supabase     Next.js + Supabase — full website with a UI (read its README first)"
     Write-Host "   0) skip                no skeleton — I'll build from scratch"
     $pick = Read-Host "Select skeleton [1/2/0] (default: 1)"
@@ -130,22 +130,43 @@ if ($Type -eq 'web') {
         '0'      { $SkeletonChoice = '' }
         default  { $SkeletonChoice = 'web-app' }
     }
-    if ($SkeletonChoice) {
-        $skelSrc = Join-Path $BaselineDir "templates/$SkeletonChoice"
-        if (Test-Path $skelSrc) {
-            Write-Host "📦 Copying skeleton 'templates/$SkeletonChoice' into the project..."
-            Copy-Item -Path (Join-Path $skelSrc '*') -Destination $TargetPath -Recurse -Force
-            # Copy dotfiles too (Copy-Item '*' misses hidden files like .github, .env.example)
-            Get-ChildItem -Path $skelSrc -Force | Where-Object { $_.Name -like '.*' } | ForEach-Object {
-                Copy-Item -Path $_.FullName -Destination $TargetPath -Recurse -Force
-            }
-            Write-Host "✅ Skeleton applied. Run 'make first-run' inside the project to start it."
-        } else {
-            Write-Host "⚠️  Skeleton 'templates/$SkeletonChoice' not found in baseline — skipping."
-        }
-    } else {
-        Write-Host "⏭️  No skeleton selected — starting from a blank canvas."
+} elseif ($Type -eq 'trading') {
+    Write-Host ""
+    Write-Host "🏠 Starter skeleton (optional) — quantitative trading with risk guardrails."
+    Write-Host "   1) trading-ea (default) FastAPI Risk Guardian bridge + MQL5 EA template"
+    Write-Host "   0) skip                 no skeleton — I'll build from scratch"
+    $pick = Read-Host "Select skeleton [1/0] (default: 1)"
+    switch ($pick) {
+        '0'      { $SkeletonChoice = '' }
+        default  { $SkeletonChoice = 'trading-ea' }
     }
+} elseif ($Type -eq 'mobile') {
+    Write-Host ""
+    Write-Host "🏠 Starter skeleton (optional) — mobile app with Keystore & SSL pinning."
+    Write-Host "   1) mobile-android (default) Kotlin Native with Keystore, SSL Pinning, & FLAG_SECURE"
+    Write-Host "   0) skip                     no skeleton — I'll build from scratch"
+    $pick = Read-Host "Select skeleton [1/0] (default: 1)"
+    switch ($pick) {
+        '0'      { $SkeletonChoice = '' }
+        default  { $SkeletonChoice = 'mobile-android' }
+    }
+}
+
+if ($SkeletonChoice) {
+    $skelSrc = Join-Path $BaselineDir "templates/$SkeletonChoice"
+    if (Test-Path $skelSrc) {
+        Write-Host "📦 Copying skeleton 'templates/$SkeletonChoice' into the project..."
+        Copy-Item -Path (Join-Path $skelSrc '*') -Destination $TargetPath -Recurse -Force
+        # Copy dotfiles too (Copy-Item '*' misses hidden files like .github, .env.example)
+        Get-ChildItem -Path $skelSrc -Force | Where-Object { $_.Name -like '.*' } | ForEach-Object {
+            Copy-Item -Path $_.FullName -Destination $TargetPath -Recurse -Force
+        }
+        Write-Host "✅ Skeleton applied successfully."
+    } else {
+        Write-Host "⚠️  Skeleton 'templates/$SkeletonChoice' not found in baseline — skipping."
+    }
+} else {
+    Write-Host "⏭️  No skeleton selected — starting from a blank canvas."
 }
 
 # --- Initialise local Git repository
