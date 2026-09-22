@@ -129,7 +129,7 @@ Ini klaim terbesar README yang belum ada kodenya. Kerjakan **Trading dulu** (blu
 4. **Setiap endpoint/fitur baru wajib:** STRIDE singkat di `docs/adr/` + audit-log + test. Ini bukan opsional — `AGENTS.md` §3.3 & §5 sudah memerintahkan, jadi jangan tambahkan boilerplate, **ikuti saja**.
 5. **Jangan tambah dependency baru bila stdlib cukup.** Rate limiter: Redis + pipeline manual, bukan `slowapi`. MFA: `pyotp` wajib (standar TOTP RFC 6238), itu pengecualian yang dapat diterima.
 6. **Saat membuka repo ini di Cline/Cursor/Claude:** baca file ini pertama kali. AGENTS.md adalah kontrak, file ini adalah backlog-nya.
-7. Repo lokal: `/home/tpam_su/Project/Baseline`. Sebelum mulai: `git pull --ff-only` (per 2026-09-21 lokal sudah di-sync ke v0.1.6).
+7. Sebelum mulai kerja: pastikan branch lokal up-to-date (`git pull --ff-only`).
 
 ---
 
