@@ -20,6 +20,28 @@ permissions:
   contents: read
 
 jobs:
+  web-app-unit-tests:
+    name: Backend Pytest Suite — templates/web-app
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies
+        working-directory: templates/web-app/backend
+        run: |
+          pip install -r requirements.txt -r requirements-dev.txt
+
+      - name: Run Pytest Suite
+        working-directory: templates/web-app/backend
+        run: pytest -v
+
   web-app-fastapi:
     name: Smoke test — templates/web-app (FastAPI)
     runs-on: ubuntu-latest
