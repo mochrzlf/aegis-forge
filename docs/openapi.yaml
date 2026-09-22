@@ -1,22 +1,88 @@
 openapi: 3.0.3
 info:
-  title: "[PROJECT_NAME] REST API Specification"
+  title: "Aegis Forge REST API Specification"
   version: 1.0.0
   description: |
-    Spesifikasi REST API standar enterprise.
-    Semua respons API wajib mengikuti format envelope standar `{ success, data, meta }` atau `{ success, error }`.
+    Enterprise Banking-Grade REST API Specification for Aegis Forge.
+    All API responses follow the standard envelope format `{ success, data, meta }` or `{ success, error }`.
+  license:
+    name: Apache-2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0.html
+
 servers:
-  - url: http://localhost:3001/api/v1
-    description: Local Development Server
+  - url: /api/v1
+    description: Relative API Root
+  - url: https://api.production.local/api/v1
+    description: Production Gateway Server
 
 security:
   - bearerAuth: []
   - cookieAuth: []
 
+tags:
+  - name: Health
+    description: Liveness and readiness health check endpoints
+  - name: Authentication
+    description: Authentication, RTR tokens, MFA/TOTP, password reset, and verification
+  - name: Users
+    description: User profiles, account lifecycle (JML kill-switch), and lockout administration
+  - name: Approvals
+    description: Maker-Checker (dual control) authorization and role promotion workflows
+
 paths:
-  /auth/google:
+  # ============================================================================
+  # HEALTH PROBES
+  # ============================================================================
+  /healthz:
+    get:
+      operationId: getLivenessProbe
+      summary: Liveness probe
+      description: Basic server liveness check. Always returns 200 when the process is up.
+      security: []
+      tags: [Health]
+      responses:
+        '200':
+          description: Service is alive.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessEnvelopeHealth'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /readyz:
+    get:
+      operationId: getReadinessProbe
+      summary: Readiness probe
+      description: Verifies dependent backing services (PostgreSQL database and Redis cache).
+      security: []
+      tags: [Health]
+      responses:
+        '200':
+          description: Service and all dependencies are healthy.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessEnvelopeReady'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '503':
+          description: One or more backing services are unreachable.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  # ============================================================================
+  # AUTHENTICATION & SESSIONS
+  # ============================================================================
+  /auth/register:
     post:
-      summary: Login atau Registrasi via Google OAuth
+      operationId: registerUser
+      summary: Register a new account
+      description: Creates a new user with bcrypt/Argon2id password hashing and auto-sends an email verification link.
       security: []
       tags: [Authentication]
       requestBody:
@@ -24,112 +90,707 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              required: [id_token]
-              properties:
-                id_token:
-                  type: string
-                  description: Google ID Token dari client SDK
+              $ref: '#/components/schemas/RegisterIn'
       responses:
-        '200':
-          description: Login berhasil. Refresh token dikirimkan via HttpOnly Cookie.
+        '201':
+          description: User registered successfully. Returns access token and sets HttpOnly refresh token cookie.
           headers:
-            Set-Cookie:
-              schema:
-                type: string
-                example: refresh_token=abc123xyz; Path=/api/auth; HttpOnly; Secure; SameSite=Strict
+            SetCookieRefresh:
+              $ref: '#/components/headers/SetCookieRefresh'
           content:
             application/json:
               schema:
-                allOf:
-                  - $ref: '#/components/schemas/SuccessResponse'
-                  - type: object
-                    properties:
-                      data:
-                        type: object
-                        properties:
-                          access_token: { type: string, example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." }
-                          expires_in: { type: integer, example: 900 }
-                          user: { $ref: '#/components/schemas/UserProfile' }
+                $ref: '#/components/schemas/SuccessEnvelopeToken'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '409':
+          description: Email already registered.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '429':
+          $ref: '#/components/responses/RateLimitedError'
+
+  /auth/login:
+    post:
+      operationId: loginUser
+      summary: Authenticate user credentials
+      description: |
+        Validates email and password. Protected by sliding-window rate limiting and account lockout.
+        If MFA is disabled, returns 200 with tokens. If MFA is enabled, returns 202 (half-authenticated)
+        and sets a temporary pending session cookie to be completed at `/auth/login/totp`.
+      security: []
+      tags: [Authentication]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginIn'
+      responses:
+        '200':
+          description: Login successful (MFA disabled). Returns access token and sets refresh cookie.
+          headers:
+            SetCookieRefresh:
+              $ref: '#/components/headers/SetCookieRefresh'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessEnvelopeToken'
+        '202':
+          description: Credentials valid, MFA required. Sets pending challenge cookie.
+          headers:
+            SetCookieRefresh:
+              $ref: '#/components/headers/SetCookieRefresh'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessEnvelopeMfaRequired'
         '401':
           $ref: '#/components/responses/UnauthorizedError'
+        '423':
+          $ref: '#/components/responses/LockedError'
+        '429':
+          $ref: '#/components/responses/RateLimitedError'
+
+  /auth/login/totp:
+    post:
+      operationId: completeMfaLogin
+      summary: Complete MFA authentication
+      description: Redeems the pending session cookie with a valid 6-digit TOTP code or single-use backup code.
+      security:
+        - cookieAuth: []
+      tags: [Authentication]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MfaCodeIn'
+      responses:
+        '200':
+          description: MFA verification successful. Rotates refresh token and returns access token.
+          headers:
+            SetCookieRefresh:
+              $ref: '#/components/headers/SetCookieRefresh'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessEnvelopeToken'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '429':
+          $ref: '#/components/responses/RateLimitedError'
 
   /auth/refresh:
     post:
-      summary: Refresh Access Token (Refresh Token Rotation)
-      security: []
+      operationId: refreshToken
+      summary: Rotate refresh token and issue new access token
+      description: |
+        Reads the refresh token from the HttpOnly cookie. Implements strict Refresh Token Rotation (RTR)
+        with automated replay detection. If a reused token is detected, all descendant sessions are immediately revoked.
+      security:
+        - cookieAuth: []
       tags: [Authentication]
-      description: Membaca refresh token dari HttpOnly Cookie dan menerbitkan token baru.
       responses:
         '200':
-          description: Token baru berhasil diterbitkan.
+          description: New token pair issued successfully.
+          headers:
+            SetCookieRefresh:
+              $ref: '#/components/headers/SetCookieRefresh'
           content:
             application/json:
               schema:
-                allOf:
-                  - $ref: '#/components/schemas/SuccessResponse'
-                  - type: object
-                    properties:
-                      data:
-                        type: object
-                        properties:
-                          access_token: { type: string }
-                          expires_in: { type: integer, example: 900 }
+                $ref: '#/components/schemas/SuccessEnvelopeToken'
         '401':
           $ref: '#/components/responses/UnauthorizedError'
+        '429':
+          $ref: '#/components/responses/RateLimitedError'
 
   /auth/logout:
     post:
-      summary: Logout dan Invalidate Sesi
+      operationId: logoutUser
+      summary: Invalidate active session
+      description: Revokes the active refresh token in the database and clears the client cookie.
+      security:
+        - cookieAuth: []
+        - bearerAuth: []
       tags: [Authentication]
       responses:
         '200':
-          description: Sesi dibatalkan dan cookie dibersihkan.
+          description: Session invalidated and cookie cleared.
           headers:
-            Set-Cookie:
+            SetCookieRefresh:
               schema:
                 type: string
-                example: refresh_token=; Path=/api/auth; Max-Age=0; HttpOnly; Secure; SameSite=Strict
+                example: refresh_token=; Path=/api/v1/auth; Max-Age=0; HttpOnly; Secure; SameSite=Strict
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/SuccessResponse'
-
-  /users/me:
-    get:
-      summary: Get the profile of the currently logged-in user
-      tags: [Users]
-      responses:
-        '200':
-          description: Data profil berhasil diambil
-          content:
-            application/json:
-              schema:
-                allOf:
-                  - $ref: '#/components/schemas/SuccessResponse'
-                  - type: object
-                    properties:
-                      data: { $ref: '#/components/schemas/UserProfile' }
+                $ref: '#/components/schemas/SuccessEnvelopeEmpty'
         '401':
           $ref: '#/components/responses/UnauthorizedError'
 
+  # ============================================================================
+  # PASSWORD RESET & EMAIL VERIFICATION
+  # ============================================================================
+  /auth/password-reset/request:
+    post:
+      operationId: requestPasswordReset
+      summary: Request password reset link
+      description: |
+        Generates an opaque SHA-256 hashed single-use token and sends an email via SMTP.
+        Always returns 200 OK regardless of whether the email exists to prevent user enumeration.
+      security: []
+      tags: [Authentication]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PasswordResetRequestIn'
+      responses:
+        '200':
+          description: Request received. If an account exists, a reset link has been dispatched.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessEnvelopeEmpty'
+        '429':
+          $ref: '#/components/responses/RateLimitedError'
+
+  /auth/password-reset/confirm:
+    post:
+      operationId: confirmPasswordReset
+      summary: Redeem password reset token
+      description: |
+        Consumes the single-use reset token, updates password with Argon2id hashing,
+        and revokes all active sessions for the account (blast radius containment).
+      security: []
+      tags: [Authentication]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PasswordResetConfirmIn'
+      responses:
+        '200':
+          description: Password reset successful. All prior sessions revoked.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessEnvelopeEmpty'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '404':
+          description: Token not found, expired, or already consumed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '429':
+          $ref: '#/components/responses/RateLimitedError'
+
+  /auth/email-verification/request:
+    post:
+      operationId: requestEmailVerification
+      summary: Resend email verification link
+      description: Dispatches a new email verification link to the authenticated user's registered address.
+      security:
+        - bearerAuth: []
+      tags: [Authentication]
+      responses:
+        '200':
+          description: Verification link dispatched.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessEnvelopeEmpty'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '409':
+          description: Email is already verified.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '429':
+          $ref: '#/components/responses/RateLimitedError'
+
+  /auth/email-verification/confirm:
+    post:
+      operationId: confirmEmailVerification
+      summary: Confirm email verification token
+      description: Validates and consumes the email verification token, setting `email_verified_at`.
+      security: []
+      tags: [Authentication]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EmailVerificationConfirmIn'
+      responses:
+        '200':
+          description: Email address verified successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessEnvelopeEmpty'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '404':
+          description: Token not found, expired, or already consumed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '429':
+          $ref: '#/components/responses/RateLimitedError'
+
+  # ============================================================================
+  # MULTI-FACTOR AUTHENTICATION (MFA / TOTP)
+  # ============================================================================
+  /auth/mfa/enroll:
+    post:
+      operationId: enrollMfa
+      summary: Initiate TOTP MFA enrollment
+      description: Generates a new TOTP secret and provisioning URI (`otpauth://`). Does NOT activate MFA until verified.
+      security:
+        - bearerAuth: []
+      tags: [Authentication]
+      responses:
+        '200':
+          description: MFA enrollment initiated. Secret and URI returned for client QR generation.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessEnvelopeMfaEnroll'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '409':
+          description: MFA is already enabled on this account.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /auth/mfa/activate:
+    post:
+      operationId: activateMfa
+      summary: Confirm and activate TOTP MFA
+      description: Verifies initial code from authenticator app, enables MFA, and generates 10 hashed single-use backup codes.
+      security:
+        - bearerAuth: []
+      tags: [Authentication]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MfaCodeIn'
+      responses:
+        '200':
+          description: MFA activated successfully. Plaintext backup codes returned once.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessEnvelopeBackupCodes'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '409':
+          description: MFA is already enabled or enrollment not initiated.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /auth/mfa/disable:
+    post:
+      operationId: disableMfa
+      summary: Disable MFA on account
+      description: Disables MFA, purges TOTP secret and unconsumed backup codes. Requires a fresh valid TOTP/backup code.
+      security:
+        - bearerAuth: []
+      tags: [Authentication]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MfaCodeIn'
+      responses:
+        '200':
+          description: MFA disabled successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessEnvelopeEmpty'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+
+  /auth/step-up:
+    post:
+      operationId: issueStepUpToken
+      summary: Request step-up authentication token
+      description: "Issues a short-lived (5-minute) JWT bearing step_up claim required for sensitive operations."
+      security:
+        - bearerAuth: []
+      tags: [Authentication]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MfaCodeIn'
+      responses:
+        '200':
+          description: Step-up token issued successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessEnvelopeToken'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+
+  # ============================================================================
+  # USERS & ACCESS GOVERNANCE (JML)
+  # ============================================================================
+  /users/me:
+    get:
+      operationId: getOwnProfile
+      summary: Get authenticated user profile
+      security:
+        - bearerAuth: []
+      tags: [Users]
+      responses:
+        '200':
+          description: Current user profile data.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessEnvelopeUser'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+    delete:
+      operationId: deleteOwnAccount
+      summary: Self-terminate account (requires step-up)
+      description: Destructive action. Marks user status as `terminated` and instantly revokes all active sessions. Requires step-up auth.
+      security:
+        - bearerAuth: []
+      tags: [Users]
+      responses:
+        '200':
+          description: Account terminated and sessions revoked.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessEnvelopeEmpty'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          description: Missing or expired step-up authorization token.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /users:
+    get:
+      operationId: listUsers
+      summary: List all user accounts (Admin only)
+      security:
+        - bearerAuth: []
+      tags: [Users]
+      responses:
+        '200':
+          description: List of user accounts.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessEnvelopeUserList'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+
+  /users/{user_id}:
+    get:
+      operationId: getUserById
+      summary: Get user profile by ID
+      description: Returns user profile. Callers may only access their own ID unless they possess `admin` or `superadmin` role.
+      security:
+        - bearerAuth: []
+      tags: [Users]
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: User profile details.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessEnvelopeUser'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+  /users/{user_id}/status:
+    put:
+      operationId: setUserStatus
+      summary: Update user account status (JML Kill-Switch)
+      description: |
+        Admin-only operation to manage Joiner-Mover-Leaver lifecycle.
+        Transitioning status to `suspended` or `terminated` instantly terminates all active sessions
+        for the target account in a single atomic database transaction. Anti-self-suspension guard enforced.
+      security:
+        - bearerAuth: []
+      tags: [Users]
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserStatusIn'
+      responses:
+        '200':
+          description: Account status updated and kill-switch executed if suspended/terminated.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessEnvelopeUser'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+  /users/{user_id}/unlock:
+    post:
+      operationId: unlockUserAccount
+      summary: Manually unlock a locked account
+      description: Admin-only operation to clear brute-force failure counters and release an account lock. Audit-logged.
+      security:
+        - bearerAuth: []
+      tags: [Users]
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Account unlocked successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessEnvelopeEmpty'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+  # ============================================================================
+  # APPROVALS & MAKER-CHECKER (DUAL CONTROL)
+  # ============================================================================
+  /approvals:
+    get:
+      operationId: listPendingApprovals
+      summary: List pending Maker-Checker approvals
+      description: Admin-only endpoint to view active authorization requests awaiting checker approval.
+      security:
+        - bearerAuth: []
+      tags: [Approvals]
+      responses:
+        '200':
+          description: List of pending approval requests.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessEnvelopeApprovalList'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+
+  /approvals/role-change:
+    post:
+      operationId: requestRoleChange
+      summary: Submit a role promotion request (Maker action)
+      description: |
+        Enforces dual control (Four-Eyes principle). The maker creates a request to change another user's role.
+        The maker is strictly prevented from approving their own request. Self-targeting is prohibited.
+      security:
+        - bearerAuth: []
+      tags: [Approvals]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RoleChangeIn'
+      responses:
+        '201':
+          description: Approval request registered as pending.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessEnvelopeApproval'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '409':
+          description: A pending approval request already exists for this user.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /approvals/{request_id}/approve:
+    post:
+      operationId: approveRequest
+      summary: Approve authorization request (Checker action)
+      description: |
+        Checker confirms the action. Enforced by database CHECK constraint `maker_user_id <> checker_user_id`.
+        Applies role change and revokes active sessions in the same atomic transaction.
+      security:
+        - bearerAuth: []
+      tags: [Approvals]
+      parameters:
+        - name: request_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Request approved and state mutated.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessEnvelopeApproval'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          description: Forbidden (Maker attempted self-approval or non-admin).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+  /approvals/{request_id}/reject:
+    post:
+      operationId: rejectRequest
+      summary: Reject authorization request (Checker action)
+      description: Rejects the request with an audit-logged reason without mutating the target entity state.
+      security:
+        - bearerAuth: []
+      tags: [Approvals]
+      parameters:
+        - name: request_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApprovalDecisionIn'
+      responses:
+        '200':
+          description: Request rejected and closed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessEnvelopeApproval'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+# ==============================================================================
+# COMPONENTS (SCHEMAS, RESPONSES, HEADERS, SECURITY)
+# ==============================================================================
 components:
   securitySchemes:
     bearerAuth:
       type: http
       scheme: bearer
       bearerFormat: JWT
+      description: Bearer JWT access token passed via Authorization header.
     cookieAuth:
       type: apiKey
       in: cookie
       name: refresh_token
+      description: HttpOnly, Secure, SameSite=Strict cookie carrying session refresh token.
+
+  headers:
+    SetCookieRefresh:
+      schema:
+        type: string
+        example: refresh_token=abc123xyz; Path=/api/v1/auth; HttpOnly; Secure; SameSite=Strict
 
   schemas:
-    SuccessResponse:
+    # --- Base Envelopes ---
+    SuccessResponseBase:
       type: object
       required: [success]
       properties:
-        success: { type: boolean, example: true }
+        success:
+          type: boolean
+          example: true
         meta:
           type: object
           properties:
@@ -141,28 +802,375 @@ components:
       type: object
       required: [success, error]
       properties:
-        success: { type: boolean, example: false }
+        success:
+          type: boolean
+          example: false
         error:
           type: object
           required: [code, message]
           properties:
-            code: { type: string, example: "VALIDATION_ERROR" }
-            message: { type: string, example: "Data masukan tidak valid" }
-            details: { type: object }
+            code:
+              type: string
+              example: "VALIDATION_ERROR"
+            message:
+              type: string
+              example: "Invalid input parameters"
+            details:
+              type: object
 
-    UserProfile:
+    # --- Concrete Envelopes ---
+    SuccessEnvelopeEmpty:
+      allOf:
+        - $ref: '#/components/schemas/SuccessResponseBase'
+        - type: object
+          properties:
+            data:
+              type: object
+              example: {}
+
+    SuccessEnvelopeHealth:
+      allOf:
+        - $ref: '#/components/schemas/SuccessResponseBase'
+        - type: object
+          properties:
+            data:
+              type: object
+              properties:
+                status: { type: string, example: "ok" }
+                app: { type: string, example: "aegis-web-app" }
+
+    SuccessEnvelopeReady:
+      allOf:
+        - $ref: '#/components/schemas/SuccessResponseBase'
+        - type: object
+          properties:
+            data:
+              type: object
+              properties:
+                status: { type: string, example: "ready" }
+                database: { type: string, example: "connected" }
+                cache: { type: string, example: "connected" }
+
+    SuccessEnvelopeToken:
+      allOf:
+        - $ref: '#/components/schemas/SuccessResponseBase'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/TokenOut'
+
+    SuccessEnvelopeMfaRequired:
+      allOf:
+        - $ref: '#/components/schemas/SuccessResponseBase'
+        - type: object
+          properties:
+            data:
+              type: object
+              properties:
+                mfa_required: { type: boolean, example: true }
+                message: { type: string, example: "MFA challenge required. Complete authentication at /auth/login/totp" }
+
+    SuccessEnvelopeMfaEnroll:
+      allOf:
+        - $ref: '#/components/schemas/SuccessResponseBase'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/MfaEnrollOut'
+
+    SuccessEnvelopeBackupCodes:
+      allOf:
+        - $ref: '#/components/schemas/SuccessResponseBase'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/BackupCodesOut'
+
+    SuccessEnvelopeUser:
+      allOf:
+        - $ref: '#/components/schemas/SuccessResponseBase'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/UserOut'
+
+    SuccessEnvelopeUserList:
+      allOf:
+        - $ref: '#/components/schemas/SuccessResponseBase'
+        - type: object
+          properties:
+            data:
+              type: array
+              items:
+                $ref: '#/components/schemas/UserOut'
+
+    SuccessEnvelopeApproval:
+      allOf:
+        - $ref: '#/components/schemas/SuccessResponseBase'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/ApprovalOut'
+
+    SuccessEnvelopeApprovalList:
+      allOf:
+        - $ref: '#/components/schemas/SuccessResponseBase'
+        - type: object
+          properties:
+            data:
+              type: array
+              items:
+                $ref: '#/components/schemas/ApprovalOut'
+
+    # --- DTO Models ---
+    RegisterIn:
+      type: object
+      required: [email, password]
+      properties:
+        email:
+          type: string
+          format: email
+          example: user@example.com
+        password:
+          type: string
+          format: password
+          minLength: 12
+          maxLength: 128
+          example: "SuperSecurePass123!"
+
+    LoginIn:
+      type: object
+      required: [email, password]
+      properties:
+        email:
+          type: string
+          format: email
+          example: user@example.com
+        password:
+          type: string
+          format: password
+          example: "SuperSecurePass123!"
+
+    TokenOut:
+      type: object
+      required: [access_token, token_type, expires_in]
+      properties:
+        access_token:
+          type: string
+          example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+        token_type:
+          type: string
+          example: "bearer"
+        expires_in:
+          type: integer
+          example: 900
+
+    UserOut:
+      type: object
+      required: [id, email, role, status]
+      properties:
+        id:
+          type: string
+          format: uuid
+        email:
+          type: string
+          format: email
+        role:
+          type: string
+          enum: [superadmin, admin, support, member, guest]
+        status:
+          type: string
+          enum: [active, suspended, terminated]
+
+    PasswordResetRequestIn:
+      type: object
+      required: [email]
+      properties:
+        email:
+          type: string
+          format: email
+
+    PasswordResetConfirmIn:
+      type: object
+      required: [token, new_password]
+      properties:
+        token:
+          type: string
+          minLength: 1
+          maxLength: 128
+        new_password:
+          type: string
+          format: password
+          minLength: 12
+          maxLength: 128
+
+    EmailVerificationConfirmIn:
+      type: object
+      required: [token]
+      properties:
+        token:
+          type: string
+          minLength: 1
+          maxLength: 128
+
+    MfaCodeIn:
+      type: object
+      required: [code]
+      properties:
+        code:
+          type: string
+          minLength: 6
+          maxLength: 64
+          example: "123456"
+
+    MfaEnrollOut:
+      type: object
+      required: [secret, otpauth_uri]
+      properties:
+        secret:
+          type: string
+          example: "JBSWY3DPEHPK3PXP"
+        otpauth_uri:
+          type: string
+          example: "otpauth://totp/aegis-web-app:user@example.com?secret=JBSWY3DPEHPK3PXP&issuer=aegis-web-app"
+
+    BackupCodesOut:
+      type: object
+      required: [backup_codes]
+      properties:
+        backup_codes:
+          type: array
+          items:
+            type: string
+          example: ["a1b2-c3d4", "e5f6-g7h8"]
+
+    UserStatusIn:
+      type: object
+      required: [status]
+      properties:
+        status:
+          type: string
+          enum: [active, suspended, terminated]
+        reason:
+          type: string
+          maxLength: 256
+          nullable: true
+
+    RoleChangeIn:
+      type: object
+      required: [target_user_id, new_role]
+      properties:
+        target_user_id:
+          type: string
+          format: uuid
+        new_role:
+          type: string
+          enum: [member, support, admin, superadmin]
+        reason:
+          type: string
+          maxLength: 256
+          nullable: true
+
+    ApprovalDecisionIn:
       type: object
       properties:
-        id: { type: string, format: uuid }
-        email: { type: string, format: email }
-        name: { type: string }
-        role: { type: string, enum: [superadmin, admin, support, member, guest] }
-        avatar_url: { type: string, nullable: true }
-        created_at: { type: string, format: date-time }
+        rejection_reason:
+          type: string
+          maxLength: 256
+          nullable: true
+
+    ApprovalOut:
+      type: object
+      required: [id, action_type, target_entity_type, target_entity_id, payload, maker_user_id, status, expires_at, created_at]
+      properties:
+        id:
+          type: string
+          format: uuid
+        action_type:
+          type: string
+          example: "role_change"
+        target_entity_type:
+          type: string
+          example: "user"
+        target_entity_id:
+          type: string
+          format: uuid
+        payload:
+          type: object
+        maker_user_id:
+          type: string
+          format: uuid
+        checker_user_id:
+          type: string
+          format: uuid
+          nullable: true
+        status:
+          type: string
+          enum: [pending, approved, rejected, expired]
+        rejection_reason:
+          type: string
+          nullable: true
+        expires_at:
+          type: string
+          format: date-time
+        created_at:
+          type: string
+          format: date-time
+        resolved_at:
+          type: string
+          format: date-time
+          nullable: true
 
   responses:
+    ValidationError:
+      description: Invalid request parameters or payload.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
     UnauthorizedError:
-      description: Sesi tidak valid atau telah berakhir
+      description: Authentication credentials missing, invalid, or expired.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    ForbiddenError:
+      description: Caller lacks sufficient privileges (RBAC or Maker self-action prohibited).
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    NotFoundError:
+      description: Requested resource was not found.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    LockedError:
+      description: Account is temporarily locked due to repeated failed login attempts.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    RateLimitedError:
+      description: Rate limit exceeded. Try again after cooldown period indicated in Retry-After header.
+      headers:
+        Retry-After:
+          schema:
+            type: integer
+            example: 60
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    InternalServerError:
+      description: Internal server error.
       content:
         application/json:
           schema:
