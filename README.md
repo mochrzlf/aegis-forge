@@ -227,7 +227,8 @@ This is the biggest time-saver. Aegis Forge ships **runnable starter skeletons**
 
 | Domain | Blueprint Specification | Starter Skeleton | CI & Test Verification | Maturity Status |
 |---|---|---|---|---|
-| **Web (FastAPI Backend)** | ✅ `docs/blueprints/web-application-blueprint.md` | ✅ `templates/web-app/` | ✅ Docker Compose smoke test + 20 Pytest unit tests | **Production-Ready Core** (v0.1.6) |
+| **Web (FastAPI Backend)** | ✅ `docs/blueprints/web-application-blueprint.md` | ✅ `templates/web-app/` | ✅ Docker Compose smoke test + 20 Pytest unit tests | **Production-Ready Core** (Python) |
+| **Web (Express.js Backend)** | ✅ `docs/blueprints/web-application-blueprint.md` | ✅ `templates/web-app-express/` | ✅ Docker Compose + 9 Vitest unit tests | **Production-Ready Core** (TypeScript) |
 | **Trading EA & Quantitative** | ✅ `docs/blueprints/ea-trading-blueprint.md` | ✅ `templates/trading-ea/` (MQL5 + FastAPI bridge) | ✅ 6 Pytest unit tests (Risk Guardian & Sizing) | **Code-Backed Starter** |
 | **Mobile (Android Kotlin)** | ✅ `docs/blueprints/mobile-application-blueprint.md` | ✅ `templates/mobile-android/` (Keystore + Pinning) | ✅ Architecture verified (Clean Arch + AppSec) | **Code-Backed Starter** |
 | **Web (Next.js + Supabase)** | ✅ `docs/blueprints/web-application-blueprint.md` | ⚠️ `templates/web-app-nextjs-supabase/` | ⚠️ Manual verification | **Reference Only** (trades strictness for UI speed) |
@@ -236,7 +237,8 @@ This is the biggest time-saver. Aegis Forge ships **runnable starter skeletons**
 
 | Skeleton | Best for | What's inside |
 |---|---|---|
-| **`templates/web-app/`** ⭐ default | A secure backend/API | FastAPI + Postgres + Redis. Login (RTR), RBAC/anti-IDOR, lockout, JML kill-switch, Maker-Checker, MFA/TOTP, audit trail — **CI smoke-tested (Docker) & Pytest suite verified (20 tests)**. |
+| **`templates/web-app/`** ⭐ default | A secure backend/API (Python) | FastAPI + Postgres + Redis. Login (RTR), RBAC/anti-IDOR, lockout, JML kill-switch, Maker-Checker, MFA/TOTP, audit trail — **CI smoke-tested & Pytest verified (20 tests)**. |
+| **`templates/web-app-express/`** | A secure backend/API (TypeScript) | Express.js + Postgres + Redis. Login (RTR), lockout, JML kill-switch, Maker-Checker DB constraint, audit trigger — **Vitest verified (9 tests)**. |
 | **`templates/trading-ea/`** | Algo trading & Expert Advisors | FastAPI Risk Guardian bridge + native MQL5 EA template (`AegisRiskGuardianEA.mq5`). Dynamic lot sizing (1-2%), hard SL, 5% drawdown circuit breaker — **Pytest verified (6 tests)**. |
 | **`templates/mobile-android/`** | Secure native Android app | Kotlin Native with Android Keystore `SecureStorage` (AES256-GCM), `network_security_config.xml` (SSL Pinning), `FLAG_SECURE` screen protection, and ProGuard/R8 rules. |
 | **`templates/web-app-nextjs-supabase/`** | Fast website with UI | Next.js + Supabase. Pages, login, dashboard (RLS). Reference-only alternative. |

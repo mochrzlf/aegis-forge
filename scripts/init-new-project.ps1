@@ -23,19 +23,51 @@
 #>
 [CmdletBinding(PositionalBinding = $true)]
 param(
-    [Parameter(Mandatory = $true, Position = 0)]
+    [Parameter(Mandatory = $false, Position = 0)]
     [string]$ProjectName,
 
-    [Parameter(Mandatory = $true, Position = 1)]
+    [Parameter(Mandatory = $false, Position = 1)]
     [string]$TargetPath,
 
     [Parameter(Mandatory = $false, Position = 2)]
-    [ValidateSet('web', 'mobile', 'trading', 'fullstack')]
-    [string]$Type = 'fullstack'
+    [ValidateSet('web', 'mobile', 'trading', 'enterprise', 'fullstack')]
+    [string]$Type
 )
 
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
+
+# --- Interactive Wizard fallback if parameters are omitted ---
+if (-not $ProjectName) {
+    Write-Host "=================================================================="
+    Write-Host "🛡️  Aegis Forge — Interactive Project Setup Wizard"
+    Write-Host "=================================================================="
+    do {
+        $ProjectName = Read-Host "🏷️  Masukkan nama proyek (contoh: TokoKeren)"
+    } while (-not $ProjectName)
+}
+
+if (-not $TargetPath) {
+    $defaultTarget = "..\$ProjectName"
+    $inputTarget = Read-Host "📁 Lokasi folder tujuan (default: $defaultTarget)"
+    $TargetPath = if ($inputTarget) { $inputTarget } else { $defaultTarget }
+}
+
+if (-not $Type) {
+    Write-Host ""
+    Write-Host "🌐 Pilih domain proyek:"
+    Write-Host "   1) Web        (FastAPI / Express / Next.js) [Default]"
+    Write-Host "   2) Trading    (Algorithmic Trading & EA MT5)"
+    Write-Host "   3) Mobile     (Android Kotlin)"
+    Write-Host "   4) Enterprise (Multi-tier enterprise)"
+    $domainPick = Read-Host "Pilihan domain [1-4] (default: 1)"
+    switch ($domainPick) {
+        '2'     { $Type = 'trading' }
+        '3'     { $Type = 'mobile' }
+        '4'     { $Type = 'enterprise' }
+        default { $Type = 'web' }
+    }
+}
 
 # Dynamically detect baseline directory (works across any host/user environment)
 $ScriptDir   = Split-Path -Parent $MyInvocation.MyCommand.Path
@@ -125,12 +157,14 @@ if ($Type -eq 'web') {
     Write-Host ""
     Write-Host "🏠 Starter skeleton (optional) — runnable code with security pre-wired."
     Write-Host "   Choose one to copy into your project, or skip to start from a blank canvas:"
-    Write-Host "   1) web-app (default)   FastAPI + Postgres + Redis — secure backend/API (CI tested)"
-    Write-Host "   2) nextjs-supabase     Next.js + Supabase — full website with a UI (read its README first)"
+    Write-Host "   1) web-app (default)   FastAPI + Postgres + Redis (Python)"
+    Write-Host "   2) web-app-express     Express.js + TypeScript + Postgres + Redis (Node.js)"
+    Write-Host "   3) nextjs-supabase     Next.js + Supabase — full website with a UI"
     Write-Host "   0) skip                no skeleton — I'll build from scratch"
-    $pick = Read-Host "Select skeleton [1/2/0] (default: 1)"
+    $pick = Read-Host "Select skeleton [1/2/3/0] (default: 1)"
     switch ($pick) {
-        '2'      { $SkeletonChoice = 'web-app-nextjs-supabase' }
+        '2'      { $SkeletonChoice = 'web-app-express' }
+        '3'      { $SkeletonChoice = 'web-app-nextjs-supabase' }
         '0'      { $SkeletonChoice = '' }
         default  { $SkeletonChoice = 'web-app' }
     }

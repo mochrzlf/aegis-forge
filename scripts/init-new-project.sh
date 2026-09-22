@@ -7,15 +7,39 @@ set -e
 
 PROJECT_NAME="$1"
 TARGET_DIR="$2"
-PROJECT_TYPE="${3:-fullstack}"
+PROJECT_TYPE="${3}"
 
-if [ -z "$PROJECT_NAME" ] || [ -z "$TARGET_DIR" ]; then
-    echo "Usage: bash init-new-project.sh <ProjectName> <TargetPath> [web|mobile|trading|fullstack]"
-    echo "Examples:"
-    echo "  bash init-new-project.sh FinPortal ../FinPortal web"
-    echo "  bash init-new-project.sh FinMobile ../FinMobile mobile"
-    echo "  bash init-new-project.sh QuantEA   ../QuantEA trading"
-    exit 1
+# --- Interactive Wizard fallback if arguments are missing ---
+if [ -z "$PROJECT_NAME" ]; then
+    echo "=================================================================="
+    echo "🛡️  Aegis Forge — Interactive Project Setup Wizard"
+    echo "=================================================================="
+    read -r -p "🏷️  Masukkan nama proyek (contoh: TokoKeren): " PROJECT_NAME
+    while [ -z "$PROJECT_NAME" ]; do
+        read -r -p "⚠️  Nama proyek tidak boleh kosong. Masukkan nama: " PROJECT_NAME
+    done
+fi
+
+if [ -z "$TARGET_DIR" ]; then
+    DEFAULT_TARGET="../$PROJECT_NAME"
+    read -r -p "📁 Lokasi folder tujuan (default: $DEFAULT_TARGET): " TARGET_DIR
+    TARGET_DIR="${TARGET_DIR:-$DEFAULT_TARGET}"
+fi
+
+if [ -z "$PROJECT_TYPE" ]; then
+    echo ""
+    echo "🌐 Pilih domain proyek:"
+    echo "   1) Web        (FastAPI / Express / Next.js) [Default]"
+    echo "   2) Trading    (Algorithmic Trading & EA MT5)"
+    echo "   3) Mobile     (Android Kotlin)"
+    echo "   4) Enterprise (Multi-tier enterprise)"
+    read -r -p "Pilihan domain [1-4] (default: 1): " DOMAIN_PICK
+    case "$DOMAIN_PICK" in
+        2) PROJECT_TYPE="trading" ;;
+        3) PROJECT_TYPE="mobile" ;;
+        4) PROJECT_TYPE="enterprise" ;;
+        *) PROJECT_TYPE="web" ;;
+    esac
 fi
 
 # Dynamically detect baseline directory (works across any host/user environment)
@@ -119,12 +143,14 @@ if [ "$PROJECT_TYPE" = "web" ]; then
     echo ""
     echo "🏠 Starter skeleton (optional) — runnable code with security pre-wired."
     echo "   Choose one to copy into your project, or skip to start from a blank canvas:"
-    echo "   1) web-app (default)   FastAPI + Postgres + Redis — secure backend/API (CI tested)"
-    echo "   2) nextjs-supabase     Next.js + Supabase — full website with a UI (read its README first)"
+    echo "   1) web-app (default)   FastAPI + Postgres + Redis (Python)"
+    echo "   2) web-app-express     Express.js + TypeScript + Postgres + Redis (Node.js)"
+    echo "   3) nextjs-supabase     Next.js + Supabase — full website with a UI"
     echo "   0) skip                no skeleton — I'll build from scratch"
-    read -r -p "Select skeleton [1/2/0] (default: 1): " pick
+    read -r -p "Select skeleton [1/2/3/0] (default: 1): " pick
     case "$pick" in
-        2)  SKELETON_CHOICE="web-app-nextjs-supabase" ;;
+        2)  SKELETON_CHOICE="web-app-express" ;;
+        3)  SKELETON_CHOICE="web-app-nextjs-supabase" ;;
         0)  SKELETON_CHOICE="" ;;
         *)  SKELETON_CHOICE="web-app" ;;
     esac
