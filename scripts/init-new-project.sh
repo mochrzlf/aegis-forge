@@ -145,12 +145,14 @@ if [ "$PROJECT_TYPE" = "web" ]; then
     echo "   Choose one to copy into your project, or skip to start from a blank canvas:"
     echo "   1) web-app (default)   FastAPI + Postgres + Redis (Python)"
     echo "   2) web-app-express     Express.js + TypeScript + Postgres + Redis (Node.js)"
-    echo "   3) nextjs-supabase     Next.js + Supabase — full website with a UI"
+    echo "   3) web-app-laravel     Laravel 11 + Postgres + Redis (PHP)"
+    echo "   4) nextjs-supabase     Next.js + Supabase — full website with a UI"
     echo "   0) skip                no skeleton — I'll build from scratch"
-    read -r -p "Select skeleton [1/2/3/0] (default: 1): " pick
+    read -r -p "Select skeleton [1/2/3/4/0] (default: 1): " pick
     case "$pick" in
         2)  SKELETON_CHOICE="web-app-express" ;;
-        3)  SKELETON_CHOICE="web-app-nextjs-supabase" ;;
+        3)  SKELETON_CHOICE="web-app-laravel" ;;
+        4)  SKELETON_CHOICE="web-app-nextjs-supabase" ;;
         0)  SKELETON_CHOICE="" ;;
         *)  SKELETON_CHOICE="web-app" ;;
     esac

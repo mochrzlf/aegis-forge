@@ -159,12 +159,14 @@ if ($Type -eq 'web') {
     Write-Host "   Choose one to copy into your project, or skip to start from a blank canvas:"
     Write-Host "   1) web-app (default)   FastAPI + Postgres + Redis (Python)"
     Write-Host "   2) web-app-express     Express.js + TypeScript + Postgres + Redis (Node.js)"
-    Write-Host "   3) nextjs-supabase     Next.js + Supabase — full website with a UI"
+    Write-Host "   3) web-app-laravel     Laravel 11 + Postgres + Redis (PHP)"
+    Write-Host "   4) nextjs-supabase     Next.js + Supabase — full website with a UI"
     Write-Host "   0) skip                no skeleton — I'll build from scratch"
-    $pick = Read-Host "Select skeleton [1/2/3/0] (default: 1)"
+    $pick = Read-Host "Select skeleton [1/2/3/4/0] (default: 1)"
     switch ($pick) {
         '2'      { $SkeletonChoice = 'web-app-express' }
-        '3'      { $SkeletonChoice = 'web-app-nextjs-supabase' }
+        '3'      { $SkeletonChoice = 'web-app-laravel' }
+        '4'      { $SkeletonChoice = 'web-app-nextjs-supabase' }
         '0'      { $SkeletonChoice = '' }
         default  { $SkeletonChoice = 'web-app' }
     }

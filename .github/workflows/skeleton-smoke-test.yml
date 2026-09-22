@@ -89,6 +89,30 @@ jobs:
         working-directory: templates/web-app-express/backend
         run: npm run build
 
+  laravel-backend-tests:
+    name: Laravel Backend PHPUnit Suite — templates/web-app-laravel
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: mbstring, xml, ctype, iconv, intl, pdo_sqlite, bcmath
+          coverage: none
+
+      - name: Install dependencies
+        working-directory: templates/web-app-laravel/backend
+        run: |
+          composer config policy.advisories.block false
+          composer install --no-interaction --prefer-dist
+
+      - name: Run PHPUnit Test Suite
+        working-directory: templates/web-app-laravel/backend
+        run: php artisan test
+
   web-app-fastapi:
     name: Smoke test — templates/web-app (FastAPI)
     runs-on: ubuntu-latest
