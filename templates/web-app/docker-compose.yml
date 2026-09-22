@@ -28,6 +28,14 @@ services:
     ports:
       - "6379:6379"
 
+  # Mailpit: local SMTP relay + web UI. Password-reset and email-verification
+  # links land here (http://localhost:8025) instead of a real mailbox (ADR-007).
+  mailpit:
+    image: axllent/mailpit:latest
+    ports:
+      - "8025:8025"  # web UI
+      - "1025:1025"  # SMTP
+
   api:
     build: ./backend
     env_file: .env
@@ -36,6 +44,8 @@ services:
         condition: service_healthy
       cache:
         condition: service_healthy
+      mailpit:
+        condition: service_started
     ports:
       - "8000:8000"
     command: >

@@ -42,6 +42,36 @@ class Settings(BaseSettings):
     LOCKOUT_MAX_FAILURES: int = 5
     LOCKOUT_SECONDS: int = 900
 
+    # Password reset + email verification tokens (ADR-007). Opaque random
+    # secrets, stored SHA-256-hashed, single-use — same pattern as refresh
+    # tokens (ADR-002), shorter lives because they travel by email.
+    PASSWORD_RESET_TOKEN_MINUTES: int = 30
+    EMAIL_VERIFICATION_TOKEN_HOURS: int = 24
+    APP_BASE_URL: str = "http://localhost:8000"
+
+    # Outbound mail via the local Mailpit relay (ADR-007). An empty SMTP_HOST
+    # disables delivery without breaking the endpoints — links are simply never
+    # sent, and never echoed into an API response either.
+    SMTP_HOST: str = ""
+    SMTP_PORT: int = 1025
+    SMTP_FROM: str = "no-reply@aegis-web-app.local"
+
+    # Rate limiting on the token endpoints (ADR-003). The *request* endpoints are
+    # unauthenticated, so they carry the tightest bounds and a per-address limit
+    # on top, to keep one mailbox from being flooded with reset links.
+    RATE_LIMIT_PASSWORD_RESET_REQUEST_IP: int = 5
+    RATE_LIMIT_PASSWORD_RESET_EMAIL: int = 3
+    RATE_LIMIT_PASSWORD_RESET_CONFIRM_IP: int = 10
+    RATE_LIMIT_EMAIL_VERIFICATION_REQUEST_IP: int = 5
+    RATE_LIMIT_EMAIL_VERIFICATION_CONFIRM_IP: int = 10
+
+    # MFA / TOTP step-up (ADR-008). pyotp is the one sanctioned new dependency
+    # (gap-analysis rule 5). The step-up token is deliberately minutes-scoped.
+    MFA_STEP_UP_TOKEN_MINUTES: int = 5
+    MFA_BACKUP_CODE_COUNT: int = 10
+    TOTP_REPLAY_TTL_SECONDS: int = 90   # covers pyotp's ±1 window (3 x 30s)
+    RATE_LIMIT_MFA_IP: int = 10         # per IP — 6-digit brute-force bound
+
     LOG_LEVEL: str = "info"
 
     @property
