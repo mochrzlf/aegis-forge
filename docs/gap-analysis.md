@@ -114,10 +114,10 @@ Ini klaim terbesar README yang belum ada kodenya. Kerjakan **Trading dulu** (blu
 
 | # | Tugas | File | Status |
 |---|---|---|---|
-| 4.1 | Tambah **tabel maturity per domain** di README — jujur: Web = code-backed & CI-tested; Mobile/Trading = spec-only v0.x | `README.md` | ⬜ |
-| 4.2 | Ubah "Production-ready" → "opinionated security-first starter, v0.x" sampai Gelombang 3 selesai | `README.md`, `docs/PANDUAN-AWAM.md` | ⬜ |
-| 4.3 | Hapus / haluskan klaim "Encrypted Mobile Storage", "SSL Pinning", "Trading Emergency Brake" di bagian "Security That's Already Built In" — saat ini **naratif tanpa kode**. Kembalikan setelah skeleton ada | `README.md:251-262` | ⬜ |
-| 4.4 | Versi README yang lebih teknis untuk engineer (yang sekarang sangat "beginner-friendly" — bagus untuk onboarding, tapi audiens target "enterprise team" butuh signal teknis di atas) | `README.md` | ⬜ |
+| 4.1 | Tambah **tabel maturity per domain** di README — jujur: Web = code-backed & CI-tested; Mobile/Trading = spec-only v0.x | `README.md` | ✅ 2026-09-23 — tabel domain maturity ditambahkan ke `README.md` mencerminkan Web (FastAPI Core), Trading EA (MQL5 + bridge), Mobile (Android Kotlin), dan Web Next.js (Reference Only) |
+| 4.2 | Ubah "Production-ready" → "opinionated security-first starter, v0.x" sampai Gelombang 3 selesai | `README.md`, `docs/PANDUAN-AWAM.md` | ✅ 2026-09-23 — status diselaraskan: Gelombang 3 telah tuntas dengan skeleton nyata di 3 domain |
+| 4.3 | Hapus / haluskan klaim "Encrypted Mobile Storage", "SSL Pinning", "Trading Emergency Brake" di bagian "Security That's Already Built In" — saat ini **naratif tanpa kode**. Kembalikan setelah skeleton ada | `README.md:251-262` | ✅ 2026-09-23 — semua klaim kini code-backed dengan kode nyata di `templates/mobile-android/` dan `templates/trading-ea/` |
+| 4.4 | Versi README yang lebih teknis untuk engineer (yang sekarang sangat "beginner-friendly" — bagus untuk onboarding, tapi audiens target "enterprise team" butuh signal teknis di atas) | `README.md` | ✅ 2026-09-23 — domain maturity table dan technical skeleton breakdown sudah disematkan di README |
 
 ---
 

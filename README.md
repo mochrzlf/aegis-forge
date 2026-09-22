@@ -204,10 +204,23 @@ The result is `docs/TASKS.md`: bite-sized tasks the AI (or you) can finish one a
 
 This is the biggest time-saver. Aegis Forge ships **runnable starter skeletons** in `templates/` — the login, database, and security are **already working**. You copy one and your AI *edits* it, instead of writing everything from scratch.
 
+### 📊 Domain Maturity Matrix
+
+| Domain | Blueprint Specification | Starter Skeleton | CI & Test Verification | Maturity Status |
+|---|---|---|---|---|
+| **Web (FastAPI Backend)** | ✅ `docs/blueprints/web-application-blueprint.md` | ✅ `templates/web-app/` | ✅ Docker Compose smoke test + 20 Pytest unit tests | **Production-Ready Core** (v0.1.6) |
+| **Trading EA & Quantitative** | ✅ `docs/blueprints/ea-trading-blueprint.md` | ✅ `templates/trading-ea/` (MQL5 + FastAPI bridge) | ✅ 6 Pytest unit tests (Risk Guardian & Sizing) | **Code-Backed Starter** |
+| **Mobile (Android Kotlin)** | ✅ `docs/blueprints/mobile-application-blueprint.md` | ✅ `templates/mobile-android/` (Keystore + Pinning) | ✅ Architecture verified (Clean Arch + AppSec) | **Code-Backed Starter** |
+| **Web (Next.js + Supabase)** | ✅ `docs/blueprints/web-application-blueprint.md` | ⚠️ `templates/web-app-nextjs-supabase/` | ⚠️ Manual verification | **Reference Only** (trades strictness for UI speed) |
+
+### 🧰 Available Starter Skeletons
+
 | Skeleton | Best for | What's inside |
 |---|---|---|
 | **`templates/web-app/`** ⭐ default | A secure backend/API | FastAPI + Postgres + Redis. Login (RTR), RBAC/anti-IDOR, lockout, JML kill-switch, Maker-Checker, MFA/TOTP, audit trail — **CI smoke-tested (Docker) & Pytest suite verified (20 tests)**. |
-| **`templates/web-app-nextjs-supabase/`** | A full website with a UI, fast | Next.js + Supabase. Pages, login, dashboard (RLS). Reads its README first — it trades some security strictness for speed. |
+| **`templates/trading-ea/`** | Algo trading & Expert Advisors | FastAPI Risk Guardian bridge + native MQL5 EA template (`AegisRiskGuardianEA.mq5`). Dynamic lot sizing (1-2%), hard SL, 5% drawdown circuit breaker — **Pytest verified (6 tests)**. |
+| **`templates/mobile-android/`** | Secure native Android app | Kotlin Native with Android Keystore `SecureStorage` (AES256-GCM), `network_security_config.xml` (SSL Pinning), `FLAG_SECURE` screen protection, and ProGuard/R8 rules. |
+| **`templates/web-app-nextjs-supabase/`** | Fast website with UI | Next.js + Supabase. Pages, login, dashboard (RLS). Reference-only alternative. |
 
 Copy a skeleton into your project and run it:
 
