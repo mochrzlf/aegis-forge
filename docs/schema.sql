@@ -79,6 +79,10 @@ CREATE TABLE users (
     last_login_at           TIMESTAMPTZ,
     password_changed_at     TIMESTAMPTZ DEFAULT now(),
     email_verified_at       TIMESTAMPTZ,
+    -- TOTP step-up (ADR-008): mfa_secret is plaintext until field-level
+    -- encryption lands — documented residual risk, see ADR-008 §3.
+    mfa_secret              VARCHAR(64),
+    mfa_enabled             BOOLEAN NOT NULL DEFAULT FALSE,
     
     -- Data Privacy Laws Compliance (e.g., GDPR) (Consent & Right to Erasure)
     consent_given_at        TIMESTAMPTZ NOT NULL DEFAULT now(),
@@ -253,3 +257,21 @@ CREATE TABLE auth_tokens (
 );
 CREATE INDEX idx_auth_tokens_hash ON auth_tokens(token_hash);
 CREATE INDEX idx_auth_tokens_user_purpose ON auth_tokens(user_id, purpose);
+
+-- -----------------------------------------------------------------------------
+-- 9. MFA BACKUP CODES (TOTP Step-Up — Single-Use, Hashed, ADR-008)
+-- -----------------------------------------------------------------------------
+-- One-time backup codes for the TOTP second factor. Like auth_tokens and
+-- refresh_tokens only the SHA-256 hash is stored: a database leak yields no
+-- usable codes. `used_at` is the single-use marker, and the code column is
+-- deliberately absent — the raw value is shown to the user exactly once, at
+-- activation. The TOTP secret itself lives on users.mfa_secret (§1).
+CREATE TABLE mfa_backup_codes (
+    id                      UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id                 UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    code_hash               VARCHAR(64) NOT NULL UNIQUE,       -- SHA-256 of the raw code
+    used_at                 TIMESTAMPTZ,                        -- set once, on redemption
+    created_at              TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+CREATE INDEX idx_mfa_backup_codes_user ON mfa_backup_codes(user_id);
+CREATE INDEX idx_mfa_backup_codes_hash ON mfa_backup_codes(code_hash);
