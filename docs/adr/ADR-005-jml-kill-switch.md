@@ -88,9 +88,10 @@ why the item is cheap now: the data model was right, only the behaviour was miss
   (ADR-002). The session cannot be extended, so exposure is bounded and closes fast.
   Option B above is the upgrade path when that bound is too loose for a deployment.
 * **Limitation — single-admin self-service:** the self-suspend guard prevents the obvious
-  footgun but is not Maker-Checker; dual control for status changes arrives with the
-  `approval_requests` mechanism in gap item 1.4, and this endpoint is the natural first
-  consumer of it.
+  footgun but is not Maker-Checker. Dual control for role changes shipped in gap item 1.4
+  as `POST /api/v1/approvals/role-change` — see ADR-006. Status changes are deliberately
+  left outside that flow: the kill-switch must stay able to suspend an account instantly,
+  without waiting for a second approver, or the protective control becomes the bottleneck.
 * **Operational:** reactivating a user (`suspended` → `active`) restores the ability to
   log in but does not re-issue any token — sessions were revoked, not paused. A
   reactivated user must authenticate again. That is deliberate: a restored account

@@ -50,3 +50,7 @@ class ErrorCode:
     # "your input is wrong" (VALIDATION_ERROR).
     RATE_LIMITED = "RATE_LIMITED"
     LOCKED = "LOCKED"
+    # Skeleton-local extension (documented in ADR-006): a Maker-Checker request
+    # exists for this target already, so the new one is refused rather than
+    # queued — two pending approvals for one role change is a confusion bug.
+    CONFLICT = "CONFLICT"
