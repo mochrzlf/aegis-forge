@@ -171,9 +171,13 @@ cd aegis-forge
 
 ### Step 2 — Create Your New Project
 
-Choose **one** command based on the type of project you want:
+You can run the setup wizard interactively (recommended) or pass arguments directly:
 
 ```bash
+# 🧙‍♂️ Interactive Setup Wizard (asks you questions step-by-step):
+bash scripts/init-new-project.sh
+
+# Or run directly with arguments:
 # 🌐 For a Web App:
 bash scripts/init-new-project.sh "YourProjectName" "../YourProjectName" web
 
@@ -182,15 +186,21 @@ bash scripts/init-new-project.sh "YourProjectName" "../YourProjectName" mobile
 
 # 📈 For a Trading Bot:
 bash scripts/init-new-project.sh "YourProjectName" "../YourProjectName" trading
-
-# 🏢 For a Complete System (Web + Backend):
-bash scripts/init-new-project.sh "YourProjectName" "../YourProjectName" fullstack
 ```
 
 > 🪟 **On Windows (PowerShell)?** Use the `.ps1` version instead:
 > ```powershell
+> # Interactive Wizard:
+> pwsh scripts/init-new-project.ps1
+> 
+> # Or directly with arguments:
 > pwsh scripts/init-new-project.ps1 "YourProjectName" "../YourProjectName" web
 > ```
+
+> 💡 **What the Wizard lets you choose:**
+> 1. **Pre-built Templates:** FastAPI (Python), Express.js (TypeScript), Laravel 11 (PHP), Next.js + Supabase, MT5 EA Trading, or Android Kotlin.
+> 2. **Custom Stack Mix & Match:** Pick your own Frontend (Next.js, React Vite, Vue, SvelteKit), Backend (FastAPI, Express, Laravel, Go, NestJS, Spring Boot), CSS (Tailwind, Shadcn, Bootstrap), and Database (Postgres, MySQL, SQLite, Mongo, Redis).
+> 3. **Banking-Grade Security Choice:** Choose whether to enforce enterprise banking IAM standards (RTR, lockout, JML kill-switch, Maker-Checker, immutable audit log). If yes, the wizard generates `AI-AGENT-PROMPT.md` for your AI Agent to configure the rules into your custom stack!
 
 > 💡 Replace `"YourProjectName"` with your actual project name. Examples: `"WartegBot"`, `"PatientPortal"`, `"GoldScalperEA"`
 
