@@ -100,12 +100,15 @@ jobs:
         uses: shivammathur/setup-php@a42e73e16d831796463b22b8d70a3efcad74e074 # 2.32.0
         with:
           php-version: '8.3'
-          extensions: mbstring, xml, ctype, iconv, intl, pdo_sqlite, bcmath
+          extensions: mbstring, xml, ctype, iconv, intl, pdo_sqlite, sqlite3, bcmath, fileinfo, dom
           coverage: none
 
-      - name: Install dependencies
+      - name: Prepare environment & install dependencies
         working-directory: templates/web-app-laravel/backend
-        run: composer install --no-interaction --prefer-dist --no-progress
+        run: |
+          cp .env.example .env
+          composer install --no-interaction --prefer-dist --no-progress --ignore-platform-reqs
+          php artisan key:generate --ansi
 
       - name: Run PHPUnit Test Suite
         working-directory: templates/web-app-laravel/backend
