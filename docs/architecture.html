@@ -229,6 +229,7 @@
       <button class="tab-btn active" onclick="switchTab(0)">1. Network & Container Topology</button>
       <button class="tab-btn" onclick="switchTab(1)">2. Zero Trust IAM & RTR Flow</button>
       <button class="tab-btn" onclick="switchTab(2)">3. Maker-Checker (Four-Eyes) State Machine</button>
+      <button class="tab-btn" onclick="switchTab(3)">4. End-to-End Workflow (Step 1–7)</button>
     </div>
 
     <!-- TAB 1: Network Topology -->
@@ -497,6 +498,144 @@
         <div class="spec-box">
           <h3><span class="badge badge-blue">Auditability</span> Non-Repudiation</h3>
           <p>Every decision records both Maker and Checker user IDs with timestamps in the append-only <code>audit_logs</code> table.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 4: End-to-End Development Flow (Step 1–7) -->
+    <div class="diagram-card" id="tab-3">
+      <div class="diagram-header">
+        <h2>🚀 End-to-End Development Workflow (Step 1 to Step 7)</h2>
+        <p>From initial scaffolding to production deployment. Spec-First, AI guardrails, and verification gates.</p>
+      </div>
+
+      <div class="svg-wrapper">
+        <svg viewBox="0 0 1060 480" width="1060" height="480" xmlns="http://www.w3.org/2000/svg">
+          <!-- Step 1 -->
+          <g transform="translate(20, 40)">
+            <rect x="0" y="0" width="125" height="150" rx="10" fill="var(--card-bg)" stroke="var(--primary)" stroke-width="2"/>
+            <rect x="0" y="0" width="125" height="28" rx="10" fill="rgba(59, 130, 246, 0.15)"/>
+            <text x="62" y="19" fill="var(--primary)" font-size="11" font-weight="700" text-anchor="middle">Step 1: Clone</text>
+            <text x="10" y="55" fill="var(--text)" font-size="11" font-weight="700">Aegis Baseline</text>
+            <text x="10" y="75" fill="var(--text-muted)" font-size="10">git clone repo</text>
+            <text x="10" y="95" fill="var(--text-muted)" font-size="10">4 core pillars</text>
+            <text x="10" y="115" fill="var(--success)" font-size="10">Zero secrets</text>
+            <text x="10" y="135" fill="var(--text-muted)" font-size="9">Pure template</text>
+          </g>
+
+          <line x1="145" y1="115" x2="175" y2="115" stroke="var(--border)" stroke-width="2"/>
+          <polygon points="175,110 183,115 175,120" fill="var(--border)"/>
+
+          <!-- Step 2 -->
+          <g transform="translate(185, 20)">
+            <rect x="0" y="0" width="155" height="190" rx="10" fill="var(--card-bg)" stroke="var(--cyan)" stroke-width="2"/>
+            <rect x="0" y="0" width="155" height="28" rx="10" fill="rgba(6, 182, 212, 0.15)"/>
+            <text x="77" y="19" fill="var(--cyan)" font-size="11" font-weight="700" text-anchor="middle">Step 2: Init Wizard</text>
+            <text x="10" y="50" fill="var(--cyan)" font-size="10" font-weight="700">init-new-project.sh</text>
+            <text x="10" y="70" fill="var(--text)" font-size="10">• Mode 1: Prebuilt</text>
+            <text x="18" y="86" fill="var(--text-muted)" font-size="9">(FastAPI, Express,</text>
+            <text x="18" y="100" fill="var(--text-muted)" font-size="9">Go, Laravel, Mobile)</text>
+            <text x="10" y="120" fill="var(--text)" font-size="10">• Mode 2: Custom</text>
+            <text x="18" y="136" fill="var(--text-muted)" font-size="9">Mix & Match Stack</text>
+            <text x="18" y="150" fill="var(--purple)" font-size="9">AI-AGENT-PROMPT</text>
+            <text x="10" y="172" fill="var(--success)" font-size="9">Git hooks auto-set</text>
+          </g>
+
+          <line x1="340" y1="115" x2="370" y2="115" stroke="var(--border)" stroke-width="2"/>
+          <polygon points="370,110 378,115 370,120" fill="var(--border)"/>
+
+          <!-- Step 3 -->
+          <g transform="translate(380, 40)">
+            <rect x="0" y="0" width="145" height="150" rx="10" fill="var(--card-bg)" stroke="var(--purple)" stroke-width="2"/>
+            <rect x="0" y="0" width="145" height="28" rx="10" fill="rgba(139, 92, 246, 0.15)"/>
+            <text x="72" y="19" fill="var(--purple)" font-size="11" font-weight="700" text-anchor="middle">Step 3: Define Specs</text>
+            <text x="10" y="55" fill="var(--text)" font-size="10" font-weight="700">Spec-First Design</text>
+            <text x="10" y="75" fill="var(--text-muted)" font-size="10">• docs/PRD.md</text>
+            <text x="10" y="95" fill="var(--text-muted)" font-size="10">• docs/ui-design.md</text>
+            <text x="10" y="115" fill="var(--text-muted)" font-size="10">• docs/openapi.yaml</text>
+            <text x="10" y="135" fill="var(--purple)" font-size="9">No code before spec</text>
+          </g>
+
+          <line x1="525" y1="115" x2="555" y2="115" stroke="var(--border)" stroke-width="2"/>
+          <polygon points="555,110 563,115 555,120" fill="var(--border)"/>
+
+          <!-- Step 4 -->
+          <g transform="translate(565, 40)">
+            <rect x="0" y="0" width="140" height="150" rx="10" fill="var(--card-bg)" stroke="var(--warning)" stroke-width="2"/>
+            <rect x="0" y="0" width="140" height="28" rx="10" fill="rgba(245, 158, 11, 0.15)"/>
+            <text x="70" y="19" fill="var(--warning)" font-size="11" font-weight="700" text-anchor="middle">Step 4: Tasks</text>
+            <text x="10" y="55" fill="var(--text)" font-size="10" font-weight="700">Atomic Tasks Breakdown</text>
+            <text x="10" y="75" fill="var(--text-muted)" font-size="10">• docs/TASKS.md</text>
+            <text x="10" y="95" fill="var(--text-muted)" font-size="10">• Size XS / S / M</text>
+            <text x="10" y="115" fill="var(--text-muted)" font-size="10">• DoD + Traceability</text>
+            <text x="10" y="135" fill="var(--warning)" font-size="9">Prevents context blow</text>
+          </g>
+
+          <!-- Arrow Down from Step 4 to Step 5 -->
+          <line x1="635" y1="190" x2="635" y2="250" stroke="var(--primary)" stroke-width="2"/>
+          <polygon points="630,250 635,258 640,250" fill="var(--primary)"/>
+
+          <!-- Step 5 -->
+          <g transform="translate(550, 260)">
+            <rect x="0" y="0" width="170" height="170" rx="10" fill="var(--card-bg)" stroke="var(--primary)" stroke-width="2"/>
+            <rect x="0" y="0" width="170" height="28" rx="10" fill="rgba(59, 130, 246, 0.15)"/>
+            <text x="85" y="19" fill="var(--primary)" font-size="11" font-weight="700" text-anchor="middle">Step 5 & 6: AI Coding</text>
+            <text x="10" y="50" fill="var(--text)" font-size="10" font-weight="700">Electric Fence (AGENTS.md)</text>
+            <text x="10" y="70" fill="var(--text-muted)" font-size="10">• TDD Red-Green</text>
+            <text x="10" y="88" fill="var(--text-muted)" font-size="10">• Banking IAM Enforced</text>
+            <text x="10" y="106" fill="var(--cyan)" font-size="10">• make seed (Auto-User)</text>
+            <text x="10" y="124" fill="var(--text-muted)" font-size="10">• Decoupled Frontend</text>
+            <text x="10" y="145" fill="var(--success)" font-size="10" font-weight="700">Unit Tests Passing 100%</text>
+          </g>
+
+          <!-- Arrow Left from Step 5 to Step 7 -->
+          <line x1="550" y1="345" x2="480" y2="345" stroke="var(--border)" stroke-width="2"/>
+          <polygon points="480,340 472,345 480,350" fill="var(--border)"/>
+
+          <!-- Step 7: Verification & Security -->
+          <g transform="translate(290, 260)">
+            <rect x="0" y="0" width="180" height="170" rx="10" fill="var(--card-bg)" stroke="var(--danger)" stroke-width="2"/>
+            <rect x="0" y="0" width="180" height="28" rx="10" fill="rgba(239, 68, 68, 0.15)"/>
+            <text x="90" y="19" fill="var(--danger)" font-size="11" font-weight="700" text-anchor="middle">Step 7A: Verify Gate</text>
+            <text x="10" y="50" fill="var(--text)" font-size="10" font-weight="700">Automated Audit Suite</text>
+            <text x="10" y="70" fill="var(--text-muted)" font-size="10">• Redocly Lint (OpenAPI)</text>
+            <text x="10" y="88" fill="var(--text-muted)" font-size="10">• STRIDE ADR Validator</text>
+            <text x="10" y="106" fill="var(--text-muted)" font-size="10">• Gitleaks Pre-commit</text>
+            <text x="10" y="124" fill="var(--text-muted)" font-size="10">• Semgrep & Trivy Clean</text>
+            <text x="10" y="145" fill="var(--danger)" font-size="10" font-weight="700">Zero Secret Leaks</text>
+          </g>
+
+          <!-- Arrow Left from 7A to 7B -->
+          <line x1="290" y1="345" x2="220" y2="345" stroke="var(--success)" stroke-width="3"/>
+          <polygon points="220,340 210,345 220,350" fill="var(--success)"/>
+
+          <!-- Step 7B: Production Deploy -->
+          <g transform="translate(30, 260)">
+            <rect x="0" y="0" width="180" height="170" rx="10" fill="var(--card-bg)" stroke="var(--success)" stroke-width="2"/>
+            <rect x="0" y="0" width="180" height="28" rx="10" fill="rgba(16, 185, 129, 0.15)"/>
+            <text x="90" y="19" fill="var(--success)" font-size="11" font-weight="700" text-anchor="middle">Step 7B: Production Deploy</text>
+            <text x="10" y="50" fill="var(--success)" font-size="10" font-weight="700">VPS Cloud-Agnostic</text>
+            <text x="10" y="70" fill="var(--text)" font-size="10">• Caddy Auto-HTTPS</text>
+            <text x="10" y="88" fill="var(--text)" font-size="10">• Zero Public Port Leak</text>
+            <text x="10" y="106" fill="var(--text-muted)" font-size="10">• UFW & Fail2ban Ready</text>
+            <text x="10" y="124" fill="var(--text-muted)" font-size="10">• make prod-up</text>
+            <text x="10" y="145" fill="var(--success)" font-size="10" font-weight="700">🚀 LIVE & SECURE</text>
+          </g>
+        </svg>
+      </div>
+
+      <div class="grid-spec">
+        <div class="spec-box">
+          <h3><span class="badge badge-purple">Spec-First</span> Guardrails for Agents</h3>
+          <p>AI Coding Agents are strictly grounded in <code>docs/PRD.md</code> and <code>docs/TASKS.md</code> to prevent hallucinated scope or weakened security.</p>
+        </div>
+        <div class="spec-box">
+          <h3><span class="badge badge-blue">Ready Seeder</span> Zero Friction Dev</h3>
+          <p>Developers and QA run <code>make seed</code> to obtain functional <code>superadmin</code> and <code>checker</code> credentials instantly.</p>
+        </div>
+        <div class="spec-box">
+          <h3><span class="badge badge-green">Production Gate</span> Defense in Depth</h3>
+          <p>Pre-commit security checks block leaked credentials before push; production VPS runs with zero open DB/cache ports.</p>
         </div>
       </div>
     </div>
