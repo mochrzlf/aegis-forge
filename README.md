@@ -57,7 +57,28 @@ Every time someone starts a software project, they spend the **first few days** 
 3. **"How do I stop API keys from leaking to the internet?"** — one small mistake = data stolen.
 4. **"How do I organize folders so code doesn't become a mess as it grows?"**
 
-**Aegis Forge solves all of this *upfront*.** Whether you're building a SaaS portal, an Android app, or an automated trading bot — all core architecture patterns, security checklists, and AI agent rules are ready on day one.
+### 🤖 The Real Problem: Why AI Coding Agents Need Guardrails
+
+Modern AI coding agents (Claude Code, Cursor, Copilot, Hermes) write code at blistering speed. But when asked to build an application from scratch on a blank canvas, **AI agents are notoriously careless with security**:
+
+- 🔓 **Fragile Authentication:** They frequently dump raw JWT tokens into browser `localStorage` (trivially vulnerable to XSS credential theft).
+- 🚪 **Missing Rate Limits:** They omit brute-force defenses, leaving login endpoints vulnerable to automated credential stuffing.
+- 🕳️ **Broken Access Controls:** They forget object-level authorization checks, creating Insecure Direct Object References (IDOR).
+- 💥 **Reckless Trading Algorithms:** If asked to write a trading bot, they often author unhedged grid or martingale algorithms that inevitably liquidate user accounts on market volatility.
+- 🌀 **Hallucinated Scope:** Without an immutable technical contract, they drift from requirements and invent speculative abstractions.
+
+### 🛡️ How Aegis Forge Solves It (The "Earthquake-Proof Bunker" Analogy)
+
+Think of building software like constructing a building:
+- **Hiring an AI agent without Aegis Forge** is like giving a power tool to an eager worker on an empty plot with no blueprint. They might throw up walls in record time, but the foundation is cracked, the plumbing leaks, and the front door has no lock.
+- **Aegis Forge is the earthquake-proof bunker foundation.** It provides:
+  1. ⚡ **An "Electric Fence" for AI Agents (`AGENTS.md` + Spec-First):** AI tools are strictly pinned to verified contracts (`docs/openapi.yaml`, PRD, STRIDE threat models). They are prevented from hallucinating or cutting security corners.
+  2. 🏦 **Enterprise Banking-Grade IAM from Day One:** Zero Trust session management, Refresh Token Rotation (RTR) with replay detection, JML session kill-switches, database-enforced Maker-Checker dual control, and automated lockout.
+  3. 🧱 **Pre-Tested Starter Skeletons:** You never start from zero. The core FastAPI backend, Android Kotlin module, and MQL5 EA trading engine are already built, runtime-verified, and protected by automated CI test suites.
+
+**Aegis Forge solves all of this upfront.** Whether you're building a SaaS portal, an Android app, or an automated trading bot — all core architecture patterns, security checklists, and AI agent rules are ready on day one.
+
+> 🌐 **Interactive System Architecture:** Explore the live visual diagrams for network topology, Zero Trust IAM, and Maker-Checker in [`docs/architecture.html`](docs/architecture.html).
 
 ---
 
@@ -152,9 +173,13 @@ cd aegis-forge
 
 ### Step 2 — Create Your New Project
 
-Choose **one** command based on the type of project you want:
+You can run the setup wizard interactively (recommended) or pass arguments directly:
 
 ```bash
+# 🧙‍♂️ Interactive Setup Wizard (asks you questions step-by-step):
+bash scripts/init-new-project.sh
+
+# Or run directly with arguments:
 # 🌐 For a Web App:
 bash scripts/init-new-project.sh "YourProjectName" "../YourProjectName" web
 
@@ -163,15 +188,21 @@ bash scripts/init-new-project.sh "YourProjectName" "../YourProjectName" mobile
 
 # 📈 For a Trading Bot:
 bash scripts/init-new-project.sh "YourProjectName" "../YourProjectName" trading
-
-# 🏢 For a Complete System (Web + Backend):
-bash scripts/init-new-project.sh "YourProjectName" "../YourProjectName" fullstack
 ```
 
 > 🪟 **On Windows (PowerShell)?** Use the `.ps1` version instead:
 > ```powershell
+> # Interactive Wizard:
+> pwsh scripts/init-new-project.ps1
+> 
+> # Or directly with arguments:
 > pwsh scripts/init-new-project.ps1 "YourProjectName" "../YourProjectName" web
 > ```
+
+> 💡 **What the Wizard lets you choose:**
+> 1. **Pre-built Templates:** FastAPI (Python), Express.js (TypeScript), Laravel 11 (PHP), Next.js + Supabase, MT5 EA Trading, or Android Kotlin.
+> 2. **Custom Stack Mix & Match:** Pick your own Frontend (Next.js, React Vite, Vue, SvelteKit), Backend (FastAPI, Express, Laravel, Go, NestJS, Spring Boot), CSS (Tailwind, Shadcn, Bootstrap), and Database (Postgres, MySQL, SQLite, Mongo, Redis).
+> 3. **Banking-Grade Security Choice:** Choose whether to enforce enterprise banking IAM standards (RTR, lockout, JML kill-switch, Maker-Checker, immutable audit log). If yes, the wizard generates `AI-AGENT-PROMPT.md` for your AI Agent to configure the rules into your custom stack!
 
 > 💡 Replace `"YourProjectName"` with your actual project name. Examples: `"WartegBot"`, `"PatientPortal"`, `"GoldScalperEA"`
 
@@ -182,15 +213,21 @@ bash scripts/init-new-project.sh "YourProjectName" "../YourProjectName" fullstac
 4. ✅ A "security alarm" is installed (prevents secret keys from leaking).
 5. ✅ Unique security keys are generated just for your project.
 
-### Step 3 — Define Your Specs First (Important!)
+### Step 3 — Define Your Specs & UI Design First (Important!)
 
-> ⚠️ **Don't write code yet!** First decide *what* you want to build.
+> ⚠️ **Don't write code yet!** First decide *what* you want to build and *how* it should look.
 
-If you're using an AI agent (Claude, Cursor, etc.), give it this instruction:
+1. **Features, Personas & Security Specs:**
+   Have your AI agent interview you to produce an airtight requirement spec without guessing:
+   > *"Use the prd-interviewer skill. Read AGENTS.md, then draft docs/PRD.md and docs/PRD-detail.md for my project based on the blueprint in docs/blueprints/ — interview me first. Then run a STRIDE security analysis in docs/adr/ before writing application code."*
 
-> *"Use the prd-interviewer skill. Read AGENTS.md, then draft docs/PRD.md and docs/PRD-detail.md for my project based on the blueprint in docs/blueprints/ — interview me first. Then run a STRIDE security analysis in docs/adr/ before writing application code."*
+2. **UI Mockups, Screens & Design Tokens (`docs/ui-design.md`):**
+   If your project has a Web or Mobile user interface, this is where you define the visual identity:
+   - Color palette, typography, button states, and spacing tokens (Tailwind / CSS tokens).
+   - Screen wireframes and layouts (Login, Dashboard, Navigation, User Settings).
+   > 💡 **Prompt your AI:** *"Read docs/ui-design-template.md and draft docs/ui-design.md with complete UI tokens and screen layouts matching our PRD."*
 
-The AI will create planning documents and analyze security risks **before** it starts programming — just like an architect draws blueprints before building.
+The AI will create planning documents, visual design tokens, and analyze security risks **before** it starts programming — just like an architect draws blueprints and 3D mockups before building.
 
 ### Step 4 — Break the Plan into Tasks
 
@@ -204,10 +241,31 @@ The result is `docs/TASKS.md`: bite-sized tasks the AI (or you) can finish one a
 
 This is the biggest time-saver. Aegis Forge ships **runnable starter skeletons** in `templates/` — the login, database, and security are **already working**. You copy one and your AI *edits* it, instead of writing everything from scratch.
 
+### 📊 Domain Maturity Matrix
+
+| Domain | Blueprint Specification | Starter Skeleton | CI & Test Verification | Maturity Status |
+|---|---|---|---|---|
+| **Web (FastAPI Backend)** | ✅ `docs/blueprints/web-application-blueprint.md` | ✅ `templates/web-app/` | ✅ Docker Compose smoke test + 20 Pytest unit tests | **Production-Ready Core** (Python) |
+| **Web (Express.js Backend)** | ✅ `docs/blueprints/web-application-blueprint.md` | ✅ `templates/web-app-express/` | ✅ Docker Compose + 9 Vitest unit tests | **Production-Ready Core** (TypeScript) |
+| **Web (Laravel Backend)** | ✅ `docs/blueprints/web-application-blueprint.md` | ✅ `templates/web-app-laravel/` | ✅ Docker Compose + 10 PHPUnit feature tests | **Production-Ready Core** (PHP) |
+| **Web (Go / Golang Backend)** | ✅ `docs/blueprints/web-application-blueprint.md` | ✅ `templates/web-app-go/` | ✅ Docker Compose + 8 Go unit tests | **Production-Ready Core** (Go) |
+| **Trading EA & Quantitative** | ✅ `docs/blueprints/ea-trading-blueprint.md` | ✅ `templates/trading-ea/` (MQL5 + FastAPI bridge) | ✅ 6 Pytest unit tests (Risk Guardian & Sizing) | **Code-Backed Starter** |
+| **Mobile (Android Kotlin)** | ✅ `docs/blueprints/mobile-application-blueprint.md` | ✅ `templates/mobile-android/` (Keystore + Pinning) | ✅ Architecture verified (Clean Arch + AppSec) | **Code-Backed Starter** |
+| **Mobile (iOS Swift)** | ✅ `docs/blueprints/mobile-application-blueprint.md` | ✅ `templates/mobile-ios/` (Keychain + Pinning) | ✅ Architecture verified (SwiftUI + AppSec) | **Code-Backed Starter** |
+| **Web (Next.js + Supabase)** | ✅ `docs/blueprints/web-application-blueprint.md` | ⚠️ `templates/web-app-nextjs-supabase/` | ⚠️ Manual verification | **Reference Only** (trades strictness for UI speed) |
+
+### 🧰 Available Starter Skeletons
+
 | Skeleton | Best for | What's inside |
 |---|---|---|
-| **`templates/web-app/`** ⭐ default | A secure backend/API | FastAPI + Postgres + Redis. Login (RTR), RBAC/anti-IDOR, audit trail — **runtime-verified**. |
-| **`templates/web-app-nextjs-supabase/`** | A full website with a UI, fast | Next.js + Supabase. Pages, login, dashboard (RLS). Reads its README first — it trades some security strictness for speed. |
+| **`templates/web-app/`** ⭐ default | A secure backend/API (Python) | FastAPI + Postgres + Redis. Login (RTR), RBAC/anti-IDOR, lockout, JML kill-switch, Maker-Checker, MFA/TOTP, audit trail — **CI smoke-tested & Pytest verified (20 tests)**. |
+| **`templates/web-app-express/`** | A secure backend/API (TypeScript) | Express.js + Postgres + Redis. Login (RTR), RBAC/anti-IDOR, lockout, JML kill-switch, Maker-Checker DB constraint, audit trigger — **Vitest verified (9 tests)**. |
+| **`templates/web-app-laravel/`** | A secure backend/API (PHP) | Laravel 11 + Postgres + Redis. Login (RTR), RBAC/anti-IDOR, lockout, JML kill-switch, Maker-Checker DB constraint, audit trail — **PHPUnit verified (10 tests)**. |
+| **`templates/web-app-go/`** | A high-perf secure backend/API (Go) | Go (Chi) + Postgres + Redis. Login (RTR), RBAC/anti-IDOR, lockout, JML kill-switch, Maker-Checker DB constraint, immutable audit — **Go test verified (8 tests, ~15MB RAM)**. |
+| **`templates/trading-ea/`** | Algo trading & Expert Advisors | FastAPI Risk Guardian bridge + native MQL5 EA template (`AegisRiskGuardianEA.mq5`). Dynamic lot sizing (1-2%), hard SL, 5% drawdown circuit breaker — **Pytest verified (6 tests)**. |
+| **`templates/mobile-android/`** | Secure native Android app | Kotlin Native with Android Keystore `SecureStorage` (AES256-GCM), `network_security_config.xml` (SSL Pinning), `FLAG_SECURE` screen protection, and ProGuard/R8 rules. |
+| **`templates/mobile-ios/`** | Secure native iOS app | Swift / SwiftUI with Apple Keychain Services (`kSecAttrAccessibleThisDeviceOnly`), SPKI SHA-256 SSL Pinning, Privacy Shield (App Switcher blur & anti-screen capture), and multi-layer jailbreak detection. |
+| **`templates/web-app-nextjs-supabase/`** | Fast website with UI | Next.js + Supabase. Pages, login, dashboard (RLS). Reference-only alternative. |
 
 Copy a skeleton into your project and run it:
 
@@ -216,6 +274,17 @@ Copy a skeleton into your project and run it:
 cp -r templates/web-app/* .
 make first-run     # copies .env, builds, runs migrations → app live at localhost:8000
 ```
+
+> 🖥️ **Where does the Frontend UI go? (Option A: Decoupled vs. Option B: Fullstack)**
+>
+> The web backend skeletons (`web-app`, `web-app-express`, `web-app-laravel`) are **API-first / Headless Backends** (FastAPI, Express, or Laravel + Postgres + Redis). Right after `make first-run`, your backend API is live at `http://localhost:8000` (docs at `/docs` or health at `/health/live`) and Mailpit at `:8025`.
+>
+> **How does the frontend fit in?**
+> - **Specs & UI Design (Step 3):** Your screens, layouts, and design tokens are already planned in `docs/ui-design.md`.
+> - **Code Implementation (Step 6):** Tell your AI coding agent:
+>   > *"Scaffold a frontend in `frontend/` using [React + Vite / Next.js / Vue] with Tailwind CSS. Follow the design tokens in `docs/ui-design.md` and connect API calls to our backend at `http://localhost:8000` (using cookie credentials)."*
+>
+> *(Prefer a skeleton with a pre-built web UI from day one without setting up a backend? Choose `nextjs-supabase` in Step 2).*
 
 > 💡 Your AI's tasks in `TASKS.md` already say *which skeleton file to edit* (the `skeleton_hint`) — so it modifies existing safe code instead of generating new code from nothing.
 
@@ -246,6 +315,20 @@ git commit -m "feat: add user registration feature"
 
 **Done!** 🎉 Your project now stands on a secure foundation.
 
+### 🎯 Concrete Walkthrough: Building an E-Commerce Store ("TokoKeren")
+
+Here is exactly how the 7 steps look in practice when building an online store:
+
+| Stage | Command / Prompt | What Happens |
+|---|---|---|
+| **1. Initialize (Step 2)** | `bash scripts/init-new-project.sh TokoKeren ../TokoKeren web`<br>*(Select `1` for FastAPI)* | Generates `../TokoKeren/` with pre-wired IAM, unique `.env` crypto keys, gitleaks pre-commit hooks, and starter code. |
+| **2. Navigate** | `cd ../TokoKeren` | Enter your new project workspace. |
+| **3. Plan Specs (Step 3)** | Prompt AI: *"Use the `prd-interviewer` skill to interview me and draft `docs/PRD.md` for TokoKeren (product catalog, cart, checkout, payment webhooks, and buyer/admin roles)."* | AI interviews you and creates an airtight requirement spec without hallucinating scope. |
+| **4. Break Tasks (Step 4)** | Prompt AI: *"Use the `spec-to-tasks` skill to turn `docs/PRD.md` into atomic tasks in `docs/TASKS.md` with explicit `skeleton_hint`."* | AI generates manageable tasks, each pointing to the exact skeleton file to edit. |
+| **5. Start Stack (Step 5)** | `make first-run` | Starts PostgreSQL, Redis, runs DB migrations, and launches FastAPI at `http://localhost:8000` (docs at `/docs`). |
+| **6. Build Backend & UI (Step 6)** | Prompt AI:<br>• *(Backend)* *"Execute Task 1 from `docs/TASKS.md`: Implement product catalog endpoints per skeleton_hint."*<br>• *(Frontend UI - Option A)* *"Scaffold a web frontend in `frontend/` using Vite + React + Tailwind CSS that connects to `http://localhost:8000`."* | AI edits existing safe backend code first, then scaffolds the decoupled web UI. |
+| **7. Verify & Save (Step 7)** | `make test && make audit`<br>`git add . && git commit -m "feat: add product catalog"` | Runs 20+ automated tests, scans for leaked secrets, and commits cleanly. |
+
 ---
 
 ## 🔐 Security That's Already Built In
@@ -257,6 +340,9 @@ You **don't need to be a security expert** — these protections are active from
 - 🛑 **Trading Emergency Brake:** If the trading bot loses up to the daily limit (e.g., 5% of capital), the system **automatically stops** to protect your funds.
 - 📜 **Tamper-Proof Audit Trail:** Every important action is recorded in the database and **cannot be deleted or edited** — useful for audits and investigations.
 - 🚫 **Restricted Trading API Keys:** API keys for the trading bot are **forbidden** from having withdrawal permission — so even if they leak, your funds stay safe.
+- 👥 **Role-Based Access Control (RBAC):** Strict 5-level role hierarchy (`superadmin`, `admin`, `support`, `member`, `guest`) with anti-IDOR/BOLA query binding (`WHERE id = :id AND user_id = :current_user_id`).
+- ⚡ **JML Instant Kill-Switch:** Suspending or terminating a user account revokes all active refresh tokens and sessions immediately.
+- 👁️ **Dual Control / Maker-Checker:** High-risk actions (role promotions, fund disbursements) require dual authorization with database-level constraint prevention (`maker_id <> checker_id`).
 
 ---
 
@@ -279,6 +365,7 @@ aegis-forge/
 │   ├── 📁 security/            ← 🔐 Security checklists per domain
 │   ├── 📁 adr/                 ← 📝 Architecture decisions + risk analysis
 │   ├── 📁 diagrams/            ← 🎨 Visual architecture diagrams
+│   ├── architecture.html       ← 🌐 Interactive Visual Architecture (Dark/Light + SVG)
 │   │
 │   ├── PRD-template.md         ← Template "what to build"
 │   ├── schema.sql              ← Your active database schema (OK to edit)
@@ -288,7 +375,13 @@ aegis-forge/
 ├── 📁 evals/                   ← 🧪 Tests for AI output quality
 ├── 📁 skills/                  ← 🛡️ Installable "rule packs" for AI agents
 ├── 📁 templates/               ← 🏠 Runnable starter skeletons (copy & run!)
-│   ├── web-app/                ←   FastAPI + Postgres + Redis (secure backend)
+│   ├── web-app/                ←   FastAPI + Postgres + Redis (secure Python backend)
+│   ├── web-app-express/        ←   Express.js + TypeScript + Postgres + Redis (Node.js)
+│   ├── web-app-laravel/        ←   Laravel 11 + Postgres + Redis + Nginx (PHP)
+│   ├── web-app-go/             ←   Go (Chi) + Postgres + Redis (High-Perf Golang)
+│   ├── trading-ea/             ←   FastAPI Risk Guardian + MQL5 EA (Algo Trading)
+│   ├── mobile-android/         ←   Android Kotlin (Keystore + Pinning + FLAG_SECURE)
+│   ├── mobile-ios/             ←   iOS Swift / SwiftUI (Keychain + Pinning + Screen Shield)
 │   └── web-app-nextjs-supabase/←   Next.js + Supabase (full website + UI)
 └── 📁 scripts/                 ← ⚙️ Automation scripts
     ├── init-new-project.sh     ← Create project (Linux/Mac)
@@ -328,9 +421,14 @@ aegis-forge/
 | `make audit` | **Check security** — make sure no secrets are leaked. |
 | `make up` | **Start** local services (database, etc.). |
 | `make down` | **Stop** all local services. |
+| `make seed` | **Seed initial administrative accounts** (`superadmin` & `checker`). |
 | `make mock-api` | Run a **fake API server** for testing at `http://localhost:4010`. |
+| `make prod-up` | **Deploy to production** on VPS (Caddy auto-HTTPS + isolated DB). |
+| `make prod-down` | **Stop production stack** on VPS. |
 | `make status` | See the status of running services. |
 
+> 🌐 **Deploying to a Linux VPS (DigitalOcean, Hetzner, AWS, etc.)?** Follow the complete guide in [`docs/vps-deployment-guide.md`](docs/vps-deployment-guide.md).
+>
 > 🪟 **Windows without `make`?** Use the PowerShell equivalents — see `SETUP.md`.
 
 ---
@@ -430,9 +528,6 @@ Install Git from [git-scm.com](https://git-scm.com)
 ---
 
 ## 📚 Full Documentation
-
-> **🔧 Kontributor & AI agent:** baca [`docs/gap-analysis.md`](docs/gap-analysis.md) dulu — backlog audit + roadmap perbaikan per gelombang. Jangan mulai fitur baru sebelum gelombang sebelumnya selesai.
-
 
 | Topic | File | What it's for |
 |---|---|---|

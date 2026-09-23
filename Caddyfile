@@ -1,0 +1,48 @@
+{
+    # Global options
+    email {$ACME_EMAIL:admin@example.com}
+    # Disable admin API listening on TCP in production
+    admin off
+}
+
+# Production Domain Configuration
+# Auto-provisions free SSL/TLS certificates via Let's Encrypt / ZeroSSL
+{$DOMAIN_NAME:localhost} {
+    # 🛡️ Hardened Banking-Grade Security Headers
+    header {
+        Strict-Transport-Security "max-age=63072000; includeSubDomains; preload"
+        X-Frame-Options "DENY"
+        X-Content-Type-Options "nosniff"
+        X-XSS-Protection "1; mode=block"
+        Referrer-Policy "strict-origin-when-cross-origin"
+        Permissions-Policy "camera=(), microphone=(), geolocation=(), payment=()"
+        # Hide Caddy server signature
+        -Server
+    }
+
+    # Enable gzip / zstd compression
+    encode zstd gzip
+
+    # Route /api/* and health checks directly to Backend API container
+    @api {
+        path /api/*
+        path /health/*
+        path /docs*
+        path /openapi.json
+    }
+    handle @api {
+        reverse_proxy api:8000 {
+            header_up X-Forwarded-For {remote_host}
+            header_up X-Forwarded-Proto {scheme}
+        }
+    }
+
+    # Default fallback: if a decoupled frontend container exists, route UI traffic to it
+    # Otherwise forward all remaining traffic to API
+    handle {
+        reverse_proxy api:8000 {
+            header_up X-Forwarded-For {remote_host}
+            header_up X-Forwarded-Proto {scheme}
+        }
+    }
+}

@@ -20,6 +20,123 @@ permissions:
   contents: read
 
 jobs:
+  web-app-unit-tests:
+    name: Backend Pytest Suite — templates/web-app
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+
+      - name: Set up Python
+        uses: actions/setup-python@0a5c61591373683505ea898e09a3ea4f39ef2b9c # v5.0.0
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies
+        working-directory: templates/web-app/backend
+        run: |
+          pip install -r requirements.txt -r requirements-dev.txt
+
+      - name: Run Pytest Suite
+        working-directory: templates/web-app/backend
+        run: pytest -v
+
+  trading-ea-tests:
+    name: Trading EA Risk Guardian Tests — templates/trading-ea
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+
+      - name: Set up Python
+        uses: actions/setup-python@0a5c61591373683505ea898e09a3ea4f39ef2b9c # v5.0.0
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies
+        working-directory: templates/trading-ea/backend
+        run: pip install -r requirements.txt
+
+      - name: Run Risk Guardian Tests
+        working-directory: templates/trading-ea/backend
+        run: pytest tests/ -v
+
+  express-backend-tests:
+    name: Express.js Backend Vitest Suite — templates/web-app-express
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+
+      - name: Set up Node.js
+        uses: actions/setup-node@1e60f620b9541d16bece96c5465dc8ee9832be0b # v4.0.3
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: templates/web-app-express/backend/package-lock.json
+
+      - name: Install dependencies
+        working-directory: templates/web-app-express/backend
+        run: npm ci
+
+      - name: Run Vitest Suite
+        working-directory: templates/web-app-express/backend
+        run: npm test
+
+      - name: Build TypeScript
+        working-directory: templates/web-app-express/backend
+        run: npm run build
+
+  laravel-backend-tests:
+    name: Laravel Backend PHPUnit Suite — templates/web-app-laravel
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@a42e73e16d831796463b22b8d70a3efcad74e074 # 2.32.0
+        with:
+          php-version: '8.3'
+          extensions: mbstring, xml, ctype, iconv, intl, pdo_sqlite, sqlite3, bcmath, fileinfo, dom
+          coverage: none
+
+      - name: Prepare environment & install dependencies
+        working-directory: templates/web-app-laravel/backend
+        run: |
+          cp .env.example .env
+          composer install --no-interaction --prefer-dist --no-progress --ignore-platform-reqs
+          php artisan key:generate --ansi
+
+      - name: Run PHPUnit Test Suite
+        working-directory: templates/web-app-laravel/backend
+        run: php artisan test
+
+  go-backend-tests:
+    name: Go Backend Test Suite — templates/web-app-go
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+
+      - name: Set up Go
+        uses: actions/setup-go@f111f3307d8850f501ac008e886eec1fd1932a34 # v5.3.0
+        with:
+          go-version: '1.22'
+          cache-dependency-path: templates/web-app-go/backend/go.sum
+
+      - name: Run Go Unit Tests
+        working-directory: templates/web-app-go/backend
+        run: go test -v ./...
+
+      - name: Build Go Binaries
+        working-directory: templates/web-app-go/backend
+        run: |
+          go build -v ./cmd/server
+          go build -v ./cmd/seed
+
   web-app-fastapi:
     name: Smoke test — templates/web-app (FastAPI)
     runs-on: ubuntu-latest

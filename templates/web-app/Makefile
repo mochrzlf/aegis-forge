@@ -31,13 +31,26 @@ logs: ## Tail API logs
 migrate: ## Apply DB migrations (alembic upgrade head)
 	$(COMPOSE) exec api alembic upgrade head
 
+seed: ## Seed initial administrative users (Superadmin & Checker)
+	@if [ -d backend/.venv ]; then \
+		PYTHONPATH=backend backend/.venv/bin/python3 -m app.commands.seed; \
+	else \
+		$(COMPOSE) exec api python3 -m app.commands.seed; \
+	fi
+
 audit: ## Security audit: gitleaks + semgrep + trivy (best-effort, needs tools)
 	@echo "▶ gitleaks";  gitleaks detect --source . --no-banner || true
 	@echo "▶ semgrep";   semgrep --config p/owasp-top-ten --error backend/ || true
 	@echo "▶ trivy fs";  trivy fs --severity HIGH,CRITICAL . || true
 
-test: ## Run backend tests (pytest) inside the api container
-	$(COMPOSE) exec api pytest -q || echo "⚠ no tests yet — add under backend/tests/"
+test: ## Run backend tests (pytest via local venv or docker container)
+	@if [ -d backend/.venv ]; then \
+		backend/.venv/bin/pytest backend/tests -v; \
+	elif command -v pytest >/dev/null 2>&1; then \
+		pytest backend/tests -v; \
+	else \
+		$(COMPOSE) exec api pytest -q; \
+	fi
 
 check: audit test ## Run audit + tests (gate before opening a PR)
 

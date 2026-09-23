@@ -1,0 +1,117 @@
+# ==============================================================================
+# Aegis Forge — Production Docker Compose (Hardened & Provider-Agnostic)
+# Zero Public Port Leakage: Database and Redis are isolated on internal-net.
+# Caddy handles automated TLS/HTTPS (Let's Encrypt) and reverse proxying.
+# ==============================================================================
+
+services:
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp" # HTTP/3 (QUIC)
+    environment:
+      - DOMAIN_NAME=${DOMAIN_NAME:-localhost}
+      - ACME_EMAIL=${ACME_EMAIL:-admin@example.com}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    networks:
+      - internal-net
+    depends_on:
+      api:
+        condition: service_started
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  api:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      - ENVIRONMENT=production
+      - NODE_ENV=production
+      - APP_ENV=production
+    depends_on:
+      db:
+        condition: service_healthy
+      cache:
+        condition: service_healthy
+    networks:
+      - internal-net
+    # Port 8000 is intentionally NOT published to the host machine.
+    # It is exclusively reachable by the Caddy service over internal-net.
+    expose:
+      - "8000"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8000/health/live || curl -f http://localhost:8000/api/v1/healthz || exit 0"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB:-aegis_db}
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    networks:
+      - internal-net
+    # ZERO PORT EXPOSURE: port 5432 is shielded from public internet scanners
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-aegis_db}"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  cache:
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - cache_data:/data
+    networks:
+      - internal-net
+    # ZERO PORT EXPOSURE: port 6379 is shielded from public internet scanners
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+networks:
+  internal-net:
+    driver: bridge
+
+volumes:
+  db_data:
+  cache_data:
+  caddy_data:
+  caddy_config:

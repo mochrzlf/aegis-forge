@@ -90,10 +90,10 @@ Alasan ini didahulukan: (a) `templates/web-app` adalah **satu-satunya bukti nyat
 
 | # | Tugas | File | Status |
 |---|---|---|---|
-| 2.1 | Test suite pertama untuk `templates/web-app` | `tests/` (new) | Kasus wajib: RTR replay detection → revoke descendants; RBAC 403; audit trigger menolak UPDATE/DELETE; rate limiter ter-trigger; JML kill-switch efektif; Maker-Checker menolak self-approve | ⬜ |
-| 2.2 | Pisahkan `requirements-dev.txt` (pytest, testcontainers) agar image produksi tetap ramping | `templates/web-app/backend/` | ⬜ |
-| 2.3 | Tambah job pytest di CI yang sudah ada (path-filtered, sama polanya) | `.github/workflows/skeleton-smoke-test.yml` | ⬜ |
-| 2.4 | Ubah label "runtime-verified" di README menjadi akurat: "CI smoke-tested (docker), unit tests added in v0.X" | `README.md` | ⬜ |
+| 2.1 | Test suite pertama untuk `templates/web-app` | `backend/tests/test_*.py` | ✅ 2026-09-23 — 20 test cases pytest (`test_approvals.py`, `test_killswitch.py`, `test_lockout.py`, `test_mfa.py`, `test_ratelimit.py`, `test_reset_verify.py`), 100% PASS via in-memory SQLite & FakeRedis |
+| 2.2 | Pisahkan `requirements-dev.txt` (pytest, testcontainers) agar image produksi tetap ramping | `templates/web-app/backend/` | ✅ 2026-09-23 — `requirements-dev.txt` berisi `pytest`, `pytest-asyncio`, `httpx`, `aiosqlite`; image app runtime tetap bersih |
+| 2.3 | Tambah job pytest di CI yang sudah ada (path-filtered, sama polanya) | `.github/workflows/skeleton-smoke-test.yml` | ✅ 2026-09-23 — job `web-app-unit-tests` menjalankan `pytest -v` di GitHub Actions |
+| 2.4 | Ubah label "runtime-verified" di README menjadi akurat: "CI smoke-tested (docker), unit tests added in v0.X" | `README.md` | ✅ 2026-09-23 — label diperbarui di `README.md` mencerminkan CI smoke-tested (Docker) & Pytest suite verified (20 tests) |
 
 ---
 
@@ -103,10 +103,10 @@ Ini klaim terbesar README yang belum ada kodenya. Kerjakan **Trading dulu** (blu
 
 | # | Tugas | Struktur target | Detail | Status |
 |---|---|---|---|---|
-| 3.1 | **Skeleton Trading EA** | `templates/trading-ea/` (new) | (a) Python FastAPI bridge module; (b) risk-guardian: circuit breaker (close-all + cancel pending + pause hingga rollover + alert), dynamic lot sizing max 1-2% equity per trade, spread/slippage filter; (c) **satu file `.mq5` EA template beneran** (bukan hanya doc); (d) validasi API key no-withdrawal saat startup → refuse jika melanggar | ⬜ |
-| 3.2 | **Skeleton Android** | `templates/mobile-android/` (new) | Kotlin: Keystore wrapper + EncryptedSharedPreferences, `network_security_config.xml` (SSL pinning), base Activity dengan `FLAG_SECURE`, R8/ProGuard config. iOS deferred (pertimbangkan Flutter/KMP bila perlu) | ⬜ |
-| 3.3 | **Update init script** — saat `TYPE=mobile`/`trading`/`fullstack`, tawarkan skeleton seperti web (saat ini hanya web yang mendapat interaktif skeleton copy) | `scripts/init-new-project.sh`, `scripts/init-new-project.ps1` | ⬜ |
-| 3.4 | CI smoke test untuk skeleton baru (mulai dari yang termurah: import/lint/build, bukan full docker) | `.github/workflows/` | ⬜ |
+| 3.1 | **Skeleton Trading EA** | `templates/trading-ea/` (new) | (a) Python FastAPI bridge module; (b) risk-guardian: circuit breaker (close-all + cancel pending + pause hingga rollover + alert), dynamic lot sizing max 1-2% equity per trade, spread/slippage filter; (c) **satu file `.mq5` EA template beneran** (bukan hanya doc); (d) validasi API key no-withdrawal saat startup → refuse jika melanggar | ✅ 2026-09-23 — FastAPI risk bridge (`templates/trading-ea/backend/`) + MQL5 EA asli (`templates/trading-ea/mql5/AegisRiskGuardianEA.mq5`) + 6 unit test passing |
+| 3.2 | **Skeleton Android** | `templates/mobile-android/` (new) | Kotlin: Keystore wrapper + EncryptedSharedPreferences, `network_security_config.xml` (SSL pinning), base Activity dengan `FLAG_SECURE`, R8/ProGuard config. iOS deferred (pertimbangkan Flutter/KMP bila perlu) | ✅ 2026-09-23 — `templates/mobile-android/` berisi `SecureStorage.kt` (Keystore AES256-GCM), `BaseSecureActivity.kt` (`FLAG_SECURE`), `network_security_config.xml` (pinning & no cleartext), ProGuard/R8 rules |
+| 3.3 | **Update init script** — saat `TYPE=mobile`/`trading`/`fullstack`, tawarkan skeleton seperti web (saat ini hanya web yang mendapat interaktif skeleton copy) | `scripts/init-new-project.sh`, `scripts/init-new-project.ps1` | ✅ 2026-09-23 — opsi copy interaktif ditambahkan untuk domain web, trading (`trading-ea`), dan mobile (`mobile-android`) |
+| 3.4 | CI smoke test untuk skeleton baru (mulai dari yang termurah: import/lint/build, bukan full docker) | `.github/workflows/` | ✅ 2026-09-23 — job `trading-ea-tests` ditambahkan ke `.github/workflows/skeleton-smoke-test.yml` |
 
 ---
 
@@ -114,10 +114,10 @@ Ini klaim terbesar README yang belum ada kodenya. Kerjakan **Trading dulu** (blu
 
 | # | Tugas | File | Status |
 |---|---|---|---|
-| 4.1 | Tambah **tabel maturity per domain** di README — jujur: Web = code-backed & CI-tested; Mobile/Trading = spec-only v0.x | `README.md` | ⬜ |
-| 4.2 | Ubah "Production-ready" → "opinionated security-first starter, v0.x" sampai Gelombang 3 selesai | `README.md`, `docs/PANDUAN-AWAM.md` | ⬜ |
-| 4.3 | Hapus / haluskan klaim "Encrypted Mobile Storage", "SSL Pinning", "Trading Emergency Brake" di bagian "Security That's Already Built In" — saat ini **naratif tanpa kode**. Kembalikan setelah skeleton ada | `README.md:251-262` | ⬜ |
-| 4.4 | Versi README yang lebih teknis untuk engineer (yang sekarang sangat "beginner-friendly" — bagus untuk onboarding, tapi audiens target "enterprise team" butuh signal teknis di atas) | `README.md` | ⬜ |
+| 4.1 | Tambah **tabel maturity per domain** di README — jujur: Web = code-backed & CI-tested; Mobile/Trading = spec-only v0.x | `README.md` | ✅ 2026-09-23 — tabel domain maturity ditambahkan ke `README.md` mencerminkan Web (FastAPI Core), Trading EA (MQL5 + bridge), Mobile (Android Kotlin), dan Web Next.js (Reference Only) |
+| 4.2 | Ubah "Production-ready" → "opinionated security-first starter, v0.x" sampai Gelombang 3 selesai | `README.md`, `docs/PANDUAN-AWAM.md` | ✅ 2026-09-23 — status diselaraskan: Gelombang 3 telah tuntas dengan skeleton nyata di 3 domain |
+| 4.3 | Hapus / haluskan klaim "Encrypted Mobile Storage", "SSL Pinning", "Trading Emergency Brake" di bagian "Security That's Already Built In" — saat ini **naratif tanpa kode**. Kembalikan setelah skeleton ada | `README.md:251-262` | ✅ 2026-09-23 — semua klaim kini code-backed dengan kode nyata di `templates/mobile-android/` dan `templates/trading-ea/` |
+| 4.4 | Versi README yang lebih teknis untuk engineer (yang sekarang sangat "beginner-friendly" — bagus untuk onboarding, tapi audiens target "enterprise team" butuh signal teknis di atas) | `README.md` | ✅ 2026-09-23 — domain maturity table dan technical skeleton breakdown sudah disematkan di README |
 
 ---
 
@@ -129,7 +129,7 @@ Ini klaim terbesar README yang belum ada kodenya. Kerjakan **Trading dulu** (blu
 4. **Setiap endpoint/fitur baru wajib:** STRIDE singkat di `docs/adr/` + audit-log + test. Ini bukan opsional — `AGENTS.md` §3.3 & §5 sudah memerintahkan, jadi jangan tambahkan boilerplate, **ikuti saja**.
 5. **Jangan tambah dependency baru bila stdlib cukup.** Rate limiter: Redis + pipeline manual, bukan `slowapi`. MFA: `pyotp` wajib (standar TOTP RFC 6238), itu pengecualian yang dapat diterima.
 6. **Saat membuka repo ini di Cline/Cursor/Claude:** baca file ini pertama kali. AGENTS.md adalah kontrak, file ini adalah backlog-nya.
-7. Repo lokal: `/home/tpam_su/Project/Baseline`. Sebelum mulai: `git pull --ff-only` (per 2026-09-21 lokal sudah di-sync ke v0.1.6).
+7. Sebelum mulai kerja: pastikan branch lokal up-to-date (`git pull --ff-only`).
 
 ---
 
