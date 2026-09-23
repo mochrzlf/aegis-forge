@@ -78,6 +78,8 @@ Think of building software like constructing a building:
 
 **Aegis Forge solves all of this upfront.** Whether you're building a SaaS portal, an Android app, or an automated trading bot — all core architecture patterns, security checklists, and AI agent rules are ready on day one.
 
+> 🌐 **Interactive System Architecture:** Explore the live visual diagrams for network topology, Zero Trust IAM, and Maker-Checker in [`docs/architecture.html`](docs/architecture.html).
+
 ---
 
 ## 📖 Glossary — Plain-Language Terms
@@ -363,6 +365,7 @@ aegis-forge/
 │   ├── 📁 security/            ← 🔐 Security checklists per domain
 │   ├── 📁 adr/                 ← 📝 Architecture decisions + risk analysis
 │   ├── 📁 diagrams/            ← 🎨 Visual architecture diagrams
+│   ├── architecture.html       ← 🌐 Interactive Visual Architecture (Dark/Light + SVG)
 │   │
 │   ├── PRD-template.md         ← Template "what to build"
 │   ├── schema.sql              ← Your active database schema (OK to edit)
