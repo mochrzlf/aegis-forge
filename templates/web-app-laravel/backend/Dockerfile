@@ -25,5 +25,8 @@ COPY . .
 RUN composer dump-autoload --optimize \
     && chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
 
+# Security hardening: run as unprivileged www-data user
+USER www-data
+
 EXPOSE 9000
 CMD ["php-fpm"]

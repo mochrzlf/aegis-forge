@@ -35,7 +35,7 @@ jobs:
       # directly via the official CLI container and emits SARIF so findings
       # appear in the GitHub Security tab alongside Trivy results.
       - name: Semgrep SAST Scan (OWASP Top 10, SARIF Output)
-        uses: actions/setup-python@v7
+        uses: actions/setup-python@0a5c61591373683505ea898e09a3ea4f39ef2b9c # v5.0.0
         with:
           python-version: '3.12'
 
@@ -68,7 +68,7 @@ jobs:
       # (Dependabot will propose version bumps automatically). NOTE: tags use
       # the "v" prefix (e.g. v0.36.0) since the project's tag migration.
       - name: Trivy Vulnerability Scan (SARIF Output)
-        uses: aquasecurity/trivy-action@v0.36.0
+        uses: aquasecurity/trivy-action@a9c7b0f06e461e9d4b4d1711f154ee024b8d7ab8 # v0.36.0
         with:
           scan-type: 'fs'
           format: 'sarif'
@@ -162,7 +162,7 @@ jobs:
       # Blocks PRs that introduce dependencies with known vulnerabilities
       # or non-compliant licenses before they reach main.
       - name: Dependency Review
-        uses: actions/dependency-review-action@v5
+        uses: actions/dependency-review-action@a1d282b36b6f3519aa1f3fc636f609c47dddb294 # v5.0.0
         with:
           fail-on-severity: high
 
