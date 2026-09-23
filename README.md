@@ -211,15 +211,21 @@ bash scripts/init-new-project.sh "YourProjectName" "../YourProjectName" trading
 4. ✅ A "security alarm" is installed (prevents secret keys from leaking).
 5. ✅ Unique security keys are generated just for your project.
 
-### Step 3 — Define Your Specs First (Important!)
+### Step 3 — Define Your Specs & UI Design First (Important!)
 
-> ⚠️ **Don't write code yet!** First decide *what* you want to build.
+> ⚠️ **Don't write code yet!** First decide *what* you want to build and *how* it should look.
 
-If you're using an AI agent (Claude, Cursor, etc.), give it this instruction:
+1. **Features, Personas & Security Specs:**
+   Have your AI agent interview you to produce an airtight requirement spec without guessing:
+   > *"Use the prd-interviewer skill. Read AGENTS.md, then draft docs/PRD.md and docs/PRD-detail.md for my project based on the blueprint in docs/blueprints/ — interview me first. Then run a STRIDE security analysis in docs/adr/ before writing application code."*
 
-> *"Use the prd-interviewer skill. Read AGENTS.md, then draft docs/PRD.md and docs/PRD-detail.md for my project based on the blueprint in docs/blueprints/ — interview me first. Then run a STRIDE security analysis in docs/adr/ before writing application code."*
+2. **UI Mockups, Screens & Design Tokens (`docs/ui-design.md`):**
+   If your project has a Web or Mobile user interface, this is where you define the visual identity:
+   - Color palette, typography, button states, and spacing tokens (Tailwind / CSS tokens).
+   - Screen wireframes and layouts (Login, Dashboard, Navigation, User Settings).
+   > 💡 **Prompt your AI:** *"Read docs/ui-design-template.md and draft docs/ui-design.md with complete UI tokens and screen layouts matching our PRD."*
 
-The AI will create planning documents and analyze security risks **before** it starts programming — just like an architect draws blueprints before building.
+The AI will create planning documents, visual design tokens, and analyze security risks **before** it starts programming — just like an architect draws blueprints and 3D mockups before building.
 
 ### Step 4 — Break the Plan into Tasks
 
@@ -267,10 +273,9 @@ make first-run     # copies .env, builds, runs migrations → app live at localh
 >
 > The web backend skeletons (`web-app`, `web-app-express`, `web-app-laravel`) are **API-first / Headless Backends** (FastAPI, Express, or Laravel + Postgres + Redis). Right after `make first-run`, your backend API is live at `http://localhost:8000` (docs at `/docs` or health at `/health/live`) and Mailpit at `:8025`.
 >
-> **When and where do you create your frontend (React, Next.js, Vue, or SvelteKit)?**
-> - **In Step 2 (Project Init):** If you choose **Custom Stack (Option 2)** in the wizard, it automatically sets up the `frontend/` directory and creates `AI-AGENT-PROMPT.md` for your AI agent.
-> - **In Step 3 (Define Specs):** Define your visual mockups, color palette, and screen designs in `docs/ui-design.md` and `docs/PRD.md`.
-> - **In Step 6 (Build Features):** Tell your AI coding agent:
+> **How does the frontend fit in?**
+> - **Specs & UI Design (Step 3):** Your screens, layouts, and design tokens are already planned in `docs/ui-design.md`.
+> - **Code Implementation (Step 6):** Tell your AI coding agent:
 >   > *"Scaffold a frontend in `frontend/` using [React + Vite / Next.js / Vue] with Tailwind CSS. Follow the design tokens in `docs/ui-design.md` and connect API calls to our backend at `http://localhost:8000` (using cookie credentials)."*
 >
 > *(Prefer a skeleton with a pre-built web UI from day one without setting up a backend? Choose `nextjs-supabase` in Step 2).*
