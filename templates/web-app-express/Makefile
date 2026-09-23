@@ -1,4 +1,4 @@
-.PHONY: help first-run up down restart logs test build clean
+.PHONY: help first-run up down restart logs test build seed clean
 
 COMPOSE ?= docker compose
 
@@ -15,6 +15,13 @@ first-run: ## Setup and run the stack from scratch
 	@echo "🚀 Stack is running!"
 	@echo "   API:      http://localhost:8000"
 	@echo "   Mailpit:  http://localhost:8025"
+
+seed: ## Seed initial administrative users (Superadmin & Checker)
+	@if command -v npm >/dev/null 2>&1; then \
+		cd backend && npm run seed; \
+	else \
+		$(COMPOSE) exec api npm run seed; \
+	fi
 
 up: ## Start the stack in background
 	$(COMPOSE) up -d

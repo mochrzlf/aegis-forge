@@ -31,6 +31,13 @@ logs: ## Tail API logs
 migrate: ## Apply DB migrations (alembic upgrade head)
 	$(COMPOSE) exec api alembic upgrade head
 
+seed: ## Seed initial administrative users (Superadmin & Checker)
+	@if [ -d backend/.venv ]; then \
+		PYTHONPATH=backend backend/.venv/bin/python3 -m app.commands.seed; \
+	else \
+		$(COMPOSE) exec api python3 -m app.commands.seed; \
+	fi
+
 audit: ## Security audit: gitleaks + semgrep + trivy (best-effort, needs tools)
 	@echo "▶ gitleaks";  gitleaks detect --source . --no-banner || true
 	@echo "▶ semgrep";   semgrep --config p/owasp-top-ten --error backend/ || true

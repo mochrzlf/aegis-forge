@@ -55,6 +55,23 @@ prod-down: ## Stop production stack
 prod-logs: ## View production stack logs
 	@docker compose -f docker-compose.prod.yml logs -f
 
+.PHONY: seed
+seed: ## Seed initial administrative users (Superadmin & Checker)
+	@if [ -f backend/app/commands/seed.py ]; then \
+		echo "🌱 Seeding FastAPI backend..."; \
+		PYTHONPATH=backend python3 -m app.commands.seed; \
+	elif [ -f backend/src/commands/seed.ts ]; then \
+		echo "🌱 Seeding Express backend..."; \
+		(cd backend && npm run seed); \
+	elif [ -f artisan ] || [ -f backend/artisan ]; then \
+		echo "🌱 Seeding Laravel backend..."; \
+		(if [ -f artisan ]; then php artisan db:seed --force; else cd backend && php artisan db:seed --force; fi); \
+	elif [ -d templates/web-app ]; then \
+		(cd templates/web-app && make seed); \
+	else \
+		echo "⚠️ No recognized backend seeder found in current directory."; \
+	fi
+
 .PHONY: status
 status: ## Check Docker container status
 	@docker compose ps

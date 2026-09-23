@@ -1,4 +1,4 @@
-.PHONY: help first-run up down restart logs test migrate clean
+.PHONY: help first-run up down restart logs test migrate seed clean
 
 COMPOSE ?= docker compose
 
@@ -18,6 +18,13 @@ first-run: ## Setup and run the stack from scratch
 	@echo "🚀 Laravel Stack is running!"
 	@echo "   API:      http://localhost:8000"
 	@echo "   Mailpit:  http://localhost:8025"
+
+seed: ## Seed initial administrative users (Superadmin & Checker)
+	@if command -v php >/dev/null 2>&1; then \
+		cd backend && php artisan db:seed --force; \
+	else \
+		$(COMPOSE) exec api php artisan db:seed --force; \
+	fi
 
 up: ## Start the stack in background
 	$(COMPOSE) up -d

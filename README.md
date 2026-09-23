@@ -415,6 +415,7 @@ aegis-forge/
 | `make audit` | **Check security** — make sure no secrets are leaked. |
 | `make up` | **Start** local services (database, etc.). |
 | `make down` | **Stop** all local services. |
+| `make seed` | **Seed initial administrative accounts** (`superadmin` & `checker`). |
 | `make mock-api` | Run a **fake API server** for testing at `http://localhost:4010`. |
 | `make prod-up` | **Deploy to production** on VPS (Caddy auto-HTTPS + isolated DB). |
 | `make prod-down` | **Stop production stack** on VPS. |
