@@ -263,18 +263,17 @@ cp -r templates/web-app/* .
 make first-run     # copies .env, builds, runs migrations → app live at localhost:8000
 ```
 
-> 🖥️ **Where does the Frontend UI go? (Option A vs. Option B)**
+> 🖥️ **Where does the Frontend UI go? (Option A: Decoupled vs. Option B: Fullstack)**
 >
-> The default skeleton (`templates/web-app/`) is an **API-first / Headless Backend** (FastAPI + Postgres + Redis). Right after `make first-run`, you have:
-> - Interactive API documentation at `http://localhost:8000/docs` (Swagger UI)
-> - Mailpit web client at `http://localhost:8025` (simulated inbox for password reset & verify emails)
+> The web backend skeletons (`web-app`, `web-app-express`, `web-app-laravel`) are **API-first / Headless Backends** (FastAPI, Express, or Laravel + Postgres + Redis). Right after `make first-run`, your backend API is live at `http://localhost:8000` (docs at `/docs` or health at `/health/live`) and Mailpit at `:8025`.
 >
-> **When and where do you create your frontend (React, Vite, Next.js, or Vue)?**
-> - **In Step 3 (Define Specs):** Define your UI mockups, screens, and design tokens in `docs/ui-design.md` and `docs/PRD.md`.
-> - **In Step 6 (Build Features):** Ask your AI agent:
->   > *"Scaffold a frontend in `frontend/` using React + Vite + Tailwind CSS that connects to our FastAPI backend at `http://localhost:8000`."*
+> **When and where do you create your frontend (React, Next.js, Vue, or SvelteKit)?**
+> - **In Step 2 (Project Init):** If you choose **Custom Stack (Option 2)** in the wizard, it automatically sets up the `frontend/` directory and creates `AI-AGENT-PROMPT.md` for your AI agent.
+> - **In Step 3 (Define Specs):** Define your visual mockups, color palette, and screen designs in `docs/ui-design.md` and `docs/PRD.md`.
+> - **In Step 6 (Build Features):** Tell your AI coding agent:
+>   > *"Scaffold a frontend in `frontend/` using [React + Vite / Next.js / Vue] with Tailwind CSS. Follow the design tokens in `docs/ui-design.md` and connect API calls to our backend at `http://localhost:8000` (using cookie credentials)."*
 >
-> *(Prefer a skeleton with a pre-built web UI from day one? Choose `2) web-app-nextjs-supabase` in Step 2).*
+> *(Prefer a skeleton with a pre-built web UI from day one without setting up a backend? Choose `nextjs-supabase` in Step 2).*
 
 > 💡 Your AI's tasks in `TASKS.md` already say *which skeleton file to edit* (the `skeleton_hint`) — so it modifies existing safe code instead of generating new code from nothing.
 
