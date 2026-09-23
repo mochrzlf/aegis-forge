@@ -31,7 +31,7 @@ if [ -z "$PROJECT_TYPE" ]; then
     echo "🌐 Pilih domain proyek:"
     echo "   1) Web        (FastAPI / Express / Next.js) [Default]"
     echo "   2) Trading    (Algorithmic Trading & EA MT5)"
-    echo "   3) Mobile     (Android Kotlin)"
+    echo "   3) Mobile     (Android Kotlin / iOS Swift)"
     echo "   4) Enterprise (Multi-tier enterprise)"
     read -r -p "Pilihan domain [1-4] (default: 1): " DOMAIN_PICK
     case "$DOMAIN_PICK" in
@@ -90,7 +90,7 @@ rm -f "$TARGET_DIR/docs/gap-analysis.md"
 
 # Replace [PROJECT_NAME] placeholder across all text files
 find "$TARGET_DIR" -type f \( -name "*.md" -o -name "*.yaml" -o -name "*.sql" -o -name ".env.example" \) | while read -r file; do
-    sed -i "s/\[PROJECT_NAME\]/$PROJECT_NAME/g" "$file"
+    sed -i "s|\[PROJECT_NAME\]|$PROJECT_NAME|g" "$file"
 done
 
 # Initialize local Git repository if not already present
@@ -291,11 +291,13 @@ elif [ "$PROJECT_TYPE" = "trading" ]; then
     esac
 elif [ "$PROJECT_TYPE" = "mobile" ]; then
     echo ""
-    echo "🏠 Starter skeleton (optional) — mobile app with Keystore & SSL pinning."
+    echo "🏠 Starter skeleton (optional) — mobile app with Keystore/Keychain & SSL pinning."
     echo "   1) mobile-android (default) Kotlin Native with Keystore, SSL Pinning, & FLAG_SECURE"
+    echo "   2) mobile-ios               Swift / SwiftUI with Apple Keychain, SSL Pinning, & Screen Shield"
     echo "   0) skip                     no skeleton — I'll build from scratch"
-    read -r -p "Select skeleton [1/0] (default: 1): " pick
+    read -r -p "Select skeleton [1/2/0] (default: 1): " pick
     case "$pick" in
+        2)  SKELETON_CHOICE="mobile-ios" ;;
         0)  SKELETON_CHOICE="" ;;
         *)  SKELETON_CHOICE="mobile-android" ;;
     esac

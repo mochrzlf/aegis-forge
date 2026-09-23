@@ -58,7 +58,7 @@ if (-not $Type) {
     Write-Host "🌐 Pilih domain proyek:"
     Write-Host "   1) Web        (FastAPI / Express / Next.js) [Default]"
     Write-Host "   2) Trading    (Algorithmic Trading & EA MT5)"
-    Write-Host "   3) Mobile     (Android Kotlin)"
+    Write-Host "   3) Mobile     (Android Kotlin / iOS Swift)"
     Write-Host "   4) Enterprise (Multi-tier enterprise)"
     $domainPick = Read-Host "Pilihan domain [1-4] (default: 1)"
     switch ($domainPick) {
@@ -302,11 +302,13 @@ if ($Type -eq 'web') {
     }
 } elseif ($Type -eq 'mobile') {
     Write-Host ""
-    Write-Host "🏠 Starter skeleton (optional) — mobile app with Keystore & SSL pinning."
+    Write-Host "🏠 Starter skeleton (optional) — mobile app with Keystore/Keychain & SSL pinning."
     Write-Host "   1) mobile-android (default) Kotlin Native with Keystore, SSL Pinning, & FLAG_SECURE"
+    Write-Host "   2) mobile-ios               Swift / SwiftUI with Apple Keychain, SSL Pinning, & Screen Shield"
     Write-Host "   0) skip                     no skeleton — I'll build from scratch"
-    $pick = Read-Host "Select skeleton [1/0] (default: 1)"
+    $pick = Read-Host "Select skeleton [1/2/0] (default: 1)"
     switch ($pick) {
+        '2'      { $SkeletonChoice = 'mobile-ios' }
         '0'      { $SkeletonChoice = '' }
         default  { $SkeletonChoice = 'mobile-android' }
     }
