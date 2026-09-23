@@ -413,8 +413,12 @@ aegis-forge/
 | `make up` | **Start** local services (database, etc.). |
 | `make down` | **Stop** all local services. |
 | `make mock-api` | Run a **fake API server** for testing at `http://localhost:4010`. |
+| `make prod-up` | **Deploy to production** on VPS (Caddy auto-HTTPS + isolated DB). |
+| `make prod-down` | **Stop production stack** on VPS. |
 | `make status` | See the status of running services. |
 
+> 🌐 **Deploying to a Linux VPS (DigitalOcean, Hetzner, AWS, etc.)?** Follow the complete guide in [`docs/vps-deployment-guide.md`](docs/vps-deployment-guide.md).
+>
 > 🪟 **Windows without `make`?** Use the PowerShell equivalents — see `SETUP.md`.
 
 ---

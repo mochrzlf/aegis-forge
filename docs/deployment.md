@@ -111,3 +111,13 @@ A change may reach production only after **all** gates pass:
 - [ ] Rollback plan confirmed (previous digest identified).
 - [ ] Dashboards/alerts visible; deploy event emitted.
 - [ ] Manual approval recorded.
+
+---
+
+## 10. Provider-Agnostic Linux VPS Deployment Blueprint
+
+For deploying on single or multi-node Linux VPS hosts (Hetzner, DigitalOcean, AWS Lightsail, Linode, Contabo, Vultr, Biznet GIO, IDCloudHost, etc.):
+- **Detailed Step-by-Step Guide:** Refer to [`docs/vps-deployment-guide.md`](vps-deployment-guide.md).
+- **Zero-Port-Leakage Compose:** Use `docker-compose.prod.yml` (PostgreSQL and Redis have 0 public ports exposed to internet scanners).
+- **Automated TLS & Reverse Proxy:** Configured via `Caddyfile` (Let's Encrypt automated certificates + hardened security headers).
+- **Quick Command:** `make prod-up` (or `docker compose -f docker-compose.prod.yml up -d --build`).

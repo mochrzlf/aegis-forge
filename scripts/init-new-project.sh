@@ -73,6 +73,8 @@ cp -r "$BASELINE_DIR/.editorconfig" "$TARGET_DIR/"
 cp -r "$BASELINE_DIR/.gitleaks.toml" "$TARGET_DIR/"
 cp -r "$BASELINE_DIR/.pre-commit-config.yaml" "$TARGET_DIR/"
 cp -r "$BASELINE_DIR/docker-compose.yml" "$TARGET_DIR/"
+cp -r "$BASELINE_DIR/docker-compose.prod.yml" "$TARGET_DIR/" 2>/dev/null || true
+cp -r "$BASELINE_DIR/Caddyfile" "$TARGET_DIR/" 2>/dev/null || true
 cp -r "$BASELINE_DIR/.github" "$TARGET_DIR/"
 cp -r "$BASELINE_DIR/docs" "$TARGET_DIR/"
 cp -r "$BASELINE_DIR/scripts" "$TARGET_DIR/"

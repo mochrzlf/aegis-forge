@@ -91,7 +91,7 @@ $items = @(
     'AGENTS.md', 'README.md', 'SETUP.md', 'SECURITY.md',
     'LICENSE', 'Makefile', '.env.example', '.gitignore', '.gitattributes',
     '.editorconfig', '.gitleaks.toml', '.pre-commit-config.yaml',
-    'docker-compose.yml', '.github', 'docs', 'scripts', 'evals', '.devcontainer'
+    'docker-compose.yml', 'docker-compose.prod.yml', 'Caddyfile', '.github', 'docs', 'scripts', 'evals', '.devcontainer'
 )
 foreach ($item in $items) {
     $src = Join-Path $BaselineDir $item

@@ -41,6 +41,20 @@ down: ## Stop entire Docker Compose stack
 	@echo -e "$(YELLOW)🛑 Stopping Docker Compose services...$(RESET)"
 	@docker compose down
 
+.PHONY: prod-up
+prod-up: ## Start production stack (Caddy auto-HTTPS, isolated DB & Cache)
+	@echo -e "$(GREEN)🚀 Starting production stack (Caddy auto-HTTPS, isolated DB & Cache)...$(RESET)"
+	@docker compose -f docker-compose.prod.yml up -d --build
+
+.PHONY: prod-down
+prod-down: ## Stop production stack
+	@echo -e "$(YELLOW)🛑 Stopping production stack...$(RESET)"
+	@docker compose -f docker-compose.prod.yml down
+
+.PHONY: prod-logs
+prod-logs: ## View production stack logs
+	@docker compose -f docker-compose.prod.yml logs -f
+
 .PHONY: status
 status: ## Check Docker container status
 	@docker compose ps
