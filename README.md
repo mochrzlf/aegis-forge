@@ -246,6 +246,7 @@ This is the biggest time-saver. Aegis Forge ships **runnable starter skeletons**
 | **Web (FastAPI Backend)** | ✅ `docs/blueprints/web-application-blueprint.md` | ✅ `templates/web-app/` | ✅ Docker Compose smoke test + 20 Pytest unit tests | **Production-Ready Core** (Python) |
 | **Web (Express.js Backend)** | ✅ `docs/blueprints/web-application-blueprint.md` | ✅ `templates/web-app-express/` | ✅ Docker Compose + 9 Vitest unit tests | **Production-Ready Core** (TypeScript) |
 | **Web (Laravel Backend)** | ✅ `docs/blueprints/web-application-blueprint.md` | ✅ `templates/web-app-laravel/` | ✅ Docker Compose + 10 PHPUnit feature tests | **Production-Ready Core** (PHP) |
+| **Web (Go / Golang Backend)** | ✅ `docs/blueprints/web-application-blueprint.md` | ✅ `templates/web-app-go/` | ✅ Docker Compose + 8 Go unit tests | **Production-Ready Core** (Go) |
 | **Trading EA & Quantitative** | ✅ `docs/blueprints/ea-trading-blueprint.md` | ✅ `templates/trading-ea/` (MQL5 + FastAPI bridge) | ✅ 6 Pytest unit tests (Risk Guardian & Sizing) | **Code-Backed Starter** |
 | **Mobile (Android Kotlin)** | ✅ `docs/blueprints/mobile-application-blueprint.md` | ✅ `templates/mobile-android/` (Keystore + Pinning) | ✅ Architecture verified (Clean Arch + AppSec) | **Code-Backed Starter** |
 | **Mobile (iOS Swift)** | ✅ `docs/blueprints/mobile-application-blueprint.md` | ✅ `templates/mobile-ios/` (Keychain + Pinning) | ✅ Architecture verified (SwiftUI + AppSec) | **Code-Backed Starter** |
@@ -258,6 +259,7 @@ This is the biggest time-saver. Aegis Forge ships **runnable starter skeletons**
 | **`templates/web-app/`** ⭐ default | A secure backend/API (Python) | FastAPI + Postgres + Redis. Login (RTR), RBAC/anti-IDOR, lockout, JML kill-switch, Maker-Checker, MFA/TOTP, audit trail — **CI smoke-tested & Pytest verified (20 tests)**. |
 | **`templates/web-app-express/`** | A secure backend/API (TypeScript) | Express.js + Postgres + Redis. Login (RTR), RBAC/anti-IDOR, lockout, JML kill-switch, Maker-Checker DB constraint, audit trigger — **Vitest verified (9 tests)**. |
 | **`templates/web-app-laravel/`** | A secure backend/API (PHP) | Laravel 11 + Postgres + Redis. Login (RTR), RBAC/anti-IDOR, lockout, JML kill-switch, Maker-Checker DB constraint, audit trail — **PHPUnit verified (10 tests)**. |
+| **`templates/web-app-go/`** | A high-perf secure backend/API (Go) | Go (Chi) + Postgres + Redis. Login (RTR), RBAC/anti-IDOR, lockout, JML kill-switch, Maker-Checker DB constraint, immutable audit — **Go test verified (8 tests, ~15MB RAM)**. |
 | **`templates/trading-ea/`** | Algo trading & Expert Advisors | FastAPI Risk Guardian bridge + native MQL5 EA template (`AegisRiskGuardianEA.mq5`). Dynamic lot sizing (1-2%), hard SL, 5% drawdown circuit breaker — **Pytest verified (6 tests)**. |
 | **`templates/mobile-android/`** | Secure native Android app | Kotlin Native with Android Keystore `SecureStorage` (AES256-GCM), `network_security_config.xml` (SSL Pinning), `FLAG_SECURE` screen protection, and ProGuard/R8 rules. |
 | **`templates/mobile-ios/`** | Secure native iOS app | Swift / SwiftUI with Apple Keychain Services (`kSecAttrAccessibleThisDeviceOnly`), SPKI SHA-256 SSL Pinning, Privacy Shield (App Switcher blur & anti-screen capture), and multi-layer jailbreak detection. |
@@ -373,6 +375,7 @@ aegis-forge/
 │   ├── web-app/                ←   FastAPI + Postgres + Redis (secure Python backend)
 │   ├── web-app-express/        ←   Express.js + TypeScript + Postgres + Redis (Node.js)
 │   ├── web-app-laravel/        ←   Laravel 11 + Postgres + Redis + Nginx (PHP)
+│   ├── web-app-go/             ←   Go (Chi) + Postgres + Redis (High-Perf Golang)
 │   ├── trading-ea/             ←   FastAPI Risk Guardian + MQL5 EA (Algo Trading)
 │   ├── mobile-android/         ←   Android Kotlin (Keystore + Pinning + FLAG_SECURE)
 │   ├── mobile-ios/             ←   iOS Swift / SwiftUI (Keychain + Pinning + Screen Shield)

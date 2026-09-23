@@ -1,0 +1,72 @@
+# ==============================================================================
+# Aegis Forge — Go + PostgreSQL + Redis Local Development Stack
+# ==============================================================================
+services:
+  api:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: aegis_go_api
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      - PORT=8000
+      - ENVIRONMENT=development
+      - DATABASE_URL=postgres://postgres:postgres@db:5432/aegis_forge_dev?sslmode=disable
+      - REDIS_URL=redis://cache:6379/0
+      - JWT_ACCESS_SECRET=dev_access_secret_do_not_use_in_prod_replace_me_32chars!
+      - JWT_REFRESH_SECRET=dev_refresh_secret_do_not_use_in_prod_replace_me_32chars!
+      - CORS_ORIGIN=http://localhost:3000
+    depends_on:
+      db:
+        condition: service_healthy
+      cache:
+        condition: service_healthy
+    networks:
+      - aegis_net
+
+  db:
+    image: postgres:16-alpine
+    container_name: aegis_go_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: aegis_forge_dev
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./backend/migrations/001_init.sql:/docker-entrypoint-initdb.d/001_init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d aegis_forge_dev"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - aegis_net
+
+  cache:
+    image: redis:7-alpine
+    container_name: aegis_go_redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redisdata:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - aegis_net
+
+volumes:
+  pgdata:
+  redisdata:
+
+networks:
+  aegis_net:
+    driver: bridge

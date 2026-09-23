@@ -193,7 +193,7 @@ if [ "$PROJECT_TYPE" = "web" ]; then
         case "$BE_PICK" in
             2) CUSTOM_BE="Express.js (TypeScript)"; SUGGESTED_SKEL="web-app-express" ;;
             3) CUSTOM_BE="Laravel 11 (PHP)"; SUGGESTED_SKEL="web-app-laravel" ;;
-            4) CUSTOM_BE="Go (Gin / Fiber)" ;;
+            4) CUSTOM_BE="Go (Golang)"; SUGGESTED_SKEL="web-app-go" ;;
             5) CUSTOM_BE="NestJS (TypeScript)" ;;
             6) CUSTOM_BE="Spring Boot (Java)" ;;
             7) CUSTOM_BE="None / BaaS (Supabase / Firebase)" ;;
@@ -268,13 +268,15 @@ if [ "$PROJECT_TYPE" = "web" ]; then
         echo "   1) web-app (default)   FastAPI + Postgres + Redis (Python)"
         echo "   2) web-app-express     Express.js + TypeScript + Postgres + Redis (Node.js)"
         echo "   3) web-app-laravel     Laravel 11 + Postgres + Redis (PHP)"
-        echo "   4) nextjs-supabase     Next.js + Supabase — full website with a UI"
+        echo "   4) web-app-go          Go (Golang) + Postgres + Redis (Ultra-fast)"
+        echo "   5) nextjs-supabase     Next.js + Supabase — full website with a UI"
         echo "   0) skip                no skeleton — I'll build from scratch"
-        read -r -p "Select skeleton [1/2/3/4/0] (default: 1): " pick
+        read -r -p "Select skeleton [1/2/3/4/5/0] (default: 1): " pick
         case "$pick" in
             2)  SKELETON_CHOICE="web-app-express" ;;
             3)  SKELETON_CHOICE="web-app-laravel" ;;
-            4)  SKELETON_CHOICE="web-app-nextjs-supabase" ;;
+            4)  SKELETON_CHOICE="web-app-go" ;;
+            5)  SKELETON_CHOICE="web-app-nextjs-supabase" ;;
             0)  SKELETON_CHOICE="" ;;
             *)  SKELETON_CHOICE="web-app" ;;
         esac

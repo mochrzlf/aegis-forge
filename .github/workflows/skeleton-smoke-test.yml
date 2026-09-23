@@ -113,6 +113,29 @@ jobs:
         working-directory: templates/web-app-laravel/backend
         run: php artisan test
 
+  go-backend-tests:
+    name: Go Backend Test Suite — templates/web-app-go
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.22'
+          cache-dependency-path: templates/web-app-go/backend/go.sum
+
+      - name: Run Go Unit Tests
+        working-directory: templates/web-app-go/backend
+        run: go test -v ./...
+
+      - name: Build Go Binaries
+        working-directory: templates/web-app-go/backend
+        run: |
+          go build -v ./cmd/server
+          go build -v ./cmd/seed
+
   web-app-fastapi:
     name: Smoke test — templates/web-app (FastAPI)
     runs-on: ubuntu-latest

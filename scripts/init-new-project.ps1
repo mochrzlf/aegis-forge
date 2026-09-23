@@ -204,7 +204,7 @@ if ($Type -eq 'web') {
         switch ($bePick) {
             '2'     { $CustomBe = 'Express.js (TypeScript)'; $suggestedSkel = 'web-app-express' }
             '3'     { $CustomBe = 'Laravel 11 (PHP)'; $suggestedSkel = 'web-app-laravel' }
-            '4'     { $CustomBe = 'Go (Gin / Fiber)' }
+            '4'     { $CustomBe = 'Go (Golang)'; $suggestedSkel = 'web-app-go' }
             '5'     { $CustomBe = 'NestJS (TypeScript)' }
             '6'     { $CustomBe = 'Spring Boot (Java)' }
             '7'     { $CustomBe = 'None / BaaS (Supabase / Firebase)' }
@@ -279,13 +279,15 @@ if ($Type -eq 'web') {
         Write-Host "   1) web-app (default)   FastAPI + Postgres + Redis (Python)"
         Write-Host "   2) web-app-express     Express.js + TypeScript + Postgres + Redis (Node.js)"
         Write-Host "   3) web-app-laravel     Laravel 11 + Postgres + Redis (PHP)"
-        Write-Host "   4) nextjs-supabase     Next.js + Supabase — full website with a UI"
+        Write-Host "   4) web-app-go          Go (Golang) + Postgres + Redis (Ultra-fast)"
+        Write-Host "   5) nextjs-supabase     Next.js + Supabase — full website with a UI"
         Write-Host "   0) skip                no skeleton — I'll build from scratch"
-        $pick = Read-Host "Select skeleton [1/2/3/4/0] (default: 1)"
+        $pick = Read-Host "Select skeleton [1/2/3/4/5/0] (default: 1)"
         switch ($pick) {
             '2'      { $SkeletonChoice = 'web-app-express' }
             '3'      { $SkeletonChoice = 'web-app-laravel' }
-            '4'      { $SkeletonChoice = 'web-app-nextjs-supabase' }
+            '4'      { $SkeletonChoice = 'web-app-go' }
+            '5'      { $SkeletonChoice = 'web-app-nextjs-supabase' }
             '0'      { $SkeletonChoice = '' }
             default  { $SkeletonChoice = 'web-app' }
         }
