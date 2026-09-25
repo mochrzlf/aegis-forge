@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.7](https://github.com/mochrzlf/aegis-forge/compare/aegis-forge-v0.1.6...aegis-forge-v0.1.7) (2026-09-23)
+
+
+### Features
+
+* enterprise multi-domain baseline, go & ios skeletons, universal seeder, and visual architecture ([#47](https://github.com/mochrzlf/aegis-forge/issues/47)) ([9cefcc8](https://github.com/mochrzlf/aegis-forge/commit/9cefcc88c671b2f98bbd3bf3fc69c42d04a1a86c))
+
 ## [0.1.6](https://github.com/mochrzlf/aegis-forge/compare/aegis-forge-v0.1.5...aegis-forge-v0.1.6) (2026-09-16)
 
 
