@@ -244,7 +244,11 @@ Anda **tidak perlu jadi ahli keamanan** — Aegis-Forge sudah memasang "pagar pe
 
 ## 7. Tutorial Membuat Proyek
 
-Ini bagian terpenting. Ikuti langkah demi langkah.
+Ini bagian terpenting. Ikuti langkah demi langkah:
+
+<p align="center">
+  <img src="diagrams/quickstart-workflow.svg" alt="Diagram Alur 7 Langkah Aegis Forge" width="100%" />
+</p>
 
 ### 📋 Prasyarat (Yang Harus Ada di Komputer Anda)
 
