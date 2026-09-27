@@ -25,11 +25,9 @@ Imagine building a **house**:
 
 This guide is designed for **complete beginners**. Follow these 7 steps in order:
 
-```
-[1. Clone Template] ──► [2. Run Setup Wizard] ──► [3. Plan with AI] ──► [4. Break Tasks]
-                                                                                │
-[7. Audit & Save]   ◄── [6. Build Features]   ◄── [5. Start Stack]   ◄────────┘
-```
+<p align="center">
+  <img src="docs/diagrams/quickstart-workflow.svg" alt="Aegis Forge 7-Step Development Journey" width="100%" />
+</p>
 
 ---
 
