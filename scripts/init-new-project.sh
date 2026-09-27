@@ -318,7 +318,7 @@ else
     echo "⏭️  No skeleton selected — starting from a blank canvas."
 fi
 
-# --- If Custom Stack was selected, generate Custom Stack Spec & AI Agent Prompt ---
+# --- Generate AI-AGENT-PROMPT.md at project root (Custom Stack or Pre-built/Domain) ---
 if [ "$IS_CUSTOM_STACK" = true ]; then
     # 1. Generate docs/CUSTOM-STACK.md
     cat << EOF > "$TARGET_DIR/docs/CUSTOM-STACK.md"
@@ -364,10 +364,16 @@ EOF
 # 🤖 Prompt Instruksi untuk AI Coding Agent ($PROJECT_NAME)
 
 > **PETUNJUK UNTUK DEVELOPER:**
-> Buka AI Agent Anda (Claude Code, Hermes, Cursor, Windsurf, Copilot, dll.), lalu salin dan kirimkan prompt di bawah ini pada giliran pertama Anda.
+> 1. Tuliskan deskripsi ide aplikasi Anda pada bagian "IDE & FITUR APLIKASI" di bawah.
+> 2. Buka AI Agent Anda (Claude Code, Hermes, Cursor, Windsurf, Copilot, dll.), lalu salin dan kirimkan prompt ini pada giliran pertama Anda.
+> 3. AI Agent akan membaca ide Anda dan otomatis memulai sesi wawancara PRD (prd-interviewer) untuk mematangkan spesifikasi sebelum menulis kode.
 
 \`\`\`text
 Halo AI Agent! Saya baru saja menginisialisasi proyek baru bernama $PROJECT_NAME menggunakan Aegis Forge Baseline.
+
+💡 IDE & FITUR APLIKASI YANG INGIN SAYA BUAT:
+[TULISKAN DI SINI: Jelaskan aplikasi apa yang ingin Anda buat beserta fitur-fitur utamanya.
+Contoh: "Saya ingin membuat website pencatatan keuangan keluarga dengan fitur catat pengeluaran harian, foto/upload bukti struk belanja, kategori budget bulanan, dan ringkasan grafik."]
 
 Berikut adalah spesifikasi arsitektur yang saya pilih:
 - 🎨 Frontend Framework: $CUSTOM_FE
@@ -382,7 +388,7 @@ TUGAS DAN ATURAN WAJIB ANDA:
    - \`docs/CUSTOM-STACK.md\` (spesifikasi arsitektur pilihan user)
    - \`docs/PRD.md\` & \`docs/PRD-detail.md\` (kebutuhan produk)
    - \`docs/security-iam-policy.md\` & \`docs/security-access-matrix.md\`
-   $([ "$BANKING_IAM" = "yes" ] && echo "   - \`docs/BANKING-IAM-GUIDE.md\` (panduan implementasi 6 pilar keamanan perbankan)")
+$([ "$BANKING_IAM" = "yes" ] && echo "   - \`docs/BANKING-IAM-GUIDE.md\` (panduan implementasi 6 pilar keamanan perbankan)")
 
 2. KEBIJAKAN KEAMANAN & IMPLEMENTASI:
 $([ "$BANKING_IAM" = "yes" ] && cat << 'SEC_PROMPT_EOF'
@@ -404,12 +410,76 @@ $([ "$BANKING_IAM" != "yes" ] && cat << 'SEC_PROMPT_EOF'
 SEC_PROMPT_EOF
 )
 
-3. ALUR KERJA (SPEC-FIRST):
-   - JANGAN langsung menulis kode implementasi secara acak!
-   - Step 1: Wawancarai saya atau konfirmasi spesifikasi di \`docs/PRD.md\` dan \`docs/PRD-detail.md\`.
-   - Step 2: Breakdown modul menjadi unit tugas di \`docs/TASKS.md\`.
-   - Step 3: Setup struktur folder (misal \`frontend/\` dan \`backend/\`) sesuai arsitektur di atas.
-   - Step 4: Tulis kode teruji dan verifikasi dengan unit test otomatis.
+3. ALUR KERJA (SPEC-FIRST — JANGAN LANGSUNG CODING!):
+   - Step 1: Baca ide & fitur aplikasi yang saya jelaskan di atas. Gunakan skill 'prd-interviewer' untuk mewawancarai saya (maksimal 5 pertanyaan terarah per putaran) guna menggali kebutuhan produk secara mendalam dan melengkapi 'docs/PRD.md' serta 'docs/PRD-detail.md'.
+   - Step 2: Rancang UI tokens & screen layout di 'docs/ui-design.md' (jika proyek memiliki tampilan UI).
+   - Step 3: Breakdown modul menjadi unit tugas di \`docs/TASKS.md\`.
+   - Step 4: Setup struktur folder (misal \`frontend/\` dan \`backend/\`) sesuai arsitektur di atas.
+   - Step 5: Tulis kode teruji dan verifikasi dengan unit test otomatis.
+
+Mohon konfirmasi pemahaman Anda terhadap arsitektur dan aturan di atas sebelum kita mulai!
+\`\`\`
+EOF
+else
+    # Generate tailored AI-AGENT-PROMPT.md for pre-built template or domain
+    cat << EOF > "$TARGET_DIR/AI-AGENT-PROMPT.md"
+# 🤖 Prompt Instruksi untuk AI Coding Agent ($PROJECT_NAME)
+
+> **PETUNJUK UNTUK DEVELOPER:**
+> 1. Tuliskan deskripsi ide aplikasi Anda pada bagian "IDE & FITUR APLIKASI" di bawah.
+> 2. Buka AI Agent Anda (Claude Code, Hermes, Cursor, Windsurf, Copilot, dll.), lalu salin dan kirimkan prompt ini pada giliran pertama Anda.
+> 3. AI Agent akan membaca ide Anda dan otomatis memulai sesi wawancara PRD (prd-interviewer) untuk mematangkan spesifikasi sebelum menulis kode.
+
+\`\`\`text
+Halo AI Agent! Saya baru saja menginisialisasi proyek baru bernama $PROJECT_NAME menggunakan Aegis Forge Baseline.
+
+Domain: ${PROJECT_TYPE^^}
+$([ -n "$SKELETON_CHOICE" ] && echo "Starter Skeleton Terpasang: $SKELETON_CHOICE (sudah disalin ke folder proyek ini)")
+
+💡 IDE & FITUR APLIKASI YANG INGIN SAYA BUAT:
+[TULISKAN DI SINI: Jelaskan aplikasi apa yang ingin Anda buat beserta fitur-fitur utamanya.
+Contoh: "Saya ingin membuat aplikasi $PROJECT_NAME dengan fitur utama: 1) ..., 2) ..., 3) ..."]
+
+TUGAS DAN ATURAN WAJIB ANDA:
+1. DOKUMEN WAJIB BACA:
+   - \`AGENTS.md\` (kontrak kerja single source of truth & guardrails)
+   - \`docs/PRD.md\` & \`docs/PRD-detail.md\` (kebutuhan produk)
+$([ "$PROJECT_TYPE" = "trading" ] && echo "   - \`docs/blueprints/ea-trading-blueprint.md\` & \`docs/security/trading-risk-policy.md\`")
+$([ "$PROJECT_TYPE" = "mobile" ] && echo "   - \`docs/blueprints/mobile-application-blueprint.md\` & \`docs/security/mobile-security-checklist.md\`")
+$([ "$PROJECT_TYPE" = "web" ] && echo "   - \`docs/blueprints/web-application-blueprint.md\` & \`docs/BANKING-IAM-GUIDE.md\`")
+
+2. PRINSIP UTAMA & GUARDRAILS:
+$([ "$PROJECT_TYPE" = "trading" ] && cat << 'TRADING_PROMPT_EOF'
+   - CAPITAL PRESERVATION DOCTRINE: Wajib Hard Stop Loss pada setiap posisi. Dilarang Martingale/unhedged grid.
+   - Dynamic lot sizing (risiko maksimal 1-2% dari modal per trade).
+   - Circuit Breaker: Batas floating loss harian 5% memicu emergency close-all dan trading halt otomatis.
+   - Exchange/broker API keys dilarang memiliki permission penarikan dana (withdrawal).
+TRADING_PROMPT_EOF
+)
+$([ "$PROJECT_TYPE" = "mobile" ] && cat << 'MOBILE_PROMPT_EOF'
+   - Clean Architecture + Repository Pattern.
+   - Token & kredensial wajib disimpan di Hardware Keystore / EncryptedSharedPreferences (Android) atau Keychain (iOS).
+   - Network Security Config dengan SSL / SPKI Pinning aktif.
+   - Layar berisi data pribadi/finansial wajib diproteksi FLAG_SECURE / privacy shield screen blur.
+MOBILE_PROMPT_EOF
+)
+$([ "$PROJECT_TYPE" = "web" ] && cat << 'WEB_PROMPT_EOF'
+   - BANKING-GRADE ZERO TRUST IAM:
+   - Refresh Token Rotation (RTR) di cookie HttpOnly; Secure; SameSite=Strict dengan replay attack detection.
+   - Role-Based Access Control (RBAC) + anti-IDOR/BOLA (ownership bound query WHERE user_id = :id).
+   - Account lockout 5x berturut-turut beku 15 menit (HTTP 423).
+   - JML session kill-switch saat status suspended/terminated.
+   - Maker-Checker dual control (maker_id <> checker_id) pada aksi mutasi sensitif.
+   - Immutable audit trail (DB trigger cegah UPDATE/DELETE).
+WEB_PROMPT_EOF
+)
+
+3. ALUR KERJA (SPEC-FIRST — JANGAN LANGSUNG CODING!):
+   - Step 1: Baca ide & fitur aplikasi yang saya jelaskan di atas. Gunakan skill 'prd-interviewer' untuk mewawancarai saya (maksimal 5 pertanyaan terarah per putaran) guna menggali kebutuhan produk secara mendalam dan melengkapi 'docs/PRD.md' serta 'docs/PRD-detail.md'.
+   - Step 2: Rancang UI tokens & screen layout di 'docs/ui-design.md' (jika proyek memiliki tampilan UI).
+   - Step 3: Gunakan skill 'spec-to-tasks' untuk memecah PRD menjadi unit tugas di 'docs/TASKS.md' dengan 'skeleton_hint' spesifik.
+$([ -n "$SKELETON_CHOICE" ] && echo "   - Step 4: EDIT file skeleton yang sudah tersedia (jangan buat ulang dari nol), jalankan test otomatis, dan pastikan 'make audit' selalu lolos.")
+$([ -z "$SKELETON_CHOICE" ] && echo "   - Step 4: Tulis kode teruji dan verifikasi dengan unit test otomatis, pastikan 'make audit' selalu lolos.")
 
 Mohon konfirmasi pemahaman Anda terhadap arsitektur dan aturan di atas sebelum kita mulai!
 \`\`\`
@@ -420,25 +490,11 @@ echo "=================================================================="
 echo "✨ Project $PROJECT_NAME (${PROJECT_TYPE^^}) successfully created at $TARGET_DIR!"
 echo "Next steps:"
 echo "  1. cd $TARGET_DIR"
-echo "  2. Open your preferred AI Coding Agent (Hermes, Claude, Cursor, etc.)"
-
 if [ "$PROJECT_TYPE" = "mobile" ]; then
-    echo "  3. Run Mock API Server: make mock-api"
-    echo "  4. Instruct: 'Read AGENTS.md and design Mobile App for $PROJECT_NAME referring to docs/blueprints/mobile-application-blueprint.md and docs/security/mobile-security-checklist.md'"
-elif [ "$PROJECT_TYPE" = "trading" ]; then
-    echo "  3. Instruct: 'Read AGENTS.md and design EA Trading System for $PROJECT_NAME referring to docs/blueprints/ea-trading-blueprint.md and docs/security/trading-risk-policy.md'"
-elif [ "$PROJECT_TYPE" = "web" ]; then
-    if [ "$IS_CUSTOM_STACK" = true ]; then
-        echo "  3. Stack: $CUSTOM_FE + $CUSTOM_BE + $CUSTOM_CSS + $CUSTOM_DB"
-        echo "  4. Keamanan: $([ "$BANKING_IAM" = "yes" ] && echo "Banking-Grade Zero Trust IAM (Aktif)" || echo "Standar Startup MVP Fleksibel")"
-        echo "  5. Buka file AI-AGENT-PROMPT.md, salin prompt-nya, dan kirimkan ke AI Agent Anda untuk mulai men-setting proyek!"
-    elif [ -n "$SKELETON_CHOICE" ]; then
-        echo "  3. Start the skeleton: make first-run   (app → http://localhost:8000 or :3000)"
-        echo "  4. Instruct agent: 'Use prd-interviewer for docs/PRD.md, then spec-to-tasks for docs/TASKS.md — EDIT the skeleton files per skeleton_hint (do not generate from scratch).'"
-    else
-        echo "  3. Instruct: 'Read AGENTS.md and design Web Application for $PROJECT_NAME referring to docs/blueprints/web-application-blueprint.md'"
-    fi
-else
-    echo "  3. Instruct: 'Read AGENTS.md and design complete specifications for $PROJECT_NAME'"
+    echo "  2. Run Mock API Server: make mock-api"
+elif [ -n "$SKELETON_CHOICE" ] && [ "$PROJECT_TYPE" = "web" ]; then
+    echo "  2. Run the pre-built skeleton: make first-run   (app → http://localhost:8000)"
 fi
+echo "  3. Open your project in your AI Coding Agent (Hermes, Claude, Cursor, Windsurf, Copilot, etc.)"
+echo "  4. 📋 Open 'AI-AGENT-PROMPT.md', copy the entire prompt, and paste it into your AI Agent to begin!"
 echo "=================================================================="
