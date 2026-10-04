@@ -87,7 +87,7 @@ services:
         max-file: "3"
 
   cache:
-    image: redis:7-alpine
+    image: redis:8-alpine
     restart: unless-stopped
     command: ["redis-server", "--appendonly", "yes"]
     volumes:
